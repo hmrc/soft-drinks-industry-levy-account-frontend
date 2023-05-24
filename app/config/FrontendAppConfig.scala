@@ -27,7 +27,7 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val host: String    = configuration.getConfString("soft-drinks-industry-levy-account-frontend.host", throw new Exception("missing config soft-drinks-industry-levy-account-frontend.host"))
   val appName: String = configuration.getString("appName")
 
-  private val contactHost = configuration.getString("contact-frontend.host")
+  private val contactHost = configuration.getConfString("contact-frontend.host", throw new Exception("missing config contact-frontend.host"))
   private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"
 
   def feedbackUrl(implicit request: RequestHeader): String =
