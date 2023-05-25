@@ -70,7 +70,7 @@ trait DateFluency {
       DateInput(
         fieldset     = Some(fieldset),
         items        = items,
-        id           = field.id,
+        id           = field.id
       )
     }
   }
