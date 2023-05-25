@@ -37,7 +37,7 @@ trait InputFluency {
         id           = field.id,
         name         = field.name,
         value        = field.value,
-        label        = label,
+        label        = label
       )
   }
 
