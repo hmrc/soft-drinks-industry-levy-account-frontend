@@ -22,13 +22,12 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.{Fieldset, Legend}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.{RadioItem, Radios}
-import viewmodels.ErrorMessageAwareness
 
 object radios extends RadiosFluency
 
 trait RadiosFluency {
 
-  object RadiosViewModel extends ErrorMessageAwareness with FieldsetFluency {
+  object RadiosViewModel extends FieldsetFluency {
 
     def apply(
                field: Field,
@@ -50,7 +49,6 @@ trait RadiosFluency {
         fieldset     = Some(fieldset),
         name         = field.name,
         items        = items map (item => item copy (checked = field.value.isDefined && field.value == item.value)),
-        errorMessage = errorMessage(field)
       )
 
     def yesNo(

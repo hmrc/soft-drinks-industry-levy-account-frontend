@@ -21,13 +21,13 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 import uk.gov.hmrc.govukfrontend.views.viewmodels.input.{Input, PrefixOrSuffix}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.label.Label
-import viewmodels.{ErrorMessageAwareness, InputWidth}
+import viewmodels.InputWidth
 
 object input extends InputFluency
 
 trait InputFluency {
 
-  object InputViewModel extends ErrorMessageAwareness {
+  object InputViewModel  {
 
     def apply(
                field: Field,
@@ -38,7 +38,6 @@ trait InputFluency {
         name         = field.name,
         value        = field.value,
         label        = label,
-        errorMessage = errorMessage(field)
       )
   }
 

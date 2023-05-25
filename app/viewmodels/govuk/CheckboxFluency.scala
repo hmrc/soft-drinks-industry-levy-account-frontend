@@ -24,13 +24,12 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Content
 import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.{Fieldset, Legend}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 import uk.gov.hmrc.govukfrontend.views.viewmodels.label.Label
-import viewmodels.ErrorMessageAwareness
 
 object checkbox extends CheckboxFluency
 
 trait CheckboxFluency {
 
-  object CheckboxesViewModel extends ErrorMessageAwareness with FieldsetFluency {
+  object CheckboxesViewModel extends FieldsetFluency {
 
     def apply(
                form: Form[_],
@@ -54,7 +53,6 @@ trait CheckboxFluency {
       Checkboxes(
         fieldset     = Some(fieldset),
         name         = name,
-        errorMessage = errorMessage(form(name)),
         items        = items.map {
           item =>
             item copy (checked = form.data.exists(data => data._2 == item.value))
