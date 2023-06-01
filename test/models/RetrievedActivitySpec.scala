@@ -94,7 +94,7 @@ class RetrievedActivitySpec extends SpecBase {
         }
 
         "and importer and contract packer" in {
-          val rActivity = retrievedActivityAllFalse.copy(importer = true)
+          val rActivity = retrievedActivityAllFalse.copy(importer = true, contractPacker = true)
           rActivity.isVoluntaryMandatory mustBe false
         }
       }
