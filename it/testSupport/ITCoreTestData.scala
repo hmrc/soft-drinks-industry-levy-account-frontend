@@ -90,7 +90,7 @@ object ITCoreTestData extends TryValues {
 
   def packagingSiteListWith3 = Map(("12345678", address45Characters), ("23456789", address47Characters), ("34567890", address49Characters))
 
-  val currentReturnPeriod = ReturnPeriod(LocalDate.now)
+  def currentReturnPeriod = ReturnPeriod(LocalDate.now)
   val pendingReturn1 = currentReturnPeriod.previous
   val pendingReturn2 = pendingReturn1.previous
   val pendingReturn3 = pendingReturn2.previous
