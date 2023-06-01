@@ -131,8 +131,9 @@ class ServicePageControllerISpec extends ReturnsITHelper {
           val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
 
           whenReady(result1) { res =>
-            res.status mustBe 500
             val page = Jsoup.parse(res.body)
+            println("$$$$$$$$$$$$$page$$$$$$$$$$$$$$$")
+            res.status mustBe 500
             page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
           }
         }
