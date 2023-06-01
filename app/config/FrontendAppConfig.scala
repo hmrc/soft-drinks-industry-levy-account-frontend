@@ -55,7 +55,6 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
   val cacheTtl: Int = configuration.getInt("mongodb.timeToLiveInSeconds")
 
-  val earliestReturnPeriodYear = configuration.getInt("earliestReturnPeriodYear")
   val creditForExportGuidance = configuration.getString("creditForExportGuidance")
 }
 

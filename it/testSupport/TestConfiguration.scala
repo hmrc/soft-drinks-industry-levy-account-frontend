@@ -83,7 +83,6 @@ trait TestConfiguration
     "json.encryption.key" -> "fqpLDZ4sumDsekHkeEBlCA==",
     "json.encryption.previousKeys" -> "[]",
     "play.http.router" -> "testOnlyDoNotUseInAppConf.Routes",
-    "earliestReturnPeriodYear" -> "2018",
     "creditForExportGuidance" -> "https://www.gov.uk/guidance/soft-drinks-industry-levy-credit-for-exported-lost-or-destroyed-drinks-notice-4"
   )
 
