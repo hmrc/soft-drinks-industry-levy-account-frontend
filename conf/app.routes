@@ -4,6 +4,10 @@
 
 GET         /                                            controllers.IndexController.onPageLoad
 
+GET         /home                controllers.ServicePageController.onPageLoad
+
+GET        /start-a-return/nilReturn/:isNilReturn        controllers.ServicePageController.startAReturn(isNilReturn: Boolean)
+
 GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 
 GET         /refresh-session                             controllers.KeepAliveController.keepAlive

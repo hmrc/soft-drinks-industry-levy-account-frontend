@@ -16,6 +16,12 @@
 
 package models.requests
 
+import models.RetrievedSubscription
 import play.api.mvc.{Request, WrappedRequest}
+import uk.gov.hmrc.auth.core.Enrolments
 
-case class IdentifierRequest[A] (request: Request[A], userId: String) extends WrappedRequest[A](request)
+case class IdentifierRequest[A] (request: Request[A],
+                                 internalId: String,
+                                 enrolments: Enrolments,
+                                 optSubscription: Option[RetrievedSubscription]
+                                ) extends WrappedRequest[A](request)

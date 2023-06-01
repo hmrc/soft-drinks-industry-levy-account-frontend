@@ -17,77 +17,73 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.UserAnswers
-import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model._
 import play.api.libs.json.Format
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 @Singleton
 class SessionRepository @Inject()(
                                    mongoComponent: MongoComponent,
-                                   appConfig: FrontendAppConfig,
-                                   clock: Clock
-                                 )(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[UserAnswers](
-    collectionName = "user-answers",
+                                   appConfig: FrontendAppConfig)
+                                 (implicit ec: ExecutionContext)
+  extends PlayMongoRepository[DatedCacheMap](
+    collectionName = "session-cache",
     mongoComponent = mongoComponent,
-    domainFormat   = UserAnswers.format,
+    domainFormat   = DatedCacheMap.formats,
     indexes        = Seq(
       IndexModel(
         Indexes.ascending("lastUpdated"),
         IndexOptions()
-          .name("lastUpdatedIdx")
+          .name("session-cache-expiry")
           .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
       )
-    )
+    ),
+    replaceIndexes = false
   ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byId(id: String): Bson = Filters.equal("_id", id)
 
-  def keepAlive(id: String): Future[Boolean] =
+  def upsert(cm: CacheMap): Future[Boolean] = {
+    val cmUpdated = DatedCacheMap(cm.id, cm.data)
+    val options = ReplaceOptions().upsert(true)
     collection
-      .updateOne(
-        filter = byId(id),
-        update = Updates.set("lastUpdated", Instant.now(clock))
-      )
-      .toFuture
-      .map(_ => true)
-
-  def get(id: String): Future[Option[UserAnswers]] =
-    keepAlive(id).flatMap {
-      _ =>
-        collection
-          .find(byId(id))
-          .headOption
-    }
-
-  def set(answers: UserAnswers): Future[Boolean] = {
-
-    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
-
-    collection
-      .replaceOne(
-        filter      = byId(updatedAnswers.id),
-        replacement = updatedAnswers,
-        options     = ReplaceOptions().upsert(true)
-      )
-      .toFuture
-      .map(_ => true)
+      .replaceOne(equal("_id", cm.id), cmUpdated, options)
+      .toFuture()
+      .map { result =>
+        result.wasAcknowledged()
+      }
   }
 
-  def clear(id: String): Future[Boolean] =
+  def removeRecord(id: String): Future[Boolean] = {
+    collection.deleteOne(equal("_id", id)).toFuture().map(_.getDeletedCount > 0)
+  }
+
+  def get(id: String): Future[Option[CacheMap]] = {
+    collection.find(equal("_id", id)).headOption().map { datedCacheMap =>
+      datedCacheMap.map { value: DatedCacheMap =>
+        CacheMap(value._id, value.data)
+      }
+    }
+  }
+
+  def updateLastUpdated(id: String): Future[Boolean] = {
     collection
-      .deleteOne(byId(id))
-      .toFuture
-      .map(_ => true)
+      .updateOne(
+        equal("_id", id),
+        set("lastUpdated", Instant.now())
+      )
+      .toFuture()
+      .map { result =>
+        result.wasAcknowledged()
+      }
+  }
 }

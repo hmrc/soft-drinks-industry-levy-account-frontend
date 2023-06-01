@@ -18,63 +18,35 @@ package controllers
 
 import base.SpecBase
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{never, times, verify, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
+import repositories.SessionCache
 
 import scala.concurrent.Future
 
 class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
 
   "keepAlive" - {
+    "must keep the answers alive and return OK" in {
 
-    "when the user has answered some questions" - {
+      val mockSessionCache = mock[SessionCache]
+      when(mockSessionCache.extendSession(any())) thenReturn Future.successful(true)
 
-      "must keep the answers alive and return OK" in {
+      val application =
+        applicationBuilder()
+          .overrides(bind[SessionCache].toInstance(mockSessionCache))
+          .build()
 
-        val mockSessionRepository = mock[SessionRepository]
-        when(mockSessionRepository.keepAlive(any())) thenReturn Future.successful(true)
+      running(application) {
 
-        val application =
-          applicationBuilder(Some(emptyUserAnswers))
-            .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .build()
+        val request = FakeRequest(GET, routes.KeepAliveController.keepAlive.url)
 
-        running(application) {
+        val result = route(application, request).value
 
-          val request = FakeRequest(GET, routes.KeepAliveController.keepAlive.url)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-        }
-      }
-    }
-
-    "when the user has not answered any questions" - {
-
-      "must return OK" in {
-
-        val mockSessionRepository = mock[SessionRepository]
-        when(mockSessionRepository.keepAlive(any())) thenReturn Future.successful(true)
-
-        val application =
-          applicationBuilder(None)
-            .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-            .build()
-
-        running(application) {
-
-          val request = FakeRequest(GET, routes.KeepAliveController.keepAlive.url)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          verify(mockSessionRepository, never()).keepAlive(any())
-        }
+        status(result) mustEqual SEE_OTHER
       }
     }
   }

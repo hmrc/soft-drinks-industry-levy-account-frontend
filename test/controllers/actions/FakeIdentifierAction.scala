@@ -16,19 +16,23 @@
 
 package controllers.actions
 
+import models.RetrievedSubscription
+
 import javax.inject.Inject
 import models.requests.IdentifierRequest
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.Enrolments
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeIdentifierAction @Inject()(bodyParsers: PlayBodyParsers) extends IdentifierAction {
+class FakeIdentifierAction @Inject()(subscription: Option[RetrievedSubscription],
+                                     bodyParsers: BodyParser[AnyContent]) extends IdentifierAction {
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(IdentifierRequest(request, "id"))
+  override protected def refine[A](request: Request[A]): Future[Either[Result, IdentifierRequest[A]]] =
+    Future.successful(Right(IdentifierRequest(request, "id", Enrolments(Set.empty), subscription)))
 
   override def parser: BodyParser[AnyContent] =
-    bodyParsers.default
+    bodyParsers
 
   override protected def executionContext: ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global

@@ -18,57 +18,70 @@ package controllers.actions
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
+import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
+import handlers.ErrorHandler
 import models.requests.IdentifierRequest
 import play.api.mvc.Results._
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
+trait IdentifierAction extends ActionRefiner[Request, IdentifierRequest] with ActionBuilder[IdentifierRequest, AnyContent]
 
-class AuthenticatedIdentifierAction @Inject()(
-                                               override val authConnector: AuthConnector,
-                                               config: FrontendAppConfig,
-                                               val parser: BodyParsers.Default
+class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
+                                               val parser: BodyParsers.Default,
+                                               sdilConnector: SoftDrinksIndustryLevyConnector,
+                                               errorHandler: ErrorHandler
                                              )
-                                             (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
+                                             (implicit val executionContext: ExecutionContext, config: FrontendAppConfig)
+  extends IdentifierAction
+  with AuthorisedFunctions
+  with ActionHelpers {
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-
+  override protected def refine[A](request: Request[A]): Future[Either[Result, IdentifierRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    val retrieval = allEnrolments and credentialRole and internalId and affinityGroup
 
-    authorised().retrieve(Retrievals.internalId) {
-      _.map {
-        internalId => block(IdentifierRequest(request, internalId))
-      }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
-    } recover {
+    authorised(AuthProviders(GovernmentGateway)).retrieve(retrieval) {
+      case enrolments ~ role ~ id ~ affinity =>
+        id.fold[Future[Either[Result, IdentifierRequest[A]]]](
+          Future.successful(
+            Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
+          )) { internalId =>
+          val maybeUtr = getUtr(enrolments)
+          val maybeSdil = getSdilEnrolment(enrolments)
+          (maybeUtr, maybeSdil) match {
+            case (Some(utr), _) => sdilConnector.retrieveSubscription(utr, "utr", internalId).value
+              .map {
+                case Right(optSubscription) =>
+                  Right(IdentifierRequest(request, internalId, enrolments, optSubscription))
+                case Left(_) => Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
+              }
+            case (_, Some(sdilEnrolment)) =>
+              sdilConnector.retrieveSubscription(sdilEnrolment.value, "sdil", internalId).value
+              .map {
+                case Right(optSubscription) =>
+                Right(IdentifierRequest(request, internalId, enrolments, optSubscription))
+                case Left(_) => Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
+              }
+            case _ => invalidRole(role).orElse(invalidAffinityGroup(affinity)) match {
+              case Some(error) => Future.successful(Left(error))
+              case None => Future.successful(Right(IdentifierRequest(request, internalId, enrolments, None)))
+            }
+          }
+        }
+    }.recover {
       case _: NoActiveSession =>
-        Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+        Left(Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl))))
       case _: AuthorisationException =>
-        Redirect(routes.UnauthorisedController.onPageLoad)
-    }
-  }
-}
-
-class SessionIdentifierAction @Inject()(
-                                         val parser: BodyParsers.Default
-                                       )
-                                       (implicit val executionContext: ExecutionContext) extends IdentifierAction {
-
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-    hc.sessionId match {
-      case Some(session) =>
-        block(IdentifierRequest(request, session.value))
-      case None =>
-        Future.successful(Redirect(routes.IndexController.onPageLoad))
+        Left(Redirect(routes.UnauthorisedController.onPageLoad))
     }
   }
 }

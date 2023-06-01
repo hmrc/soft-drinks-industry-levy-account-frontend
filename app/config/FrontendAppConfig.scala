@@ -24,21 +24,27 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
-  val host: String    = configuration.getConfString("soft-drinks-industry-levy-account-frontend.host", throw new Exception("missing config soft-drinks-industry-levy-account-frontend.host"))
+  val host: String = configuration.getConfString("soft-drinks-industry-levy-account-frontend.host",
+    throw new Exception("missing config soft-drinks-industry-levy-account-frontend.host"))
   val appName: String = configuration.getString("appName")
 
-  private val contactHost = configuration.getConfString("contact-frontend.host", throw new Exception("missing config contact-frontend.host"))
+  private val contactHost = configuration.getConfString("contact-frontend.host",
+    throw new Exception("missing config contact-frontend.host"))
   private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"
+  val returnsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-returns-frontend")
 
+
+  def startReturnUrl(year: Int, quarter: Int, isNilReturn: Boolean) = {
+    s"$returnsBaseUrl/soft-drinks-industry-levy-returns-frontend/submit-return/year/$year/quarter/$quarter/nil-return/$isNilReturn"
+  }
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
 
   val basGatewayBaseUrl: String = configuration.baseUrl("bas-gateway")
-  val sdilFrontendBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy-frontend")
   val sdilBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy")
 
   val loginUrl: String         = s"$basGatewayBaseUrl/bas-gateway/sign-in"
-  val loginContinueUrl: String = s"$sdilFrontendBaseUrl/soft-drinks-industry-levy"
+  val loginContinueUrl: String = s"$host/soft-drinks-industry-levy-account-frontend"
   val signOutUrl: String       = s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
 
   private val exitSurveyBaseUrl: String = configuration.baseUrl("feedback-frontend")
@@ -48,4 +54,8 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val countdown: Int = configuration.getInt("timeout-dialog.countdown")
 
   val cacheTtl: Int = configuration.getInt("mongodb.timeToLiveInSeconds")
+
+  val earliestReturnPeriodYear = configuration.getInt("earliestReturnPeriodYear")
+  val creditForExportGuidance = configuration.getString("creditForExportGuidance")
 }
+

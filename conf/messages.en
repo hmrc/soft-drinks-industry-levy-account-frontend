@@ -1,4 +1,4 @@
-service.name = soft-drinks-industry-levy-account-frontend
+service.name = Soft drinks industry levy
 
 site.back = Back
 site.remove = Remove
@@ -55,3 +55,30 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+servicePage.title = Your Soft Drinks Industry Levy account
+servicePage.heading = Your Soft Drinks Industry Levy account
+servicePage.returns.heading = Returns
+servicePage.returnsOverdue1.warning = The return for {0} from {1} to {2} is due by {3}.
+servicePage.returnsOverdue.warning = You have {0} overdue returns
+
+overdueReturns.paragraph = You must send your {0} overdue returns in this order, oldest first:
+overdueReturn.bullet = {0} to {1}
+noOverdueReturns.paragraph = Your return for {0} to {1} was submitted at {2} on {3}. Your next return will be for {4} to {5}. You must submit this return and make any payments due by {6}.
+returns.paragraph = You need to send a return to HMRC every quarter, even if you have nothing to report for the period.
+
+needInReturnDetails.details = What you will need to tell us in your return
+needInReturnDetails.paragraph1 = You will need to tell us how many litres of liable drink in each band you need to report that were:
+needInReturnDetails.bullet1 = packaged for your own brand or as a contract packer, not including those packaged for small producers
+needInReturnDetails.bullet2 = packaged for each small producer and the reference number of each small producer
+needInReturnDetails.bullet3 = brought into the UK from anywhere outside of the UK, not including those from small producers
+needInReturnDetails.bullet4 = brought into the UK from small producers
+needInReturnDetails.paragraph2 = If the drink is dilutable, you must report the amount of ready-to-drink litres made when it is diluted according to the dilution ratio stated on the packaging.
+needInReturnDetails.paragraph3 = You can only claim credit if you've registered for the levy and paid it directly to HMRC. Claiming credits you're not entitled to is a criminal offence.
+needInReturnDetails.paragraph4 = You can claim a credit for liable drinks that you have reported in either a previous or the current return that have been:
+needInReturnDetails.bullet5 = exported, or are expected to be exported
+needInReturnDetails.bullet6 = lost or destroyed
+needInReturnDetails.creditForExportGuidance.link = You must get and keep certain types of evidence to be able to claim a credit (opens in a new tab).
+
+returns.start = Start a return
+returns.startNilReturn = I have no activity to report for this quarter.
