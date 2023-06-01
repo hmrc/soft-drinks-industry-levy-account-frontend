@@ -13,7 +13,7 @@ case class SdilBackendStub()
   def retrieveSubscription(identifier: String, refNum: String) = {
     stubFor(
       get(
-        urlPathMatching(s"/subscription/$identifier/$refNum"))
+        urlPathEqualTo(s"/subscription/$identifier/$refNum"))
         .willReturn(
           ok(Json.toJson(aSubscription).toString())))
     builder
@@ -31,7 +31,7 @@ case class SdilBackendStub()
   def retrieveSubscriptionNone(identifier: String, refNum: String) = {
     stubFor(
       get(
-        urlPathMatching(s"/subscription/$identifier/$refNum"))
+        urlPathEqualTo(s"/subscription/$identifier/$refNum"))
         .willReturn(
           notFound()))
     builder
@@ -41,7 +41,7 @@ case class SdilBackendStub()
   def retrieveSubscriptionError(identifier: String, refNum: String) = {
     stubFor(
       get(
-        urlPathMatching(s"/subscription/$identifier/$refNum"))
+        urlPathEqualTo(s"/subscription/$identifier/$refNum"))
         .willReturn(
           serverError()))
     builder
@@ -50,7 +50,7 @@ case class SdilBackendStub()
   def retrievePendingReturns(utr: String, pendingReturns: List[ReturnPeriod]) = {
     stubFor(
       get(
-        urlPathMatching(s"/returns/$utr/pending"))
+        urlPathEqualTo(s"/returns/$utr/pending"))
         .willReturn(
           ok(Json.toJson(pendingReturns).toString())))
     builder
@@ -59,7 +59,7 @@ case class SdilBackendStub()
   def retrievePendingReturnsError(utr: String) = {
     stubFor(
       get(
-        urlPathMatching(s"/returns/$utr/pending"))
+        urlPathEqualTo(s"/returns/$utr/pending"))
         .willReturn(
           serverError()))
     builder
@@ -73,7 +73,7 @@ case class SdilBackendStub()
     }
     stubFor(
       get(
-        urlPathMatching(uri))
+        urlPathEqualTo(uri))
         .willReturn(
           response))
     builder
@@ -83,7 +83,7 @@ case class SdilBackendStub()
     val uri = s"/returns/$utr/year/${period.year}/quarter/${period.quarter}"
     stubFor(
       get(
-        urlPathMatching(uri))
+        urlPathEqualTo(uri))
         .willReturn(
           serverError()))
     builder
