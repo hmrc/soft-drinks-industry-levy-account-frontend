@@ -1,125 +1,119 @@
 package repositories
 
-import config.FrontendAppConfig
-import models.UserAnswers
-import org.mockito.Mockito.when
-import org.mongodb.scala.model.Filters
-import org.scalatest.OptionValues
+import org.mongodb.scala.bson.BsonDocument
+import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
-import java.time.{Clock, Instant, ZoneId}
-import java.time.temporal.ChronoUnit
-import scala.concurrent.ExecutionContext.Implicits.global
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 class SessionRepositorySpec
   extends AnyFreeSpec
     with Matchers
-    with DefaultPlayMongoRepositorySupport[UserAnswers]
     with ScalaFutures
     with IntegrationPatience
-    with OptionValues
-    with MockitoSugar {
+    with OptionValues with GuiceOneAppPerSuite with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach {
 
-  private val instant = Instant.now.truncatedTo(ChronoUnit.MILLIS)
-  private val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
+  val repository: SessionRepository = app.injector.instanceOf[SessionRepository]
+  def cacheMap = CacheMap("foo", Map("bar" -> Json.obj("wizz" -> "bang")))
 
-  private val userAnswers = UserAnswers("id", Json.obj("foo" -> "bar"), Instant.ofEpochSecond(1))
+  override def beforeEach(): Unit = {
+    await(repository.collection.deleteMany(BsonDocument()).toFuture())
+    super.beforeEach()
+  }
 
-  private val mockAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
-
-  protected override val repository = new SessionRepository(
-    mongoComponent = mongoComponent,
-    appConfig      = mockAppConfig,
-    clock          = stubClock
-  )
-
-  ".set" - {
-
-    "must set the last updated time on the supplied user answers to `now`, and save them" in {
-
-      val expectedResult = userAnswers copy (lastUpdated = instant)
-
-      val setResult     = repository.set(userAnswers).futureValue
-      val updatedRecord = find(Filters.equal("_id", userAnswers.id)).futureValue.headOption.value
-
-      setResult mustEqual true
-      updatedRecord mustEqual expectedResult
+  "indexes" - {
+    "are correct" in {
+      repository.indexes.toList.toString() mustBe Seq(
+        IndexModel(
+          ascending("lastUpdated"),
+          IndexOptions()
+            .name("session-cache-expiry")
+            .expireAfter(
+              900,
+              TimeUnit.SECONDS
+            )
+        )
+      ).toString
     }
   }
 
+  ".upsert" - {
+    "insert successfully when nothing exists in DB" in {
+      val timeBeforeTest = Instant.now().toEpochMilli
+      await(repository.upsert(cacheMap))
+      val timeAfterTest = Instant.now().toEpochMilli
+
+      val updatedRecord = repository.collection.find(Filters.equal("_id", "foo")).toFuture()
+
+      val lastUpdated = await(updatedRecord).head.lastUpdated.toEpochMilli
+      assert(lastUpdated > timeBeforeTest || lastUpdated == timeBeforeTest)
+      assert(lastUpdated < timeAfterTest || lastUpdated == timeAfterTest)
+    }
+    "upsert a record that already exists successfully" in {
+      val timeBeforeTest = Instant.now().toEpochMilli
+
+      await(repository.collection.countDocuments().head()) mustBe 0
+      await(repository.upsert(cacheMap))
+      await(repository.collection.countDocuments().head()) mustBe 1
+
+      val updatedCacheMap = CacheMap("foo", Map("bar" -> Json.obj("wizz" -> "bang2")))
+      await(repository.upsert(updatedCacheMap))
+      val updatedRecord = repository.collection.find(Filters.equal("_id", "foo")).toFuture()
+
+      val timeAfterTest = Instant.now().toEpochMilli
+
+      val lastUpdated = await(updatedRecord).head.lastUpdated.toEpochMilli
+
+      assert(lastUpdated > timeBeforeTest || lastUpdated == timeBeforeTest)
+      assert(lastUpdated < timeAfterTest || lastUpdated == timeAfterTest)
+    }
+  }
+
+  ".removeRecord" - {
+    "remove a record successfully" in {
+      await(repository.upsert(cacheMap))
+      await(repository.collection.countDocuments().head()) mustBe 1
+
+      await(repository.removeRecord(cacheMap.id))
+      await(repository.collection.countDocuments().head()) mustBe 0
+    }
+  }
   ".get" - {
+    "get a record successfully" in {
+      await(repository.upsert(cacheMap))
 
-    "when there is a record for this id" - {
+      await(repository.collection.countDocuments().head()) mustBe 1
 
-      "must update the lastUpdated time and get the record" in {
-
-        insert(userAnswers).futureValue
-
-        val result         = repository.get(userAnswers.id).futureValue
-        val expectedResult = userAnswers copy (lastUpdated = instant)
-
-        result.value mustEqual expectedResult
-      }
+      val result = await(repository.get(cacheMap.id))
+      result.get mustBe cacheMap
     }
+  }
+  ".updateLastUpdated" - {
+    "update last updated successfully" in {
+      val timeBeforeTest = Instant.now().toEpochMilli
+      await(repository.upsert(cacheMap))
+      await(repository.collection.countDocuments().head()) mustBe 1
+      val result = await(repository.updateLastUpdated("foo"))
+      result mustBe true
 
-    "when there is no record for this id" - {
+      val timeAfterTest = Instant.now().toEpochMilli
 
-      "must return None" in {
+      val updatedRecord = repository.collection.find(Filters.equal("_id", "foo")).toFuture()
 
-        repository.get("id that does not exist").futureValue must not be defined
-      }
+      val lastUpdated = await(updatedRecord).head.lastUpdated.toEpochMilli
+
+      assert(lastUpdated > timeBeforeTest || lastUpdated == timeBeforeTest)
+      assert(lastUpdated < timeAfterTest || lastUpdated == timeAfterTest)
     }
   }
 
-  ".clear" - {
 
-    "must remove a record" in {
-
-      insert(userAnswers).futureValue
-
-      val result = repository.clear(userAnswers.id).futureValue
-
-      result mustEqual true
-      repository.get(userAnswers.id).futureValue must not be defined
-    }
-
-    "must return true when there is no record to remove" in {
-      val result = repository.clear("id that does not exist").futureValue
-
-      result mustEqual true
-    }
-  }
-
-  ".keepAlive" - {
-
-    "when there is a record for this id" - {
-
-      "must update its lastUpdated to `now` and return true" in {
-
-        insert(userAnswers).futureValue
-
-        val result = repository.keepAlive(userAnswers.id).futureValue
-
-        val expectedUpdatedAnswers = userAnswers copy (lastUpdated = instant)
-
-        result mustEqual true
-        val updatedAnswers = find(Filters.equal("_id", userAnswers.id)).futureValue.headOption.value
-        updatedAnswers mustEqual expectedUpdatedAnswers
-      }
-    }
-
-    "when there is no record for this id" - {
-
-      "must return true" in {
-
-        repository.keepAlive("id that does not exist").futureValue mustEqual true
-      }
-    }
-  }
 }

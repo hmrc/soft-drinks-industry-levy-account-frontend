@@ -1,0 +1,46 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.FrontendAppConfig
+
+@this(govukDetails: GovukDetails)
+
+@()(implicit messages: Messages, config: FrontendAppConfig)
+
+@htmlContent = {
+ <p class ="govuk-body" id="needInReturnP1">@messages("needInReturnDetails.paragraph1")</p>
+ <ul class="govuk-list govuk-list--bullet"  id="needInReturnLiable">
+  <li >@messages("needInReturnDetails.bullet1")</li>
+  <li >@messages("needInReturnDetails.bullet2")</li>
+  <li >@messages("needInReturnDetails.bullet3")</li>
+  <li >@messages("needInReturnDetails.bullet4")</li>
+ </ul>
+ <p class ="govuk-body" id="needInReturnP2">@messages("needInReturnDetails.paragraph2")</p>
+ <p class ="govuk-body govuk-!-font-weight-bold" id="needInReturnP3">@messages("needInReturnDetails.paragraph3")</p>
+ <p class ="govuk-body" id="needInReturnP4">@messages("needInReturnDetails.paragraph4")</p>
+ <ul class="govuk-list govuk-list--bullet" id="needInReturnCredit">
+  <li >@messages("needInReturnDetails.bullet5")</li>
+  <li >@messages("needInReturnDetails.bullet6")</li>
+ </ul>
+<a class="govuk-link" id="needInReturnLink" href="@config.creditForExportGuidance" target="_blank">@messages("needInReturnDetails.creditForExportGuidance.link")</a>
+
+}
+
+@govukDetails(Details(
+ id = Some("needInReturnDetails"),
+ summary = Text(messages("needInReturnDetails.details")),
+ content = HtmlContent(htmlContent)
+))
