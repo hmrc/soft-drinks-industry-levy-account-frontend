@@ -102,4 +102,38 @@ object ITCoreTestData extends TryValues {
   )
 
   val pendingReturns1 = List(pendingReturn1)
+
+  val rosmRegistrationOrgJson =
+    """{"safeId":"fvp41Gm51rswaeiysohztnrqjdfz7cOnael38omHvuH2ye519ncqiXruPqjBbwewiKdmthpsphun",
+      |"isEditable":false,"isAnAgent":false,"isAnIndividual":false,"organisation":{"organisationName":"foo"},
+      |"address":{"addressLine1":"50","addressLine2":"The Lane","addressLine3":"The Town",
+      |"countryCode":"GB","postalCode":"SM32 5IA"},
+      |"contactDetails":{"primaryPhoneNumber":"08926 167394","emailAddress":"qovmlk@rlkioorw.com"}}""".stripMargin
+
+  val rosmRegistrationIndividualJson =
+    """{"safeId":"fvp41Gm51rswaeiysohztnrqjdfz7cOnael38omHvuH2ye519ncqiXruPqjBbwewiKdmthpsphun",
+      |"isEditable":false,"isAnAgent":false,"isAnIndividual":true,"individual":{"firstName":"name1","lastName":"name2"},
+      |"address":{"addressLine1":"50","addressLine2":"The Lane","addressLine3":"The Town",
+      |"countryCode":"GB","postalCode":"SM32 5IA"},
+      |"contactDetails":{"primaryPhoneNumber":"08926 167394","emailAddress":"qovmlk@rlkioorw.com"}}""".stripMargin
+
+  val ROSMRegistrationOrg = RosmRegistration(
+    safeId = "fvp41Gm51rswaeiysohztnrqjdfz7cOnael38omHvuH2ye519ncqiXruPqjBbwewiKdmthpsphun",
+    organisation = Some(OrganisationDetails("foo")),
+    individual = None,
+    address = UkAddress(
+      lines = List("50", "The Lane", "The Town"),
+      postCode = "SM32 5IA"
+    )
+  )
+
+  val ROSMRegistrationIndividual = RosmRegistration(
+    safeId = "fvp41Gm51rswaeiysohztnrqjdfz7cOnael38omHvuH2ye519ncqiXruPqjBbwewiKdmthpsphun",
+    organisation = None,
+    individual = Some(IndividualDetails("name1", "name2")),
+    address = UkAddress(
+      lines = List("50", "The Lane", "The Town"),
+      postCode = "SM32 5IA"
+    )
+  )
 }

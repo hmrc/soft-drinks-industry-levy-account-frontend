@@ -76,6 +76,8 @@ trait TestConfiguration
     s"microservice.services.bas-gateway.port" -> s"$wiremockPort",
     s"microservice.services.soft-drinks-industry-levy-returns-frontend.host" -> s"$wiremockHost",
     s"microservice.services.soft-drinks-industry-levy-returns-frontend.port" -> s"$wiremockPort",
+    s"microservice.services.soft-drinks-industry-levy-registration-frontend.host" -> s"$wiremockHost",
+    s"microservice.services.soft-drinks-industry-levy-registration-frontend.port" -> s"$wiremockPort",
     s"microservice.services.soft-drinks-industry-levy.host" -> s"$wiremockHost",
     s"microservice.services.soft-drinks-industry-levy.port" -> s"$wiremockPort",
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
@@ -95,7 +97,7 @@ trait TestConfiguration
       .in(Environment.simple(mode = Mode.Dev))
       .configure(config ++ configParams)
       .overrides(
-        bind[IdentifierAction].to[AuthenticatedIdentifierAction],
+        bind[AuthenticatedAction].to[AuthenticatedAuthenticatedAction],
         bind[RegisteredAction].to[RegisteredActionImp],
         bind[Clock].toInstance(Clock.systemDefaultZone().withZone(ZoneOffset.UTC))
       )

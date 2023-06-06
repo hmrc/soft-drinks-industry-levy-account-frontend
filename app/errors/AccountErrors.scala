@@ -22,3 +22,8 @@ object NoPendingReturns extends AccountErrors
 
 object UnexpectedResponseFromSDIL extends AccountErrors
 
+object RequiresIdentification extends AccountErrors
+
+object AlreadyRegistered extends AccountErrors
+
+

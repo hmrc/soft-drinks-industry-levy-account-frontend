@@ -17,71 +17,30 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import config.FrontendAppConfig
-import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
 import handlers.ErrorHandler
-import models.requests.IdentifierRequest
+import models.requests.{AuthenticatedRequest, IdentificationRequest}
 import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IdentifierAction extends ActionRefiner[Request, IdentifierRequest] with ActionBuilder[IdentifierRequest, AnyContent]
 
-class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
-                                               val parser: BodyParsers.Default,
-                                               sdilConnector: SoftDrinksIndustryLevyConnector,
-                                               errorHandler: ErrorHandler
-                                             )
-                                             (implicit val executionContext: ExecutionContext, config: FrontendAppConfig)
+class IdentificationActionImp @Inject()(errorHandler: ErrorHandler)
+                                       (implicit val executionContext: ExecutionContext)
   extends IdentifierAction
-  with AuthorisedFunctions
   with ActionHelpers {
-
-  override protected def refine[A](request: Request[A]): Future[Either[Result, IdentifierRequest[A]]] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-    val retrieval = allEnrolments and credentialRole and internalId and affinityGroup
-
-    authorised(AuthProviders(GovernmentGateway)).retrieve(retrieval) {
-      case enrolments ~ role ~ id ~ affinity =>
-        id.fold[Future[Either[Result, IdentifierRequest[A]]]](
-          Future.successful(
-            Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
-          )) { internalId =>
-          val maybeUtr = getUtr(enrolments)
-          val maybeSdil = getSdilEnrolment(enrolments)
-          (maybeUtr, maybeSdil) match {
-            case (Some(utr), _) => sdilConnector.retrieveSubscription(utr, "utr", internalId).value
-              .map {
-                case Right(optSubscription) =>
-                  Right(IdentifierRequest(request, internalId, enrolments, optSubscription))
-                case Left(_) => Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
-              }
-            case (_, Some(sdilEnrolment)) =>
-              sdilConnector.retrieveSubscription(sdilEnrolment.value, "sdil", internalId).value
-              .map {
-                case Right(optSubscription) =>
-                Right(IdentifierRequest(request, internalId, enrolments, optSubscription))
-                case Left(_) => Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
-              }
-            case _ => invalidRole(role).orElse(invalidAffinityGroup(affinity)) match {
-              case Some(error) => Future.successful(Left(error))
-              case None => Future.successful(Right(IdentifierRequest(request, internalId, enrolments, None)))
-            }
-          }
-        }
-    }.recover {
-      case _: NoActiveSession =>
-        Left(Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl))))
-      case _: AuthorisationException =>
-        Left(Redirect(routes.UnauthorisedController.onPageLoad))
+    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, IdentificationRequest[A]]] = {
+      (request.optUtr, request.optSubscription) match {
+        case (Some(_), Some(sub)) if sub.deregDate.isEmpty =>
+          Future.successful(Left(Redirect(routes.ServicePageController.onPageLoad)))
+        case (Some(_), optSub) => Future.successful(Right(IdentificationRequest(request, request.internalId, optSub, request.optUtr)))
+        case (None, Some(sub)) if sub.deregDate.nonEmpty => Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
+        case _ if request.optSdilRef.isDefined => Future.successful(Left(NotFound(errorHandler.notFoundTemplate(request))))
+        case _ => Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
+      }
     }
-  }
 }
+trait IdentifierAction extends ActionRefiner[AuthenticatedRequest, IdentificationRequest]
+
+

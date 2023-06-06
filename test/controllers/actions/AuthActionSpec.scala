@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends SpecBase {
 
-  class Harness(authAction: IdentifierAction) {
+  class Harness(authAction: AuthenticatedAction) {
     def onPageLoad() = authAction { _ => Results.Ok }
   }
 
@@ -54,7 +54,7 @@ class AuthActionSpec extends SpecBase {
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -78,7 +78,7 @@ class AuthActionSpec extends SpecBase {
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -102,7 +102,7 @@ class AuthActionSpec extends SpecBase {
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -127,7 +127,7 @@ class AuthActionSpec extends SpecBase {
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
             val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -151,7 +151,7 @@ class AuthActionSpec extends SpecBase {
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -175,7 +175,7 @@ class AuthActionSpec extends SpecBase {
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
             val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
@@ -199,7 +199,7 @@ class AuthActionSpec extends SpecBase {
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())

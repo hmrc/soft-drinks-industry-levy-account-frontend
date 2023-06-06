@@ -26,8 +26,9 @@ class Module extends AbstractModule {
   override def configure(): Unit = {
 
     // For session based storage instead of cred based, change to SessionIdentifierAction
-    bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
+    bind(classOf[AuthenticatedAction]).to(classOf[AuthenticatedAuthenticatedAction]).asEagerSingleton()
     bind(classOf[RegisteredAction]).to(classOf[RegisteredActionImp]).asEagerSingleton()
+    bind(classOf[IdentifierAction]).to(classOf[IdentificationActionImp]).asEagerSingleton()
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
   }
 }

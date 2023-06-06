@@ -19,17 +19,17 @@ package controllers.actions
 import models.RetrievedSubscription
 
 import javax.inject.Inject
-import models.requests.IdentifierRequest
+import models.requests.AuthenticatedRequest
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.Enrolments
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeIdentifierAction @Inject()(subscription: Option[RetrievedSubscription],
-                                     bodyParsers: BodyParser[AnyContent]) extends IdentifierAction {
+class FakeAuthenticatedAction @Inject()(subscription: Option[RetrievedSubscription],
+                                        bodyParsers: BodyParser[AnyContent]) extends AuthenticatedAction {
 
-  override protected def refine[A](request: Request[A]): Future[Either[Result, IdentifierRequest[A]]] =
-    Future.successful(Right(IdentifierRequest(request, "id", Enrolments(Set.empty), subscription)))
+  override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] =
+    Future.successful(Right(AuthenticatedRequest(request, "id", Enrolments(Set.empty), subscription, subscription.map(_.utr), subscription.map(_.sdilRef))))
 
   override def parser: BodyParser[AnyContent] =
     bodyParsers

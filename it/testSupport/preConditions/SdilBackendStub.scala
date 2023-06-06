@@ -47,6 +47,34 @@ case class SdilBackendStub()
     builder
   }
 
+  def retrieveROSM(utr: String, resp: String) = {
+    stubFor(
+      get(
+        urlPathEqualTo(s"/rosm-registration/lookup/$utr"))
+        .willReturn(
+          ok(resp)))
+    builder
+  }
+
+  def retrieveROSMNone(utr: String) = {
+    stubFor(
+      get(
+        urlPathEqualTo(s"/rosm-registration/lookup/$utr"))
+        .willReturn(
+          notFound()))
+    builder
+  }
+
+
+  def retrieveROSMError(utr: String) = {
+    stubFor(
+      get(
+        urlPathEqualTo(s"/rosm-registration/lookup/$utr"))
+        .willReturn(
+          serverError()))
+    builder
+  }
+
   def retrievePendingReturns(utr: String, pendingReturns: List[ReturnPeriod]) = {
     stubFor(
       get(

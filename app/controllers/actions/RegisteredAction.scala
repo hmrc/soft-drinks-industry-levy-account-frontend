@@ -17,11 +17,8 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import config.FrontendAppConfig
-import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
-import handlers.ErrorHandler
-import models.requests.{IdentifierRequest, RegisteredRequest}
+import models.requests.{AuthenticatedRequest, RegisteredRequest}
 import play.api.mvc.Results._
 import play.api.mvc._
 
@@ -32,17 +29,16 @@ class RegisteredActionImp @Inject()()
                                      (implicit val executionContext: ExecutionContext)
   extends RegisteredAction
   with ActionHelpers {
-    override protected def refine[A](request: IdentifierRequest[A]): Future[Either[Result, RegisteredRequest[A]]] = {
+    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RegisteredRequest[A]]] = {
 
       request.optSubscription match {
         case None =>
-          //ToDo redirect to identifier controller once implemented
-          Future.successful(Left(Redirect(routes.IndexController.onPageLoad)))
+          Future.successful(Left(Redirect(routes.RegisterController.start)))
         case Some(sub) =>
           Future.successful(Right(RegisteredRequest(request, request.internalId, request.enrolments, sub)))
       }
     }
 }
-trait RegisteredAction extends ActionRefiner[IdentifierRequest, RegisteredRequest]
+trait RegisteredAction extends ActionRefiner[AuthenticatedRequest, RegisteredRequest]
 
 

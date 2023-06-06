@@ -24,7 +24,7 @@ import views.html.ServiceView
 
 class ServiceViewSpec extends ReturnsViewHelper {
 
-  val application = registeredApplicationBuilder().build()
+  val application = applicationBuilder().build()
   val view = application.injector.instanceOf[ServiceView]
   implicit val request: Request[_] = FakeRequest()
   implicit val config: FrontendAppConfig = application

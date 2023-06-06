@@ -19,7 +19,7 @@ package connectors
 import cats.data.EitherT
 import config.FrontendAppConfig
 import errors.UnexpectedResponseFromSDIL
-import models.{OptPreviousSubmittedReturn, OptRetrievedSubscription, RetrievedSubscription, ReturnPeriod, SdilReturn}
+import models._
 import repositories.{SessionCache, SessionKeys}
 import service.AccountResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
