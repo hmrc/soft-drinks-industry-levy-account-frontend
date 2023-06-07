@@ -11,3 +11,7 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
++nocsrf
+POST    /test-only/direct-debit-backend               controllers.testOnly.TestOnlyController.stubDirectDebitInitialise()
+GET     /test-only/simulate-direct-debit-journey      controllers.testOnly.TestOnlyController.stubDirectDebitJourney()

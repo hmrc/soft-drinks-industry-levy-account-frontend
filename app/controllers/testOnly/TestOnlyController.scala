@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.testOnly
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import controllers.actions.{AuthenticatedAction, IdentifierAction}
+import models.SetupDirectDebitResponse
 import play.api.i18n.I18nSupport
+import play.api.libs.json.Json
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utilities.GenericLogger
 
-class RegisterController @Inject()(
-                                    val controllerComponents: MessagesControllerComponents,
-                                    val genericLogger: GenericLogger,
-                                    authenticated: AuthenticatedAction,
-                                    identifierAction: IdentifierAction
-                                  )(implicit config: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
+class TestOnlyController @Inject()(val controllerComponents: MessagesControllerComponents,
+                                   config: FrontendAppConfig)
+  extends FrontendBaseController with I18nSupport {
 
-  def start = (authenticated andThen identifierAction) { _ =>
-    Redirect(config.startRegistrationUrl)
+  def stubDirectDebitJourney() = Action { _ =>
+    Redirect(config.homePage)
+  }
+
+  def stubDirectDebitInitialise() = Action { _ =>
+    Ok(Json.toJson(SetupDirectDebitResponse(routes.TestOnlyController.stubDirectDebitJourney().url)))
   }
 
 }

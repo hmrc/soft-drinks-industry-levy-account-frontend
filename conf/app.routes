@@ -10,6 +10,8 @@ GET         /register/start                          controllers.RegisterControl
 
 GET        /start-a-return/nilReturn/:isNilReturn        controllers.ServicePageController.startAReturn(isNilReturn: Boolean)
 
+GET       /start-direct-debit-journey                    controllers.DirectDebitController.setup()
+
 GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 
 GET         /refresh-session                             controllers.KeepAliveController.keepAlive

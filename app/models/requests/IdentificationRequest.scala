@@ -16,7 +16,7 @@
 
 package models.requests
 
-import models.{RetrievedSubscription, RosmRegistration}
+import models.RetrievedSubscription
 import play.api.mvc.{Request, WrappedRequest}
 
 case class IdentificationRequest[A](request: Request[A],

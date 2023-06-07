@@ -16,8 +16,6 @@
 
 package models
 
-import cats.implicits._
-import models.SdilReturn._
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{Format, JsPath, Json, OFormat}
 

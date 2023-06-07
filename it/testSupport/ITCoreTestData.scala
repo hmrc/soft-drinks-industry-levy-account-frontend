@@ -103,6 +103,8 @@ object ITCoreTestData extends TryValues {
 
   val pendingReturns1 = List(pendingReturn1)
 
+  val directDebitResponse = SetupDirectDebitResponse("http://example.com")
+
   val rosmRegistrationOrgJson =
     """{"safeId":"fvp41Gm51rswaeiysohztnrqjdfz7cOnael38omHvuH2ye519ncqiXruPqjBbwewiKdmthpsphun",
       |"isEditable":false,"isAnAgent":false,"isAnIndividual":false,"organisation":{"organisationName":"foo"},

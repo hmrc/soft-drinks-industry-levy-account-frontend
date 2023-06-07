@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package viewmodels
+package models
 
-sealed trait LegendSize
+import play.api.libs.json.{Format, Json}
 
-object LegendSize {
-  case object ExtraLarge extends WithCssClass("govuk-fieldset__legend--xl") with LegendSize
-  case object Large      extends WithCssClass("govuk-fieldset__legend--l") with LegendSize
-  case object Medium     extends WithCssClass("govuk-fieldset__legend--m") with LegendSize
-  case object Small      extends WithCssClass("govuk-fieldset__legend--s") with LegendSize
+case class SetupDirectDebitResponse(nextUrl: String)
+
+object SetupDirectDebitResponse {
+  implicit val format: Format[SetupDirectDebitResponse] = Json.format[SetupDirectDebitResponse]
 }

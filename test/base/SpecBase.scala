@@ -24,11 +24,12 @@ import models.RetrievedSubscription
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.{OptionValues, TryValues}
-import play.api.Application
+import org.scalatest.{BeforeAndAfterEach, OptionValues, TryValues}
+import play.api.{Application, Play}
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import play.api.test.Helpers.stubControllerComponents
 import service.AccountResult
@@ -42,7 +43,8 @@ trait SpecBase
     with TryValues
     with OptionValues
     with ScalaFutures
-    with IntegrationPatience {
+    with IntegrationPatience
+    with BeforeAndAfterEach {
 
   def createSuccessAccountResult[T](result: T): AccountResult[T] =
     EitherT.right[AccountErrors](Future.successful(result))
@@ -52,17 +54,32 @@ trait SpecBase
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
-  implicit lazy val messagesAPI = applicationBuilder().build().injector.instanceOf[MessagesApi]
-  implicit lazy val messagesProvider = MessagesImpl(Lang("en"), messagesAPI)
+  lazy val application1: Application = applicationBuilder().build()
+  implicit lazy val messagesAPI: MessagesApi = application1.injector.instanceOf[MessagesApi]
+  implicit lazy val messagesProvider: MessagesImpl = MessagesImpl(Lang("en"), messagesAPI)
+  lazy val mcc: MessagesControllerComponents = application1.injector.instanceOf[MessagesControllerComponents]
   implicit lazy val hc: HeaderCarrier = new HeaderCarrier()
-  implicit lazy val ec: ExecutionContext = applicationBuilder().build().injector.instanceOf[ExecutionContext]
+  implicit lazy val ec: ExecutionContext = application1.injector.instanceOf[ExecutionContext]
 
   protected def applicationBuilder(optSubscription: Option[RetrievedSubscription] = Some(TestData.aSubscription)): GuiceApplicationBuilder = {
     val bodyParsers = stubControllerComponents().parsers.defaultBodyParser
     new GuiceApplicationBuilder()
       .overrides(
         bind[AuthenticatedAction].toInstance(new FakeAuthenticatedAction(optSubscription, bodyParsers)),
-        bind[IdentifierAction].to[IdentificationActionImp],
+        bind[IdentifierAction].to[IdentificationActionImp]
+      )
+  }
+
+  override def afterEach(): Unit = {
+    Play.stop(application1)
+    super.afterEach()
+  }
+
+  protected def registeredApplicationBuilder(optSubscription: Option[RetrievedSubscription] = Some(TestData.aSubscription)): GuiceApplicationBuilder = {
+    val bodyParsers = stubControllerComponents().parsers.defaultBodyParser
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[AuthenticatedAction].toInstance(new FakeAuthenticatedAction(optSubscription, bodyParsers)),
         bind[RegisteredAction].to[RegisteredActionImp]
       )
   }

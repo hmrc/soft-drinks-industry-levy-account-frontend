@@ -37,6 +37,7 @@ trait TestConfiguration
   val wiremockPort: Int = Port.randomAvailable
 
   val baseUrl = s"http://localhost:$port/soft-drinks-industry-levy-account-frontend"
+  val testOnlyBaseUrl = s"http://localhost:$port/test-only"
 
   val sessionId = "sessionId-eb3158c2-0aff-4ce8-8d1b-f2208ace52fe"
   val xSessionId: (String, String) = "X-Session-ID" -> sessionId
@@ -80,11 +81,15 @@ trait TestConfiguration
     s"microservice.services.soft-drinks-industry-levy-registration-frontend.port" -> s"$wiremockPort",
     s"microservice.services.soft-drinks-industry-levy.host" -> s"$wiremockHost",
     s"microservice.services.soft-drinks-industry-levy.port" -> s"$wiremockPort",
+    s"microservice.services.direct-debit-backend.host" -> s"$wiremockHost",
+    s"microservice.services.direct-debit-backend.port" -> s"$wiremockPort",
+    s"direct-debit.isTest" -> "false",
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "json.encryption.key" -> "fqpLDZ4sumDsekHkeEBlCA==",
     "json.encryption.previousKeys" -> "[]",
     "play.http.router" -> "testOnlyDoNotUseInAppConf.Routes",
+    "microservice.services.home-page-url" -> "http://www.example.com/home",
     "creditForExportGuidance" -> "https://www.gov.uk/guidance/soft-drinks-industry-levy-credit-for-exported-lost-or-destroyed-drinks-notice-4"
   )
 
