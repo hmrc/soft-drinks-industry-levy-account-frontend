@@ -20,6 +20,7 @@ import cats.data.EitherT
 import cats.implicits._
 import controllers.actions._
 import errors.AccountErrors
+import models.RetrievedSubscription
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -56,19 +57,12 @@ trait SpecBase
   implicit lazy val hc: HeaderCarrier = new HeaderCarrier()
   implicit lazy val ec: ExecutionContext = applicationBuilder().build().injector.instanceOf[ExecutionContext]
 
-  protected def applicationBuilder(): GuiceApplicationBuilder = {
+  protected def applicationBuilder(optSubscription: Option[RetrievedSubscription] = Some(TestData.aSubscription)): GuiceApplicationBuilder = {
     val bodyParsers = stubControllerComponents().parsers.defaultBodyParser
     new GuiceApplicationBuilder()
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Some(TestData.aSubscription), bodyParsers))
-      )
-  }
-
-  protected def registeredApplicationBuilder(): GuiceApplicationBuilder = {
-    val bodyParsers = stubControllerComponents().parsers.defaultBodyParser
-    new GuiceApplicationBuilder()
-      .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Some(TestData.aSubscription), bodyParsers)),
+        bind[AuthenticatedAction].toInstance(new FakeAuthenticatedAction(optSubscription, bodyParsers)),
+        bind[IdentifierAction].to[IdentificationActionImp],
         bind[RegisteredAction].to[RegisteredActionImp]
       )
   }

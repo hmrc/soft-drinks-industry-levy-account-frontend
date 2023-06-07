@@ -42,7 +42,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
   "onPageLoad" - {
     "must return OK and the correct view for a GET" in {
 
-      val application = registeredApplicationBuilder()
+      val application = applicationBuilder()
         .overrides(
           bind[RegisteredOrchestrator].toInstance(mockOrchestrator)
         ).build()
@@ -69,7 +69,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
       "when a request for a non nilReturn is submitted" in {
 
-        val application = registeredApplicationBuilder()
+        val application = applicationBuilder()
           .overrides(
             bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
 
@@ -86,7 +86,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
       "when a request for a nilReturn is submitted" in {
 
-        val application = registeredApplicationBuilder()
+        val application = applicationBuilder()
           .overrides(
             bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
 
@@ -106,7 +106,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
     "must redirect to servicePage" - {
       "when there are no pending returns" in {
-        val application = registeredApplicationBuilder()
+        val application = applicationBuilder()
           .overrides(
             bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
 
@@ -124,7 +124,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
     "must return internal server error page" - {
       "when an internal error occurs" in {
-        val application = registeredApplicationBuilder()
+        val application = applicationBuilder()
           .overrides(
             bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
 
@@ -140,7 +140,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
     }
 
     "must log an error when no pending returns" in {
-      val application = registeredApplicationBuilder()
+      val application = applicationBuilder()
         .overrides(
           bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
 

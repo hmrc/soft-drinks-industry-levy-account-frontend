@@ -86,7 +86,7 @@ class ServicePageControllerISpec extends ReturnsITHelper {
 
         "that does not include a returns section when there are no pending returns or lastReturn" in {
           given
-            .commonPrecondition
+            .commonPreconditionBoth
             .sdilBackend.retrievePendingReturns(UTR, List.empty)
             .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
 
@@ -120,23 +120,6 @@ class ServicePageControllerISpec extends ReturnsITHelper {
           }
         }
       }
-
-//      "when the backend call to get lastReturn fails" in {
-//        given
-//          .commonPrecondition
-//          .sdilBackend.retrievePendingReturns(UTR, List.empty)
-//          .sdilBackend.retrieveReturnError(UTR, currentReturnPeriod.previous)
-//
-//        WsTestClient.withClient { client =>
-//          val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
-//
-//          whenReady(result1) { res =>
-//            val page = Jsoup.parse(res.body)
-//            res.status mustBe 500
-//            page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
-//          }
-//        }
-//      }
 
       "when the backend call to get sdilSubscription fails with UTR" in {
         given
