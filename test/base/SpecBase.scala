@@ -20,6 +20,7 @@ import cats.data.EitherT
 import cats.implicits._
 import controllers.actions._
 import errors.AccountErrors
+import models.RetrievedSubscription
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -53,18 +54,19 @@ trait SpecBase
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
-  lazy val application1 = applicationBuilder().build()
-  implicit lazy val messagesAPI = application1.injector.instanceOf[MessagesApi]
-  implicit lazy val messagesProvider = MessagesImpl(Lang("en"), messagesAPI)
-  lazy val mcc = application1.injector.instanceOf[MessagesControllerComponents]
+  lazy val application1: Application = applicationBuilder().build()
+  implicit lazy val messagesAPI: MessagesApi = application1.injector.instanceOf[MessagesApi]
+  implicit lazy val messagesProvider: MessagesImpl = MessagesImpl(Lang("en"), messagesAPI)
+  lazy val mcc: MessagesControllerComponents = application1.injector.instanceOf[MessagesControllerComponents]
   implicit lazy val hc: HeaderCarrier = new HeaderCarrier()
   implicit lazy val ec: ExecutionContext = application1.injector.instanceOf[ExecutionContext]
 
-  protected def applicationBuilder(): GuiceApplicationBuilder = {
+  protected def applicationBuilder(optSubscription: Option[RetrievedSubscription] = Some(TestData.aSubscription)): GuiceApplicationBuilder = {
     val bodyParsers = stubControllerComponents().parsers.defaultBodyParser
     new GuiceApplicationBuilder()
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Some(TestData.aSubscription), bodyParsers))
+        bind[AuthenticatedAction].toInstance(new FakeAuthenticatedAction(optSubscription, bodyParsers)),
+        bind[IdentifierAction].to[IdentificationActionImp]
       )
   }
 
@@ -73,11 +75,11 @@ trait SpecBase
     super.afterEach()
   }
 
-  protected def registeredApplicationBuilder(): GuiceApplicationBuilder = {
+  protected def registeredApplicationBuilder(optSubscription: Option[RetrievedSubscription] = Some(TestData.aSubscription)): GuiceApplicationBuilder = {
     val bodyParsers = stubControllerComponents().parsers.defaultBodyParser
     new GuiceApplicationBuilder()
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Some(TestData.aSubscription), bodyParsers)),
+        bind[AuthenticatedAction].toInstance(new FakeAuthenticatedAction(optSubscription, bodyParsers)),
         bind[RegisteredAction].to[RegisteredActionImp]
       )
   }

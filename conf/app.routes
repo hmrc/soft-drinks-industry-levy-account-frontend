@@ -6,6 +6,8 @@ GET         /                                            controllers.IndexContro
 
 GET         /home                controllers.ServicePageController.onPageLoad
 
+GET         /register/start                          controllers.RegisterController.start
+
 GET        /start-a-return/nilReturn/:isNilReturn        controllers.ServicePageController.startAReturn(isNilReturn: Boolean)
 
 GET       /start-direct-debit-journey                    controllers.DirectDebitController.setup()

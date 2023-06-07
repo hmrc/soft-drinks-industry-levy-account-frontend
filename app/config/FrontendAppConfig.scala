@@ -34,10 +34,15 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
     throw new Exception("missing config contact-frontend.host"))
   private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"
   val returnsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-returns-frontend")
+  val registrationBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-registration-frontend")
 
 
   def startReturnUrl(year: Int, quarter: Int, isNilReturn: Boolean) = {
     s"$returnsBaseUrl/soft-drinks-industry-levy-returns-frontend/submit-return/year/$year/quarter/$quarter/nil-return/$isNilReturn"
+  }
+
+  val startRegistrationUrl: String = {
+    s"$returnsBaseUrl/soft-drinks-industry-levy-registration/start"
   }
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"

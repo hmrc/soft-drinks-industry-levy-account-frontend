@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import controllers.actions.{IdentifierAction, RegisteredAction}
+import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import errors.NoPendingReturns
 import handlers.ErrorHandler
 import orchestrators.RegisteredOrchestrator
@@ -33,14 +33,14 @@ import scala.concurrent.ExecutionContext
 class ServicePageController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
                                        val genericLogger: GenericLogger,
-                                       identify: IdentifierAction,
+                                       authenticated: AuthenticatedAction,
                                        registered: RegisteredAction,
                                        registeredOrchestrator: RegisteredOrchestrator,
                                        view: ServiceView,
                                        errorHandler: ErrorHandler
                                     )(implicit config: FrontendAppConfig, ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen registered).async { implicit request =>
+  def onPageLoad: Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
 
     registeredOrchestrator.handleServicePageRequest.value.map{
       case Right(viewModel) =>
@@ -51,7 +51,7 @@ class ServicePageController @Inject()(
     }
   }
 
-  def startAReturn(isNilReturn: Boolean) = (identify andThen registered).async {implicit request =>
+  def startAReturn(isNilReturn: Boolean) = (authenticated andThen registered).async {implicit request =>
     registeredOrchestrator.handleStartAReturn.value.map{
       case Right(returnPeriod) =>
         val url = config.startReturnUrl(returnPeriod.year, returnPeriod.quarter, isNilReturn)

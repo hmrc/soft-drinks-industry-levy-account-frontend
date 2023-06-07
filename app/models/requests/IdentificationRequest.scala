@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package repositories
+package models.requests
 
-import models.ReturnPeriod
+import models.RetrievedSubscription
+import play.api.mvc.{Request, WrappedRequest}
 
-object SessionKeys {
-
-  val SUBSCRIPTION = "SUBSCRIPTION"
-  def pendingReturn(utr: String) = s"PENDING_RETURNS_UTR_$utr"
-  def previousSubmittedReturn(utr: String, returnPeriod: ReturnPeriod) = {
-    val year = returnPeriod.year
-    val quarter = returnPeriod.quarter
-    s"PREVIOUS_SUBMITTED_RETURNS_UTR_${utr}_YEAR${year}_QUARTER_${quarter}"
-  }
-}
+case class IdentificationRequest[A](request: Request[A],
+                                    internalId: String,
+                                    optSubscription: Option[RetrievedSubscription],
+                                    optUtr: Option[String]
+                                ) extends WrappedRequest[A](request)

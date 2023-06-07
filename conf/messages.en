@@ -11,6 +11,15 @@ site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
 
+utr.required=Enter the Unique Taxpayer Reference (UTR) for your business
+utr.length=Unique Taxpayer Reference (UTR) must be 10 numbers
+utr.invalid=Unique Taxpayer Reference (UTR) must be 10 numbers
+
+postcode.required=Enter a postcode
+postcode.empty=Enter a postcode
+postcode.invalid=Enter a real postcode
+postcode.special=Enter a real postcode
+
 date.day = Day
 date.month = Month
 date.year = Year

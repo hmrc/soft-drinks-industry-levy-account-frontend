@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.Inject
 import connectors.DirectDebitConnector
-import controllers.actions.{IdentifierAction, RegisteredAction}
+import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,13 +30,13 @@ import scala.concurrent.ExecutionContext
 class DirectDebitController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
                                        val genericLogger: GenericLogger,
-                                       identify: IdentifierAction,
+                                       authenticated: AuthenticatedAction,
                                        registered: RegisteredAction,
                                        directDebitConnector: DirectDebitConnector,
                                        errorHandler: ErrorHandler
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def setup(): Action[AnyContent] = (identify andThen registered).async { implicit request =>
+  def setup(): Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
     directDebitConnector.initJourney().value.map{
       case Right(resp) =>
         Redirect(resp.nextUrl)
