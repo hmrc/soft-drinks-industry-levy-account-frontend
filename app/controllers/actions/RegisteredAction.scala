@@ -17,10 +17,7 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import config.FrontendAppConfig
-import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
-import handlers.ErrorHandler
 import models.requests.{IdentifierRequest, RegisteredRequest}
 import play.api.mvc.Results._
 import play.api.mvc._

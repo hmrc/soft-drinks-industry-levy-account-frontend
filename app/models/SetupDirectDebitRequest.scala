@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package viewmodels
+package models
 
-abstract class WithName(name: String) {
-  override val toString: String = name
+import config.FrontendAppConfig
+import play.api.libs.json.{Format, Json}
+
+case class SetupDirectDebitRequest(returnUrl: String, backUrl: String) {
+  def this(config: FrontendAppConfig) = this(
+    returnUrl = config.homePage,
+    backUrl = config.homePage
+  )
+}
+
+object SetupDirectDebitRequest {
+  implicit val format: Format[SetupDirectDebitRequest] = Json.format[SetupDirectDebitRequest]
 }

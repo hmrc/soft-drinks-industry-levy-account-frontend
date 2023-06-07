@@ -33,7 +33,7 @@
     alphaBanner: StandardAlphaBanner
 )
 
-@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true)(contentBlock: Html)(implicit request: Request[_], messages: Messages)
+@(pageTitle: String, timeout: Boolean = true, showSignOut: Boolean = true)(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
 
@@ -59,12 +59,6 @@
     <script src='@controllers.routes.Assets.versioned("javascripts/application.min.js")'></script>
 }
 
-@beforeContent = {
-    @if(showBackLink) {
-        @govukBackLink(BackLinkViewModel(href = "#").withCssClass("js-visible"))
-    }
-}
-
 @content = {
     @contentBlock
 
@@ -81,7 +75,7 @@
         signOutUrl  = if(showSignOut) Some(controllers.auth.routes.AuthController.signOut.url) else None,
         phaseBanner = Some(alphaBanner(appConfig.feedbackUrl))
     )),
-    beforeContentBlock = Some(beforeContent),
+    beforeContentBlock = None,
     footerBlock        = Some(hmrcStandardFooter()),
     scriptsBlock       = Some(hmrcScripts(
         scriptsBlock = Some(additionalScripts)

@@ -102,4 +102,6 @@ object ITCoreTestData extends TryValues {
   )
 
   val pendingReturns1 = List(pendingReturn1)
+
+  val directDebitResponse = SetupDirectDebitResponse("http://example.com")
 }

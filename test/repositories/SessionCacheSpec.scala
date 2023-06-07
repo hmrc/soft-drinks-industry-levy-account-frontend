@@ -20,8 +20,6 @@ import base.SpecBase
 import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.JsString
-import play.api.mvc.{AnyContent, Request}
-import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 

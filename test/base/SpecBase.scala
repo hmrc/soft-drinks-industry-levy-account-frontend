@@ -23,11 +23,12 @@ import errors.AccountErrors
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.{OptionValues, TryValues}
-import play.api.Application
+import org.scalatest.{BeforeAndAfterEach, OptionValues, TryValues}
+import play.api.{Application, Play}
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import play.api.test.Helpers.stubControllerComponents
 import service.AccountResult
@@ -41,7 +42,8 @@ trait SpecBase
     with TryValues
     with OptionValues
     with ScalaFutures
-    with IntegrationPatience {
+    with IntegrationPatience
+    with BeforeAndAfterEach {
 
   def createSuccessAccountResult[T](result: T): AccountResult[T] =
     EitherT.right[AccountErrors](Future.successful(result))
@@ -51,10 +53,12 @@ trait SpecBase
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
-  implicit lazy val messagesAPI = applicationBuilder().build().injector.instanceOf[MessagesApi]
+  lazy val application1 = applicationBuilder().build()
+  implicit lazy val messagesAPI = application1.injector.instanceOf[MessagesApi]
   implicit lazy val messagesProvider = MessagesImpl(Lang("en"), messagesAPI)
+  lazy val mcc = application1.injector.instanceOf[MessagesControllerComponents]
   implicit lazy val hc: HeaderCarrier = new HeaderCarrier()
-  implicit lazy val ec: ExecutionContext = applicationBuilder().build().injector.instanceOf[ExecutionContext]
+  implicit lazy val ec: ExecutionContext = application1.injector.instanceOf[ExecutionContext]
 
   protected def applicationBuilder(): GuiceApplicationBuilder = {
     val bodyParsers = stubControllerComponents().parsers.defaultBodyParser
@@ -62,6 +66,11 @@ trait SpecBase
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Some(TestData.aSubscription), bodyParsers))
       )
+  }
+
+  override def afterEach(): Unit = {
+    Play.stop(application1)
+    super.afterEach()
   }
 
   protected def registeredApplicationBuilder(): GuiceApplicationBuilder = {
