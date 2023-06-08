@@ -27,4 +27,10 @@ object SessionKeys {
     val quarter = returnPeriod.quarter
     s"PREVIOUS_SUBMITTED_RETURNS_UTR_${utr}_YEAR${year}_QUARTER_${quarter}"
   }
+
+  def balance(withAssessment: Boolean) = if (withAssessment) {
+    "BALANCE_WITH_ASSESSMENT"
+  } else {
+    "BALANCE_WITH_NO_ASSESSMENT"
+  }
 }

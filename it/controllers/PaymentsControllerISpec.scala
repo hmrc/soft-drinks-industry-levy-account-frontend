@@ -6,16 +6,17 @@ import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
 
-class DirectDebitControllerISpec extends ControllerITTestHelper {
+class PaymentsControllerISpec extends ControllerITTestHelper {
 
-  val path = "/start-direct-debit-journey"
+  val path = "/pay-now"
 
   s"GET $path" - {
-    "should redirect to the url provided by direct-debit" - {
-      "when the call to direct-debit succeeds" in {
+    "should redirect to the url provided by pay-api" - {
+      "when the call to pay-api succeeds" in {
         given
           .commonPrecondition
-          .ddStub.successCall()
+          .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, true)
+          .payApiStub.successCall()
 
         WsTestClient.withClient { client =>
           val result1 = createClientRequestGet(client, baseUrl + path)
@@ -29,10 +30,30 @@ class DirectDebitControllerISpec extends ControllerITTestHelper {
     }
 
     "should render the error page" - {
-      "when the call to direct-debit fails" in {
+      "when the call to pay-api fails" in {
         given
           .commonPrecondition
+          .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, true)
           .ddStub.failureCall
+
+        WsTestClient.withClient { client =>
+          val result1 = createClientRequestGet(client, baseUrl + path)
+
+          whenReady(result1) { res =>
+            res.status mustBe 500
+            val page = Jsoup.parse(res.body)
+            page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+          }
+        }
+      }
+    }
+
+
+    "should render the error page" - {
+      "when the call to sdil backend fails" in {
+        given
+          .commonPrecondition
+          .sdilBackend.balancefailure(aSubscriptionWithDeRegDate.sdilRef, true)
 
         WsTestClient.withClient { client =>
           val result1 = createClientRequestGet(client, baseUrl + path)

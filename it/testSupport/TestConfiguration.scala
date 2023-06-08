@@ -83,6 +83,8 @@ trait TestConfiguration
     s"microservice.services.soft-drinks-industry-levy.port" -> s"$wiremockPort",
     s"microservice.services.direct-debit-backend.host" -> s"$wiremockHost",
     s"microservice.services.direct-debit-backend.port" -> s"$wiremockPort",
+    s"microservice.services.pay-api.host" -> s"$wiremockHost",
+    s"microservice.services.pay-api.port" -> s"$wiremockPort",
     s"direct-debit.isTest" -> "false",
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package errors
+package models
 
-sealed trait AccountErrors
+import play.api.libs.json.{Format, Json}
 
-object NoPendingReturns extends AccountErrors
+case class SetupPayApiRequest(reference: String,
+                              amountInPence: Long,
+                              returnUrl: String,
+                              backUrl: String)
 
-object UnexpectedResponseFromSDIL extends AccountErrors
-
-object UnexpectedResponseFromDirectDebit extends AccountErrors
-object UnexpectedResponseFromPayAPI extends AccountErrors
+object SetupPayApiRequest {
+  implicit val format: Format[SetupPayApiRequest] = Json.format[SetupPayApiRequest]
+}

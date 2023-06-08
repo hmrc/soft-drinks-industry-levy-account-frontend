@@ -56,6 +56,12 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
     configuration.baseUrl("direct-debit-backend") + "/direct-debit-backend"
   }
 
+  val payApiBaseUrl: String = if (directDebitIsTest) {
+    host + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
+  } else {
+    configuration.baseUrl("pay-api") + "/pay-api"
+  }
+
 
   val loginUrl: String         = s"$basGatewayBaseUrl/bas-gateway/sign-in"
   val loginContinueUrl: String = s"$host/soft-drinks-industry-levy-account-frontend"
