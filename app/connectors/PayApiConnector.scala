@@ -35,7 +35,7 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
 
   def initJourney(sdilRef: String, balance: BigDecimal)(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    http.POST[SetupPayApiRequest, NextUrl](s"${config.payApiBaseUrl}/bta/sdil/journey/start", generateRequestForPayApi(balance, sdilRef))
+    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef))
       .map(Right(_))
       .recover{
         case _ =>

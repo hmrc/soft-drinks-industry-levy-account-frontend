@@ -56,10 +56,10 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
     configuration.baseUrl("direct-debit-backend") + "/direct-debit-backend"
   }
 
-  val payApiBaseUrl: String = if (directDebitIsTest) {
-    host + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
+  val payApiUrl: String = if (directDebitIsTest) {
+    host + controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url
   } else {
-    configuration.baseUrl("pay-api") + "/pay-api"
+    configuration.baseUrl("pay-api") + "/pay-api/bta/sdil/journey/start"
   }
 
 
