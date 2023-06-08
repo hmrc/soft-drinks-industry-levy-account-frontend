@@ -4,13 +4,13 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.json.Json
 import testSupport.ITCoreTestData._
 
-case class DirectDebitStub()
-(implicit builder: PreconditionBuilder) {
+case class PayApiStub()
+                     (implicit builder: PreconditionBuilder) {
 
 
   def successCall() = {
     stubFor(
-      post(urlPathEqualTo("/direct-debit-backend"))
+      post(urlPathEqualTo("/pay-api/bta/sdil/journey/start"))
         .willReturn(
           ok(
             Json.toJson(nextUrlResponse).toString()
@@ -22,7 +22,7 @@ case class DirectDebitStub()
   }
 
   def failureCall = {
-    post(urlPathEqualTo("/direct-debit-backend"))
+    post(urlPathEqualTo("/pay-api/bta/sdil/journey/start"))
       .willReturn(
           serverError()
     )

@@ -18,8 +18,8 @@ package models
 
 import play.api.libs.json.{Format, Json}
 
-case class SetupDirectDebitResponse(nextUrl: String)
+case class NextUrl(nextUrl: String)
 
-object SetupDirectDebitResponse {
-  implicit val format: Format[SetupDirectDebitResponse] = Json.format[SetupDirectDebitResponse]
+object NextUrl {
+  implicit val format: Format[NextUrl] = Json.format[NextUrl]
 }

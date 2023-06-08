@@ -19,7 +19,7 @@ package repositories
 import base.SpecBase
 import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.JsString
+import play.api.libs.json.{JsBoolean, JsObject, JsString, Json}
 
 import scala.concurrent.Future
 
@@ -155,6 +155,52 @@ class SessionCacheSpec extends SpecBase with MockitoSugar {
       "should return None" in {
         when(mockSessionRepository.get("sessionId")).thenReturn(Future.failed(new Exception("error")))
         val res = sessionCache.fetch("sessionId")
+
+        whenReady(res) { result =>
+          result mustBe None
+        }
+      }
+    }
+  }
+
+  "fetchEntry" - {
+    "when the session cache is empty" - {
+      "should return None" in {
+        when(mockSessionRepository.get("sessionId")).thenReturn(Future.successful(None))
+
+        val res = sessionCache.fetchEntry[String]("sessionId", "test1")
+
+        whenReady(res) { result =>
+          result mustBe None
+        }
+      }
+    }
+
+    "the session cache contains data" - {
+      "should return the data" in {
+        val data = CacheMap(
+          "sessionId",
+          Map("test" -> JsString("abc"), "test1" -> JsString("efg"))
+        )
+        when(mockSessionRepository.get("sessionId")).thenReturn(Future.successful(Some(data)))
+
+        val res = sessionCache.fetchEntry[String]("sessionId", "test")
+
+        whenReady(res) { result =>
+          result mustBe Some("abc")
+        }
+      }
+    }
+
+    "when a mongo failure occurs" - {
+      "should return None" in {
+        val data = CacheMap(
+          "sessionId",
+          Map("test" -> Json.obj("abc" -> JsBoolean(true)), "test1" -> JsString("efg"))
+        )
+        when(mockSessionRepository.get("sessionId")).thenReturn(Future.successful(Some(data)))
+
+        val res = sessionCache.fetchEntry[String]("sessionId", "test")
 
         whenReady(res) { result =>
           result mustBe None

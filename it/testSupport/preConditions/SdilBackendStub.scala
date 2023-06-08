@@ -117,5 +117,23 @@ case class SdilBackendStub()
     builder
   }
 
+  def balance(sdilRef: String, withAssessment: Boolean) = {
+    stubFor(
+      get(
+        urlPathMatching(s"/balance/$sdilRef/$withAssessment"))
+        .willReturn(
+          ok(Json.toJson(BigDecimal(1000)).toString())))
+    builder
+  }
+
+  def balancefailure(sdilRef: String, withAssessment: Boolean) = {
+    stubFor(
+      get(
+        urlPathMatching(s"/balance/$sdilRef/$withAssessment"))
+        .willReturn(
+          serverError()))
+    builder
+  }
+
 }
 

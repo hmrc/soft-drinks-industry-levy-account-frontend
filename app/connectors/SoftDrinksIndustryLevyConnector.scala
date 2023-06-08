@@ -94,4 +94,23 @@ class SoftDrinksIndustryLevyConnector @Inject()(
         }
     }
   }
+
+  def balance(
+               sdilRef: String,
+               withAssessment: Boolean, internalId: String
+             )(implicit hc: HeaderCarrier): AccountResult[BigDecimal] = EitherT{
+    sdilSessionCache.fetchEntry[BigDecimal](internalId, SessionKeys.balance(withAssessment)).flatMap {
+      case Some(b) => Future.successful(Right(b))
+      case None =>
+        http.GET[BigDecimal](s"$sdilUrl/balance/$sdilRef/$withAssessment")
+          .flatMap { b =>
+            sdilSessionCache.save[BigDecimal](internalId, SessionKeys.balance(withAssessment), b)
+              .map(_ => Right(b))
+
+          }.recover {
+          case _ => genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][balance] - unexpected response for $sdilRef")
+            Left(UnexpectedResponseFromSDIL)
+        }
+    }
+  }
 }

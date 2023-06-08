@@ -273,4 +273,91 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
     }
   }
 
+  "balance" - {
+    "when assessment is true" - {
+      "and there is no balance in the cache" - {
+        "should call the backend" - {
+          "and return the balance when sucessful" in {
+            given
+              .sdilBackend
+              .balance(aSubscription.sdilRef, true)
+
+            val res = sdilConnector.balance(aSubscription.sdilRef, true, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Right(BigDecimal(1000))
+            }
+          }
+
+          "and return UnexpectedResponseFromSDIL when call fails" in {
+            given
+              .sdilBackend
+              .balancefailure(aSubscription.sdilRef, true)
+
+            val res = sdilConnector.balance(aSubscription.sdilRef, true, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Left(UnexpectedResponseFromSDIL)
+            }
+          }
+        }
+      }
+
+      "and the balance is in the cache" - {
+        "should return the balance" in {
+          val res = for {
+            _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.balance(true), BigDecimal(1000)))
+            result <- sdilConnector.balance(aSubscription.sdilRef, true, identifier)
+          } yield result
+
+          whenReady(res.value) { result =>
+            result mustBe Right(BigDecimal(1000))
+          }
+        }
+      }
+    }
+    "when assessment is false" - {
+      "and there is no balance in the cache" - {
+        "should call the backend" - {
+          "and return the balance when sucessful" in {
+            given
+              .sdilBackend
+              .balance(aSubscription.sdilRef, false)
+
+            val res = sdilConnector.balance(aSubscription.sdilRef, false, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Right(BigDecimal(1000))
+            }
+          }
+
+          "and return UnexpectedResponseFromSDIL when call fails" in {
+            given
+              .sdilBackend
+              .balancefailure(aSubscription.sdilRef, false)
+
+            val res = sdilConnector.balance(aSubscription.sdilRef, false, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Left(UnexpectedResponseFromSDIL)
+            }
+          }
+        }
+      }
+
+      "and the balance is in the cache" - {
+        "should return the balance from the cache" in {
+          val res = for {
+            _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.balance(false), BigDecimal(1000)))
+            result <- sdilConnector.balance(aSubscription.sdilRef, false, identifier)
+          } yield result
+
+          whenReady(res.value) { result =>
+            result mustBe Right(BigDecimal(1000))
+          }
+        }
+      }
+    }
+  }
+
 }

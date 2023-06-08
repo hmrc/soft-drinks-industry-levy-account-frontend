@@ -7,5 +7,8 @@ class PreconditionBuilder extends PreconditionHelpers {
   def sdilBackend = SdilBackendStub()
   def ddStub = DirectDebitStub()
 
+  def payApiStub = PayApiStub()
+
+
 }
 

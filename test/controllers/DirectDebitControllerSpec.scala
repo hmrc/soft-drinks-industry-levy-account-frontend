@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import connectors.DirectDebitConnector
 import errors.UnexpectedResponseFromDirectDebit
-import models.SetupDirectDebitResponse
+import models.NextUrl
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -33,7 +33,7 @@ class DirectDebitControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to the url provided by direct debit" in {
 
       val mockDDConnector = mock[DirectDebitConnector]
-      when(mockDDConnector.initJourney()(any())) thenReturn createSuccessAccountResult(SetupDirectDebitResponse("http://test"))
+      when(mockDDConnector.initJourney()(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
 
       val application =
         applicationBuilder()

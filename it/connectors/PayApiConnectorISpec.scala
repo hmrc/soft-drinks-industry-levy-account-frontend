@@ -1,23 +1,23 @@
 package connectors
 
-import errors.UnexpectedResponseFromDirectDebit
+import errors.UnexpectedResponseFromPayAPI
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import testSupport.ITCoreTestData._
 import testSupport.{Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
 
-class DirectDebitConnectorISpec extends Specifications with TestConfiguration {
+class PayApiConnectorISpec extends Specifications with TestConfiguration {
 
-  val ddConnector = app.injector.instanceOf[DirectDebitConnector]
+  val payApiConnector = app.injector.instanceOf[PayApiConnector]
   implicit val hc = new HeaderCarrier()
 
   "initJourney" - {
     "should return a link to redirect the user to" - {
       "when the call to direct-debit succeeds" in {
         given
-          .ddStub.successCall()
+          .payApiStub.successCall()
 
-        val res = ddConnector.initJourney()
+        val res = payApiConnector.initJourney(aSubscriptionWithDeRegDate.sdilRef, 1000L)
 
         whenReady(res.value) { result =>
           result mustBe Right(nextUrlResponse)
@@ -25,15 +25,15 @@ class DirectDebitConnectorISpec extends Specifications with TestConfiguration {
       }
     }
 
-    "should return an UnexpectedResponseFromDirectDebit error" - {
+    "should return an UnexpectedResponseFromPayAPI error" - {
       "when the call to direct-debit fails" in {
         given
           .ddStub.failureCall
 
-        val res = ddConnector.initJourney()
+        val res = payApiConnector.initJourney(aSubscriptionWithDeRegDate.sdilRef, 1000L)
 
         whenReady(res.value) { result =>
-          result mustBe Left(UnexpectedResponseFromDirectDebit)
+          result mustBe Left(UnexpectedResponseFromPayAPI)
         }
       }
     }

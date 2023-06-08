@@ -50,4 +50,24 @@ class TestOnlyControllerSpec extends SpecBase with MockitoSugar {
     }
   }
 
+  "stubPayApiJourney" - {
+    "must redirect to the sdil home" in {
+      when(mockConfig.homePage).thenReturn("http://test.com")
+      val res = controller.stubPayApiJourney().apply(FakeRequest("", ""))
+
+      status(res) mustEqual SEE_OTHER
+      redirectLocation(res).get mustBe "http://test.com"
+    }
+  }
+
+  "stubPayApiInitialise" - {
+    "must redirect to the sdil home" in {
+      val res = controller.stubPayApiInitialise()
+        .apply(FakeRequest("", ""))
+
+      status(res) mustEqual OK
+      contentAsString(res) must include(routes.TestOnlyController.stubPayApiJourney().url)
+    }
+  }
+
 }

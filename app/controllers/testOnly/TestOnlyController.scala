@@ -18,7 +18,7 @@ package controllers.testOnly
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import models.SetupDirectDebitResponse
+import models.NextUrl
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.MessagesControllerComponents
@@ -33,7 +33,15 @@ class TestOnlyController @Inject()(val controllerComponents: MessagesControllerC
   }
 
   def stubDirectDebitInitialise() = Action { _ =>
-    Ok(Json.toJson(SetupDirectDebitResponse(routes.TestOnlyController.stubDirectDebitJourney().url)))
+    Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubDirectDebitJourney().url)))
+  }
+
+  def stubPayApiJourney() = Action { _ =>
+    Redirect(config.homePage)
+  }
+
+  def stubPayApiInitialise() = Action { _ =>
+    Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubPayApiJourney().url)))
   }
 
 }

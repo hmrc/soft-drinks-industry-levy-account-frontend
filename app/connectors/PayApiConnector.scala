@@ -19,29 +19,41 @@ package connectors
 import cats.data.EitherT
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import errors.UnexpectedResponseFromDirectDebit
-import models.{NextUrl, SetupDirectDebitRequest}
+import errors.UnexpectedResponseFromPayAPI
+import models.{NextUrl, SetupPayApiRequest}
 import service.AccountResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utilities.GenericLogger
 
 import scala.concurrent.ExecutionContext
 
-class DirectDebitConnector @Inject()(val http: HttpClient,
-                                     config: FrontendAppConfig,
-                                     genericLogger: GenericLogger
+class PayApiConnector @Inject()(val http: HttpClient,
+                                config: FrontendAppConfig,
+                                genericLogger: GenericLogger
                                    )(implicit ec: ExecutionContext) {
 
 
 
-  def initJourney()(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    http.POST[SetupDirectDebitRequest, NextUrl](config.directDebitBaseUrl, new SetupDirectDebitRequest(config))
+  def initJourney(sdilRef: String, balance: BigDecimal)(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
+    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef))
       .map(Right(_))
       .recover{
         case _ =>
-          genericLogger.logger.error(s"[DirectDebitConnector][initJourney] - unexpected response")
-          Left(UnexpectedResponseFromDirectDebit)
+          genericLogger.logger.error(s"[PayApiConnector][initJourney] - unexpected response")
+          Left(UnexpectedResponseFromPayAPI)
       }
+  }
+
+  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String): SetupPayApiRequest = {
+    val balanceInPence = balance * 100
+    val amountOwed = balanceInPence * -1
+    val exactAmountOwed = amountOwed.toLongExact
+    SetupPayApiRequest(
+      sdilRef,
+      exactAmountOwed,
+      config.homePage,
+      config.homePage
+    )
   }
 
 
