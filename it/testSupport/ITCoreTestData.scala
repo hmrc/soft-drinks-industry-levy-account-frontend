@@ -7,6 +7,7 @@ import java.time.{LocalDate, LocalDateTime, ZoneOffset}
 import scala.concurrent.duration.DurationInt
 
 object ITCoreTestData extends TryValues {
+  val localDate = LocalDate.now()
   val UTR = "0000001611"
   val SDIL_REF = "XKSDIL000000022"
 
@@ -101,7 +102,7 @@ object ITCoreTestData extends TryValues {
     pendingReturn1
   )
 
-  val pendingReturns1 = List(pendingReturn1)
+  val pendingReturns1 = List(pendingReturn3)
 
   val nextUrlResponse = NextUrl("http://example.com")
 
@@ -138,4 +139,15 @@ object ITCoreTestData extends TryValues {
       postCode = "SM32 5IA"
     )
   )
+
+  val finincialItemReturnCharge = ReturnCharge(currentReturnPeriod, BigDecimal(123.45))
+  val finincialItemReturnChargeInterest = ReturnChargeInterest(localDate, BigDecimal(-12.45))
+  val finincialItemCentralAssessment = CentralAssessment(localDate, BigDecimal(1))
+  val finincialItemCentralAssInterest = CentralAsstInterest(localDate, BigDecimal(-5))
+  val finincialItemOfficerAssessment = OfficerAssessment(localDate, BigDecimal(2))
+  val finincialItemOfficerAssInterest = OfficerAsstInterest(localDate, BigDecimal(-3))
+  val finincialItemPaymentOnAccount = PaymentOnAccount(localDate, "test", BigDecimal(300))
+  val finincialItemUnknown = Unknown(localDate, "test", BigDecimal(300))
+  val allFinicialItems = List(finincialItemReturnCharge, finincialItemReturnChargeInterest, finincialItemCentralAssessment,
+    finincialItemCentralAssInterest, finincialItemOfficerAssessment, finincialItemOfficerAssInterest, finincialItemPaymentOnAccount, finincialItemUnknown)
 }

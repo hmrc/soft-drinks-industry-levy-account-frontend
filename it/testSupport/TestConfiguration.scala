@@ -86,13 +86,16 @@ trait TestConfiguration
     s"microservice.services.pay-api.host" -> s"$wiremockHost",
     s"microservice.services.pay-api.port" -> s"$wiremockPort",
     s"direct-debit.isTest" -> "false",
+    s"direct-debit.isEnabled" -> "true",
+    s"pay-api.isTest" -> "false",
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "json.encryption.key" -> "fqpLDZ4sumDsekHkeEBlCA==",
     "json.encryption.previousKeys" -> "[]",
     "play.http.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "microservice.services.home-page-url" -> "http://www.example.com/home",
-    "creditForExportGuidance" -> "https://www.gov.uk/guidance/soft-drinks-industry-levy-credit-for-exported-lost-or-destroyed-drinks-notice-4"
+    "creditForExportGuidance" -> "https://www.gov.uk/guidance/soft-drinks-industry-levy-credit-for-exported-lost-or-destroyed-drinks-notice-4",
+    "howToPayGuidance" -> "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
   )
 
   override implicit lazy val app: Application = appBuilder().build()

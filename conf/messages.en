@@ -10,6 +10,9 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.payNow = Pay now
+
+common.youCan = You can
 
 utr.required=Enter the Unique Taxpayer Reference (UTR) for your business
 utr.length=Unique Taxpayer Reference (UTR) must be 10 numbers
@@ -70,6 +73,7 @@ servicePage.heading = Your Soft Drinks Industry Levy account
 servicePage.returns.heading = Returns
 servicePage.returnsOverdue1.warning = The return for {0} from {1} to {2} is due by {3}.
 servicePage.returnsOverdue.warning = You have {0} overdue returns
+servicePage.accountBalance.heading = Account balance
 
 overdueReturns.paragraph = You must send your {0} overdue returns in this order, oldest first:
 overdueReturn.bullet = {0} to {1}
@@ -91,3 +95,21 @@ needInReturnDetails.creditForExportGuidance.link = You must get and keep certain
 
 returns.start = Start a return
 returns.startNilReturn = I have no activity to report for this quarter.
+
+balance.heading = Account balance
+balance.zero = Your balance is £0.
+balance.inCredit = You are {0} in credit.
+balance.need-to-pay = Your balance is {0}.
+balance.need-to-pay.interest = Your balance is {0} including {1} of interest.
+balance.need-to-pay-by = You need to pay by {0}.
+balance.delayInAccountUpdate = Your account balance may not reflect payments made in the last 3 days.
+balance.viewTransactionHistory = View your transaction history
+
+howToPay.details.1 = If you choose to make payments outside of this online account, you will need to take note of your Soft Drinks Levy reference
+howToPay.link = Find out other ways to pay the levy (opens in a new tab).
+directDebit.manage.existing.subHeader = How you pay the levy
+directDebit.manage.existing.p1 = You have set up a Direct Debit to pay the levy. It will not collect any interest and penalties you owe.
+directDebit.manage.existing.link = Change or cancel your Direct Debit and view your next payment collection date
+directDebit.manage.setup.subHeader = Pay by Direct Debit
+directDebit.manage.setup.link = set up a Direct Debit
+directDebit.manage.setup.p1 = to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date.

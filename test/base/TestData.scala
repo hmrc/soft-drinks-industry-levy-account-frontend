@@ -16,13 +16,15 @@
 
 package base
 
-import models.{Contact, RetrievedActivity, RetrievedSubscription, ReturnPeriod, SdilReturn, ServicePageViewModel, Site, UkAddress}
+import models._
 
 import java.time.{LocalDate, LocalDateTime, ZoneOffset}
 
 object TestData {
 
-  val currentReturnPeriod = ReturnPeriod(LocalDate.now)
+  val localDate = LocalDate.now
+
+  val currentReturnPeriod = ReturnPeriod(localDate)
   val pendingReturn1 = currentReturnPeriod.previous
   val pendingReturn2 = pendingReturn1.previous
   val pendingReturn3 = pendingReturn2.previous
@@ -66,6 +68,20 @@ object TestData {
 
   val emptyReturn = SdilReturn((0, 0), (0, 0), List.empty, (0, 0), (0, 0), (0, 0), (0, 0), submittedOn = Some(submittedDateTime.toInstant(ZoneOffset.UTC)))
 
+  def servicePageViewModel(pendingReturns: List[ReturnPeriod],
+                           optLastReturn: Option[SdilReturn],
+                           balance: BigDecimal,
+                           interest: BigDecimal,
+                           optHasDD: Option[Boolean]) =
+    ServicePageViewModel(
+      pendingReturns,
+      aSubscription,
+      optLastReturn,
+      balance,
+      interest,
+      optHasDD
+  )
+
   val servicePageViewModel3PendingReturns = ServicePageViewModel(
     pendingReturns3,
     aSubscription,
@@ -89,5 +105,17 @@ object TestData {
     aSubscription,
     None
   )
+
+  val finincialItemReturnCharge = ReturnCharge(currentReturnPeriod, BigDecimal(123.45))
+  val finincialItemReturnChargeInterest = ReturnChargeInterest(localDate, BigDecimal(12.45))
+  val finincialItemCentralAssessment = CentralAssessment(localDate, BigDecimal(1))
+  val finincialItemCentralAssInterest = CentralAsstInterest(localDate, BigDecimal(5))
+  val finincialItemOfficerAssessment = OfficerAssessment(localDate, BigDecimal(2))
+  val finincialItemOfficerAssInterest = OfficerAsstInterest(localDate, BigDecimal(3))
+  val finincialItemPaymentOnAccount = PaymentOnAccount(localDate, "test", BigDecimal(300))
+  val finincialItemUnknown = Unknown(localDate, "test", BigDecimal(300))
+
+  val allFinicialItems = List(finincialItemReturnCharge, finincialItemReturnChargeInterest, finincialItemCentralAssessment,
+    finincialItemCentralAssInterest, finincialItemOfficerAssessment, finincialItemOfficerAssInterest, finincialItemPaymentOnAccount, finincialItemUnknown)
 
 }

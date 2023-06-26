@@ -17,11 +17,13 @@
 package orchestrators
 
 import cats.data.EitherT
+import cats.implicits._
 import com.google.inject.{Inject, Singleton}
+import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
-import errors.NoPendingReturns
+import errors.{AccountErrors, NoPendingReturns}
 import models.requests.RegisteredRequest
-import models.{ReturnPeriod, ServicePageViewModel}
+import models.{Interest, ReturnPeriod, ServicePageViewModel}
 import play.api.mvc.AnyContent
 import repositories.SessionCache
 import service.AccountResult
@@ -32,7 +34,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConnector,
-                                       sessionCache: SessionCache) {
+                                       sessionCache: SessionCache,
+                                       frontendAppConfig: FrontendAppConfig) {
 
   def handleServicePageRequest(implicit request: RegisteredRequest[AnyContent],
                                hc: HeaderCarrier,
@@ -40,14 +43,26 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     val internalId = request.internalId
     val utr = request.subscription.utr
     val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
-    val getPendingReturns = sdilConnector.returns_pending(internalId, utr)
+    val getPendingReturns = sdilConnector.returns_pending(internalId, utr).map(_.sortBy(_.start))
     val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
+    val getBalance = sdilConnector.balance(request.subscription.sdilRef, true, internalId)
+    val getInterest  = getAndCalculateInterestIfReq(internalId)
+    val optHasDDSetup = checkExistingDDIfEnabled
+
     for {
       returnsPending <- getPendingReturns
       optLastReturn <- getOptLastReturn
+      balance <- getBalance
+      interest <- getInterest
+      hasExistingDD <- optHasDDSetup
     } yield {
-      val sortReturnsPending = returnsPending.sortBy(_.start)
-      ServicePageViewModel(sortReturnsPending, request.subscription, optLastReturn)
+      ServicePageViewModel(
+        returnsPending,
+        request.subscription,
+        optLastReturn,
+        balance,
+        interest,
+        hasExistingDD)
     }
   }
 
@@ -63,6 +78,26 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
           .map(_ => Right(sortedReturnsPending.head))
       case Right(_) => Future.successful(Left(NoPendingReturns))
       case Left(error) => Future.successful(Left(error))
+    }
+  }
+
+  private def getAndCalculateInterestIfReq(internalId: String)(implicit request: RegisteredRequest[AnyContent],
+                                  hc: HeaderCarrier,
+                                  ec: ExecutionContext): AccountResult[BigDecimal] =
+    sdilConnector.balanceHistory(request.subscription.sdilRef, true, internalId)
+    .map(items =>
+      items.distinct.collect {
+        case a: Interest => a.amount
+      }.sum
+    )
+
+  private def checkExistingDDIfEnabled(implicit request: RegisteredRequest[AnyContent],
+                                                               hc: HeaderCarrier,
+                                                               ec: ExecutionContext): AccountResult[Option[Boolean]] = {
+    if(frontendAppConfig.directDebitEnabled) {
+      sdilConnector.checkDirectDebitStatus(request.subscription.sdilRef).map(Some(_))
+    } else {
+      EitherT.right[AccountErrors](Future.successful[Option[Boolean]](None))
     }
   }
 

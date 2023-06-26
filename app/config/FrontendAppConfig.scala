@@ -54,10 +54,12 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val directDebitBaseUrl: String = if (directDebitIsTest) {
     host + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
   } else {
-    configuration.baseUrl("direct-debit-backend") + "/direct-debit-backend"
+    configuration.baseUrl("direct-debit-backend") + "/direct-debit-backend/sdil-frontend/zsdl/journey/start"
   }
 
-  val payApiUrl: String = if (directDebitIsTest) {
+  val directDebitEnabled = configuration.getBoolean("direct-debit.isEnabled")
+
+  val payApiUrl: String = if (payApiIsTest) {
     host + controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url
   } else {
     configuration.baseUrl("pay-api") + "/pay-api/bta/sdil/journey/start"
@@ -77,5 +79,7 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val cacheTtl: Int = configuration.getInt("mongodb.timeToLiveInSeconds")
 
   val creditForExportGuidance = configuration.getString("creditForExportGuidance")
+  val howToPayGuidance = configuration.getString("howToPayGuidance")
+
 }
 

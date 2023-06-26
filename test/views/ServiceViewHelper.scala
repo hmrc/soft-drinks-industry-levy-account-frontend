@@ -18,13 +18,13 @@ package views
 
 import base.TestData._
 import models.{ReturnPeriod, SdilReturn}
-import org.jsoup.nodes.Element
+import org.jsoup.nodes.{Document, Element}
 import play.api.i18n.Messages
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneId}
 
-trait ReturnsViewHelper extends ViewSpecHelper {
+trait ServiceViewHelper extends ViewSpecHelper {
 
   lazy val monthFormatter = DateTimeFormatter.ofPattern("MMMM")
   lazy val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
@@ -94,6 +94,22 @@ trait ReturnsViewHelper extends ViewSpecHelper {
         val link = element.getElementsByClass("govuk-link").get(0)
         link.text() mustBe "You must get and keep certain types of evidence to be able to claim a credit (opens in a new tab)."
         link.attr("href") mustBe "https://www.gov.uk/guidance/soft-drinks-industry-levy-credit-for-exported-lost-or-destroyed-drinks-notice-4"
+      }
+    }
+  }
+
+  def getExpectedBalanceMessage(page: Document, balance: BigDecimal, interest: BigDecimal): String = {
+    val formattedBalance = f"£${balance.abs}%,.2f"
+    val formattedInterest = f"£${interest.abs}%,.2f"
+    if (balance == 0) {
+      "Your balance is £0."
+    } else if(balance > 0) {
+      s"You are ${formattedBalance} in credit."
+    } else {
+      if (interest < 0) {
+        s"Your balance is ${formattedBalance} including ${formattedInterest} of interest."
+      } else {
+        s"Your balance is ${formattedBalance}."
       }
     }
   }

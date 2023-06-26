@@ -24,6 +24,7 @@ import repositories.{SessionCache, SessionKeys}
 import service.AccountResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utilities.GenericLogger
+import models.FinancialLineItem.formatter
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -111,6 +112,34 @@ class SoftDrinksIndustryLevyConnector @Inject()(
           case _ => genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][balance] - unexpected response for $sdilRef")
             Left(UnexpectedResponseFromSDIL)
         }
+    }
+  }
+
+  def balanceHistory(
+               sdilRef: String,
+               withAssessment: Boolean, internalId: String
+             )(implicit hc: HeaderCarrier): AccountResult[List[FinancialLineItem]] = EitherT {
+    sdilSessionCache.fetchEntry[List[FinancialLineItem]](internalId, SessionKeys.balanceHistory(withAssessment)).flatMap {
+      case Some(b) => Future.successful(Right(b))
+      case None =>
+        http.GET[List[FinancialLineItem]](s"$sdilUrl/balance/$sdilRef/history/all/$withAssessment")
+          .flatMap { bh =>
+            sdilSessionCache.save[List[FinancialLineItem]](internalId, SessionKeys.balanceHistory(withAssessment), bh)
+              .map(_ => Right(bh))
+
+          }.recover {
+          case _ => genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][balanceHistory] - unexpected response for $sdilRef")
+            Left(UnexpectedResponseFromSDIL)
+        }
+    }
+  }
+
+  def checkDirectDebitStatus(sdilRef: String)(implicit hc: HeaderCarrier): AccountResult[Boolean] = EitherT {
+    http.GET[DisplayDirectDebitResponse](s"$sdilUrl/check-direct-debit-status/$sdilRef").map { result =>
+      Right(result.directDebitMandateFound)
+    }.recover {
+      case _ => genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][checkDirectDebitStatus] - unexpected response for $sdilRef")
+        Left(UnexpectedResponseFromSDIL)
     }
   }
 }

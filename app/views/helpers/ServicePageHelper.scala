@@ -16,6 +16,7 @@
 
 package views.helpers
 
+import config.FrontendAppConfig
 import models.{ReturnPeriod, SdilReturn}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
@@ -83,5 +84,19 @@ object ServicePageHelper {
       )
     )
   }
+
+  def payBy(periodsDue: List[ReturnPeriod])(implicit messages: Messages): String = {
+    val payByDate = periodsDue.map(_.deadline).min(Ordering.fromLessThan[LocalDate]((a, b) => a.isBefore(b)))
+    val formattedDate = payByDate.format(dateFormatter)
+    messages("balance.need-to-pay-by", formattedDate)
+
+  }
+
+  def otherPaymentsContent(sdilReference: String)(implicit messages: Messages, config: FrontendAppConfig): String = {
+    val guidanceLink = s"""<a href="${config.howToPayGuidance}" target="_blank">${messages("howToPay.link")}</a>"""
+    s"${messages("howToPay.details.1")} <b>$sdilReference</b>.<br>$guidanceLink"
+  }
+
+  def formatAbsPounds(bd: BigDecimal): String = f"£${bd.abs}%,.2f"
 
 }

@@ -33,4 +33,10 @@ object SessionKeys {
   } else {
     "BALANCE_WITH_NO_ASSESSMENT"
   }
+
+  def balanceHistory(withAssessment: Boolean) = if (withAssessment) {
+    "BALANCE_HISTORY_WITH_ASSESSMENT"
+  } else {
+    "BALANCE_HISTORY_WITH_NO_ASSESSMENT"
+  }
 }

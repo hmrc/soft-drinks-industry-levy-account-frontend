@@ -17,19 +17,11 @@
 package controllers
 
 import base.SpecBase
-import base.TestData._
 import config.FrontendAppConfig
-import errors.{NoPendingReturns, UnexpectedResponseFromSDIL}
 import helpers.LoggerHelper
-import orchestrators.RegisteredOrchestrator
-import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{await, _}
-import utilities.GenericLogger
-import views.html.ServiceView
+import play.api.test.Helpers._
 
 class RegisterControllerSpec extends SpecBase with MockitoSugar with LoggerHelper{
 

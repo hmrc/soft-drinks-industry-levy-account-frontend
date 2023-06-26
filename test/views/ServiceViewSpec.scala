@@ -22,7 +22,7 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import views.html.ServiceView
 
-class ServiceViewSpec extends ReturnsViewHelper {
+class ServiceViewSpec extends ServiceViewHelper {
 
   val application = applicationBuilder().build()
   val view = application.injector.instanceOf[ServiceView]
@@ -166,6 +166,238 @@ class ServiceViewSpec extends ReturnsViewHelper {
     "should not include a returns section" - {
       "when there is no pending returns or return submitted for previous period" in {
         documentNoReturn.getElementsByClass(Selectors.heading).eachText() mustNot contain("Returns")
+      }
+    }
+
+    "should include an account balance section" - {
+      "that has the expected subheader" in {
+        document1Return.getElementsByClass(Selectors.heading).eachText() must contain("Account balance")
+      }
+      "when the users balance is negative, has no interest, has a DD setup and has a return pending" - {
+        val balance = BigDecimal(-123.45)
+        val interest = BigDecimal(0)
+        val viewModel = servicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
+        val html = view(viewModel)(request, messages(application), config)
+        val document = doc(html)
+
+        "that include the amount owed message not including interest" in {
+          val balanceMessage1 = document.getElementById("balanceNeedToPayNoInterest")
+          balanceMessage1.text() mustBe getExpectedBalanceMessage(document, balance, interest)
+          balanceMessage1.className() mustBe "govuk-body govuk-!-font-weight-bold"
+        }
+
+        "that includes a pay by oldest return deadline message" in {
+          document.getElementById("payBy").text() mustBe s"You need to pay by ${pendingReturn1.deadline.format(dateFormatter)}."
+        }
+
+        "that includes how to manage direct debit" in {
+          document.getElementById("manageExistingDDSubHeader").text() mustBe "How you pay the levy"
+          document.getElementById("manageExistingDD").text() mustBe "You have set up a Direct Debit to pay the levy. It will not collect any interest and penalties you owe."
+          val manageExistingLink = document.getElementById("manageExistingDDLink")
+          manageExistingLink.text() mustBe "Change or cancel your Direct Debit and view your next payment collection date"
+          manageExistingLink.getElementsByTag("a").attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/start-direct-debit-journey"
+        }
+
+        "that includes details on other ways to pay" in {
+          val otherwaystoPay = document.getElementById("otherPaymentOptions")
+          otherwaystoPay.text() mustBe "If you choose to make payments outside of this online account, you will need to take note of your Soft Drinks Levy reference XKSDIL000000022. Find out other ways to pay the levy (opens in a new tab)."
+          otherwaystoPay.className() mustBe "govuk-inset-text"
+          otherwaystoPay.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
+        }
+
+        "that includes details of delay in payments being displayed on account" in {
+          document.getElementById("delayInAccountUpdate").text() mustBe "Your account balance may not reflect payments made in the last 3 days."
+        }
+
+        "that includes a secondary button that links to payments" in {
+          val button = document.getElementsByClass("govuk-button govuk-button--secondary").get(0)
+          button.text() mustBe "Pay now"
+          button.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/pay-now"
+        }
+
+        "that includes a link to transaction history" in {
+          val transHistoryLink = document.getElementById("viewTransactionHistory")
+          transHistoryLink.text() mustBe "View your transaction history"
+          transHistoryLink.attr("href") mustBe "#"
+        }
+      }
+
+      "when the users balance is negative, has no interest, has no DD setup and has no returns pending" - {
+        val balance = BigDecimal(-123.45)
+        val interest = BigDecimal(0)
+        val viewModel = servicePageViewModel(List.empty, None, balance, interest, Some(false))
+        val html = view(viewModel)(request, messages(application), config)
+        val document = doc(html)
+        "that include the amount owed message not including interest" in {
+          val balanceMessage1 = document.getElementById("balanceNeedToPayNoInterest")
+          balanceMessage1.text() mustBe getExpectedBalanceMessage(document, balance, interest)
+          balanceMessage1.className() mustBe "govuk-body govuk-!-font-weight-bold"
+        }
+
+        "that does not include a pay by message if no pending returns" in {
+          document.getElementById("payBy") mustBe null
+        }
+
+        "that includes how to setup direct debit" in {
+          document.getElementById("manageSetupDDSubHeader").text() mustBe "Pay by Direct Debit"
+          val manageSetupDDContent = document.getElementById("manageSetupDD")
+          manageSetupDDContent.text() mustBe "You can set up a Direct Debit to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date."
+          manageSetupDDContent.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
+        }
+
+        "that includes details on other ways to pay" in {
+          val otherwaystoPay = document.getElementById("otherPaymentOptions")
+          otherwaystoPay.text() mustBe "If you choose to make payments outside of this online account, you will need to take note of your Soft Drinks Levy reference XKSDIL000000022. Find out other ways to pay the levy (opens in a new tab)."
+          otherwaystoPay.className() mustBe "govuk-inset-text"
+          otherwaystoPay.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
+        }
+
+        "that includes details of delay in payments being displayed on account" in {
+          document.getElementById("delayInAccountUpdate").text() mustBe "Your account balance may not reflect payments made in the last 3 days."
+        }
+
+        "that includes a secondary button that links to payments" in {
+          val button = document.getElementsByClass("govuk-button govuk-button--secondary").get(0)
+          button.text() mustBe "Pay now"
+          button.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/pay-now"
+        }
+
+        "that includes a link to transaction history" in {
+          val transHistoryLink = document.getElementById("viewTransactionHistory")
+          transHistoryLink.text() mustBe "View your transaction history"
+          transHistoryLink.attr("href") mustBe "#"
+        }
+      }
+
+      "when the users balance and interest is negative, direct debit is disabled and has multiple returns pending" - {
+        val balance = BigDecimal(-123.45)
+        val interest = BigDecimal(-10)
+        val viewModel = servicePageViewModel(pendingReturns3, None, balance, interest, None)
+        val html = view(viewModel)(request, messages(application), config)
+        val document = doc(html)
+        "that include the amount owed message in bold not including interest" in {
+          val balanceMessage1 = document.getElementById("balanceNeedToPayWithInterest")
+          balanceMessage1.text() mustBe getExpectedBalanceMessage(document, balance, interest)
+          balanceMessage1.className() mustBe "govuk-body govuk-!-font-weight-bold"
+        }
+
+        "that includes a pay by oldest return deadline message" in {
+          document.getElementById("payBy").text() mustBe s"You need to pay by ${pendingReturn3.deadline.format(dateFormatter)}."
+        }
+
+        "that does not include a direct debit message" in {
+          document.getElementById("manageSetupDDSubHeader") mustBe null
+          document.getElementById("manageExistingDDSubHeader") mustBe null
+        }
+
+        "that includes details on other ways to pay" in {
+          val otherwaystoPay = document.getElementById("otherPaymentOptions")
+          otherwaystoPay.text() mustBe "If you choose to make payments outside of this online account, you will need to take note of your Soft Drinks Levy reference XKSDIL000000022. Find out other ways to pay the levy (opens in a new tab)."
+          otherwaystoPay.className() mustBe "govuk-inset-text"
+          otherwaystoPay.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
+        }
+
+        "that includes details of delay in payments being displayed on account" in {
+          document.getElementById("delayInAccountUpdate").text() mustBe "Your account balance may not reflect payments made in the last 3 days."
+        }
+
+        "that includes a secondary button that links to payments" in {
+          val button = document.getElementsByClass("govuk-button govuk-button--secondary").get(0)
+          button.text() mustBe "Pay now"
+          button.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/pay-now"
+        }
+
+        "that includes a link to transaction history" in {
+          val transHistoryLink = document.getElementById("viewTransactionHistory")
+          transHistoryLink.text() mustBe "View your transaction history"
+          transHistoryLink.attr("href") mustBe "#"
+        }
+      }
+
+      "when the users balance is positive, has no interest, has a DD setup and has returns pending" - {
+        val balance = BigDecimal(123.45)
+        val interest = BigDecimal(0)
+        val viewModel = servicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
+        val html = view(viewModel)(request, messages(application), config)
+        val document = doc(html)
+        "that include the amount in credit in normal text" in {
+          val balanceMessage1 = document.getElementById("balanceCredit")
+          balanceMessage1.text() mustBe getExpectedBalanceMessage(document, balance, interest)
+          balanceMessage1.className() mustBe Selectors.body
+        }
+
+        "that does not include a pay by message" in {
+          document.getElementById("payBy") mustBe null
+        }
+
+        "that includes how to manage direct debit" in {
+          document.getElementById("manageExistingDDSubHeader").text() mustBe "How you pay the levy"
+          document.getElementById("manageExistingDD").text() mustBe "You have set up a Direct Debit to pay the levy. It will not collect any interest and penalties you owe."
+          val manageExistingLink = document.getElementById("manageExistingDDLink")
+          manageExistingLink.text() mustBe "Change or cancel your Direct Debit and view your next payment collection date"
+          manageExistingLink.getElementsByTag("a").attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/start-direct-debit-journey"
+        }
+
+        "that does not include details on other ways to pay" in {
+          document.getElementById("otherPaymentOptions") mustBe null
+        }
+
+        "that does not include details of delay in payments being displayed on account" in {
+          document.getElementById("delayInAccountUpdate") mustBe null
+        }
+
+        "that includes a secondary button that links to payments" in {
+          document.getElementsByClass("govuk-button govuk-button--secondary").size() mustBe 0
+        }
+
+        "that includes a link to transaction history" in {
+          val transHistoryLink = document.getElementById("viewTransactionHistory")
+          transHistoryLink.text() mustBe "View your transaction history"
+          transHistoryLink.attr("href") mustBe "#"
+        }
+      }
+
+      "when the users balance is zero, has no interest, has a DD setup and has no returns pending" - {
+        val balance = BigDecimal(0)
+        val interest = BigDecimal(0)
+        val viewModel = servicePageViewModel(List.empty, None, balance, interest, Some(true))
+        val html = view(viewModel)(request, messages(application), config)
+        val document = doc(html)
+        "that include nothing owed message in normal text" in {
+          val balanceMessage1 = document.getElementById("balanceZero")
+          balanceMessage1.text() mustBe getExpectedBalanceMessage(document, balance, interest)
+          balanceMessage1.className() mustBe Selectors.body
+        }
+
+        "that does not include a pay by message" in {
+          document.getElementById("payBy") mustBe null
+        }
+
+        "that includes how to manage direct debit" in {
+          document.getElementById("manageExistingDDSubHeader").text() mustBe "How you pay the levy"
+          document.getElementById("manageExistingDD").text() mustBe "You have set up a Direct Debit to pay the levy. It will not collect any interest and penalties you owe."
+          val manageExistingLink = document.getElementById("manageExistingDDLink")
+          manageExistingLink.text() mustBe "Change or cancel your Direct Debit and view your next payment collection date"
+          manageExistingLink.getElementsByTag("a").attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/start-direct-debit-journey"
+        }
+
+        "that does not include details on other ways to pay" in {
+          document.getElementById("otherPaymentOptions") mustBe null
+        }
+
+        "that does not include details of delay in payments being displayed on account" in {
+          document.getElementById("delayInAccountUpdate") mustBe null
+        }
+
+        "that includes a secondary button that links to payments" in {
+          document.getElementsByClass("govuk-button govuk-button--secondary").size() mustBe 0
+        }
+
+        "that includes a link to transaction history" in {
+          val transHistoryLink = document.getElementById("viewTransactionHistory")
+          transHistoryLink.text() mustBe "View your transaction history"
+          transHistoryLink.attr("href") mustBe "#"
+        }
       }
     }
   }

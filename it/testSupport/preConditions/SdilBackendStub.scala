@@ -1,7 +1,7 @@
 package testSupport.preConditions
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import models.{ReturnPeriod, SdilReturn}
+import models.{DisplayDirectDebitResponse, FinancialLineItem, ReturnPeriod, SdilReturn}
 import play.api.libs.json.Json
 import testSupport.ITCoreTestData._
 
@@ -117,12 +117,12 @@ case class SdilBackendStub()
     builder
   }
 
-  def balance(sdilRef: String, withAssessment: Boolean) = {
+  def balance(sdilRef: String, withAssessment: Boolean, balance: BigDecimal = BigDecimal(1000)) = {
     stubFor(
       get(
         urlPathMatching(s"/balance/$sdilRef/$withAssessment"))
         .willReturn(
-          ok(Json.toJson(BigDecimal(1000)).toString())))
+          ok(Json.toJson(balance).toString())))
     builder
   }
 
@@ -130,6 +130,42 @@ case class SdilBackendStub()
     stubFor(
       get(
         urlPathMatching(s"/balance/$sdilRef/$withAssessment"))
+        .willReturn(
+          serverError()))
+    builder
+  }
+
+  def balanceHistory(sdilRef: String, withAssessment: Boolean, finincialItems: List[FinancialLineItem]) = {
+    stubFor(
+      get(
+        urlPathMatching(s"/balance/$sdilRef/history/all/$withAssessment"))
+        .willReturn(
+          ok(Json.toJson(finincialItems).toString())))
+    builder
+  }
+
+  def balanceHistoryfailure(sdilRef: String, withAssessment: Boolean) = {
+    stubFor(
+      get(
+        urlPathMatching(s"/balance/$sdilRef/history/all/$withAssessment"))
+        .willReturn(
+          serverError()))
+    builder
+  }
+
+  def checkDirectDebitStatus(sdilRef: String, hasDD: Boolean) = {
+    stubFor(
+      get(
+        urlPathMatching(s"/check-direct-debit-status/$sdilRef"))
+        .willReturn(
+          ok(Json.toJson(DisplayDirectDebitResponse(hasDD)).toString())))
+    builder
+  }
+
+  def checkDirectDebitStatusfailure(sdilRef: String) = {
+    stubFor(
+      get(
+        urlPathMatching(s"/check-direct-debit-status/$sdilRef"))
         .willReturn(
           serverError()))
     builder
