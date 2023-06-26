@@ -5,9 +5,9 @@ import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
-import testSupport.ReturnsITHelper
+import testSupport.ServicePageITHelper
 
-class ServicePageControllerISpec extends ReturnsITHelper {
+class ServicePageControllerISpec extends ServicePageITHelper {
 
   val servicePagePath = "/home"
   val startAReturnPath = "/start-a-return/nilReturn/false"
@@ -16,86 +16,106 @@ class ServicePageControllerISpec extends ReturnsITHelper {
   s"GET $servicePagePath" - {
     "when the user is authenticated and has a subscription" - {
       "should render the service page" - {
-        "that includes a returns section" - {
-          "with a list of pending returns" - {
-            "when the user has 1 return pending" in {
+        "that includes a returns section and account balance section" - {
+          "with a list of pending returns, and an amount to pay message" - {
+            "when the user has 1 return pending, currently owes money with no interest and has a direct debit setup" in {
               given
                 .commonPrecondition
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+                .sdilBackend.balance(SDIL_REF, true, -1000)
+                .sdilBackend.balanceHistory(SDIL_REF, true, List(finincialItemReturnCharge))
+                .sdilBackend.checkDirectDebitStatus(SDIL_REF, true)
 
               WsTestClient.withClient { client =>
                 val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
 
                 whenReady(result1) { res =>
                   res.status mustBe 200
-                  validatePage(res.body, pendingReturns1, None)
+                  validatePage(res.body, pendingReturns1, None, -1000, 0, true)
                 }
               }
             }
 
-            "when the user has more than 1 return pending" in {
+            "when the user has more than 1 return pending, currently owes money with interest and has no direct debit setup" in {
               given
                 .commonPrecondition
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns3)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+                .sdilBackend.balance(SDIL_REF, true, -1000)
+                .sdilBackend.balanceHistory(SDIL_REF, true, allFinicialItems)
+                .sdilBackend.checkDirectDebitStatus(SDIL_REF, false)
 
               WsTestClient.withClient { client =>
                 val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
 
                 whenReady(result1) { res =>
                   res.status mustBe 200
-                  validatePage(res.body, pendingReturns3, None)
+                  validatePage(res.body, pendingReturns3, None, -1000, -20.45, false)
                 }
               }
             }
 
-            "when the user has 1 return pending and also a lastReturn" in {
+            "when the user has 1 return pending, a lastReturn, a balance of zero and no ddSetup" in {
               given
                 .commonPreconditionSdilRef
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+                .sdilBackend.balance(SDIL_REF, true, 0)
+                .sdilBackend.balanceHistory(SDIL_REF, true, List.empty)
+                .sdilBackend.checkDirectDebitStatus(SDIL_REF, false)
 
               WsTestClient.withClient { client =>
                 val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
 
                 whenReady(result1) { res =>
                   res.status mustBe 200
-                  validatePage(res.body, pendingReturns1, Some(emptyReturn))
+                  validatePage(res.body, pendingReturns1, Some(emptyReturn), 0, 0, false)
                 }
               }
             }
           }
 
-          "with no warning message but inset text containing details of last sent return" in {
+          "with no warning message but inset text containing details of last sent return" - {
+
+            "when there is no returns pending, a return for the previous period submitted, and an balance in credit" in {
+              given
+                .commonPrecondition
+                .sdilBackend.retrievePendingReturns(UTR, List.empty)
+                .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+                .sdilBackend.balance(SDIL_REF, true)
+                .sdilBackend.balanceHistory(SDIL_REF, true, List.empty)
+                .sdilBackend.checkDirectDebitStatus(SDIL_REF, false)
+
+              WsTestClient.withClient { client =>
+                val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                whenReady(result1) { res =>
+                  res.status mustBe 200
+                  validatePage(res.body, List.empty, Some(emptyReturn), 1000, 0, false)
+                }
+              }
+            }
+          }
+        }
+
+        "that does not include a returns section but has an account section with correct balance and interest" - {
+          "when there are no pending returns or lastReturn and balance history returns duplicate items" in {
             given
-              .commonPrecondition
+              .commonPreconditionBoth
               .sdilBackend.retrievePendingReturns(UTR, List.empty)
-              .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+              .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+              .sdilBackend.balance(SDIL_REF, true, -1000)
+              .sdilBackend.balanceHistory(SDIL_REF, true, allFinicialItems ++ allFinicialItems)
+              .sdilBackend.checkDirectDebitStatus(SDIL_REF, true)
 
             WsTestClient.withClient { client =>
               val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
 
               whenReady(result1) { res =>
                 res.status mustBe 200
-                validatePage(res.body, List.empty, Some(emptyReturn))
+                validatePage(res.body, List.empty, None, -1000, -20.45, true)
               }
-            }
-          }
-        }
-
-        "that does not include a returns section when there are no pending returns or lastReturn" in {
-          given
-            .commonPreconditionBoth
-            .sdilBackend.retrievePendingReturns(UTR, List.empty)
-            .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
-
-          WsTestClient.withClient { client =>
-            val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
-
-            whenReady(result1) { res =>
-              res.status mustBe 200
-              validatePage(res.body, List.empty, None)
             }
           }
         }
@@ -171,8 +191,8 @@ class ServicePageControllerISpec extends ReturnsITHelper {
                 res.status mustBe 303
                 res.header(HeaderNames.LOCATION).get must include(
                   s"/soft-drinks-industry-levy-returns-frontend" +
-                    s"/submit-return/year/${pendingReturn1.year}" +
-                    s"/quarter/${pendingReturn1.quarter}/nil-return/false")
+                    s"/submit-return/year/${pendingReturn3.year}" +
+                    s"/quarter/${pendingReturn3.quarter}/nil-return/false")
               }
             }
           }
@@ -267,8 +287,8 @@ class ServicePageControllerISpec extends ReturnsITHelper {
                 res.status mustBe 303
                 res.header(HeaderNames.LOCATION).get must include(
                   s"/soft-drinks-industry-levy-returns-frontend" +
-                    s"/submit-return/year/${pendingReturn1.year}" +
-                    s"/quarter/${pendingReturn1.quarter}/nil-return/true")
+                    s"/submit-return/year/${pendingReturn3.year}" +
+                    s"/quarter/${pendingReturn3.quarter}/nil-return/true")
               }
             }
           }

@@ -18,16 +18,18 @@
 @import models._
 @import config.FrontendAppConfig
 @import views.html.helpers.ReturnsView
+@import views.html.helpers.AccountBalanceView
 
 @this(
 layout: templates.Layout,
-returns: ReturnsView
+returns: ReturnsView,
+accountBalance: AccountBalanceView
 )
 
 @(viewModel: ServicePageViewModel)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
-pageTitle    = titleNoForm(messages("servicePage.title"))
+pageTitle = titleNoForm(messages("servicePage.title"))
 ) {
 
 <span class="govuk-caption-m">@viewModel.sdilSubscription.orgName</span>
@@ -36,4 +38,8 @@ pageTitle    = titleNoForm(messages("servicePage.title"))
 @if(viewModel.overdueReturns.nonEmpty || viewModel.optLastReturn.isDefined) {
   @returns(viewModel.overdueReturns, viewModel.sdilSubscription.orgName, viewModel.optLastReturn)
  }
+
+<hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+@accountBalance(viewModel.sdilSubscription.sdilRef, viewModel.balance, viewModel.interest, viewModel.overdueReturns, viewModel.optHasExistingDD)
 }

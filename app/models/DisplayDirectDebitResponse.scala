@@ -16,10 +16,10 @@
 
 package models
 
-case class ServicePageViewModel(overdueReturns: List[ReturnPeriod],
-                                sdilSubscription: RetrievedSubscription,
-                                optLastReturn: Option[SdilReturn] = None,
-                                balance: BigDecimal = 0,
-                                interest: BigDecimal = 0,
-                                optHasExistingDD: Option[Boolean] = None
-                               )
+import play.api.libs.json.{Format, Json}
+
+case class DisplayDirectDebitResponse(directDebitMandateFound: Boolean)
+
+object DisplayDirectDebitResponse {
+  implicit val format: Format[DisplayDirectDebitResponse] = Json.format[DisplayDirectDebitResponse]
+}

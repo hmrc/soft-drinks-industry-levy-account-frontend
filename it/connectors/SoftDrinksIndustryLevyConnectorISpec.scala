@@ -2,12 +2,13 @@ package connectors
 
 import cats.data.EitherT
 import errors.{AccountErrors, UnexpectedResponseFromSDIL}
-import models.{OptPreviousSubmittedReturn, OptRetrievedSubscription, ReturnPeriod}
+import models.{FinancialLineItem, OptPreviousSubmittedReturn, OptRetrievedSubscription, ReturnPeriod}
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import repositories.SessionKeys
 import testSupport.ITCoreTestData._
 import testSupport.{Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
+import models.FinancialLineItem.formatter
 
 class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfiguration {
 
@@ -150,7 +151,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           val res = sdilConnector.returns_pending(identifier, UTR)
 
-          whenReady(res.value) {result =>
+          whenReady(res.value) { result =>
             result mustBe Right(List.empty)
           }
         }
@@ -360,4 +361,134 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
     }
   }
 
+  "balanceHistory" - {
+    "when assessment is true" - {
+      "and there is no balanceHistory in the cache" - {
+        "should call the backend" - {
+          "and return the balanceHistory when sucessful" in {
+            given
+              .sdilBackend
+              .balanceHistory(aSubscription.sdilRef, true, allFinicialItems)
+
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, true, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Right(allFinicialItems)
+            }
+          }
+
+          "and return UnexpectedResponseFromSDIL when call fails" in {
+            given
+              .sdilBackend
+              .balanceHistoryfailure(aSubscription.sdilRef, true)
+
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, true, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Left(UnexpectedResponseFromSDIL)
+            }
+          }
+        }
+      }
+
+      "and the balanceHistory is in the cache" - {
+        "should return the balanceHistory" in {
+          val res = for {
+            _ <- EitherT.right[AccountErrors](sessionCache.save[List[FinancialLineItem]](identifier, SessionKeys.balanceHistory(true), allFinicialItems))
+            result <- sdilConnector.balanceHistory(aSubscription.sdilRef, true, identifier)
+          } yield result
+
+          whenReady(res.value) { result =>
+            result mustBe Right(allFinicialItems)
+          }
+        }
+      }
+    }
+    "when assessment is false" - {
+      "and there is no balanceHistory in the cache" - {
+        "should call the backend" - {
+          "and return an empty list when no history and when sucessful" in {
+            given
+              .sdilBackend
+              .balanceHistory(aSubscription.sdilRef, false, List.empty)
+
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, false, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Right(List.empty)
+            }
+          }
+
+          "and return UnexpectedResponseFromSDIL when call fails" in {
+            given
+              .sdilBackend
+              .balanceHistoryfailure(aSubscription.sdilRef, false)
+
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, false, identifier)
+
+            whenReady(res.value) { result =>
+              result mustBe Left(UnexpectedResponseFromSDIL)
+            }
+          }
+        }
+      }
+
+      "and the balanceHistory is in the cache" - {
+        "should return the balanceHistory from the cache" in {
+          val res = for {
+            _ <- EitherT.right[AccountErrors](sessionCache.save[List[FinancialLineItem]](identifier, SessionKeys.balanceHistory(false), allFinicialItems))
+            result <- sdilConnector.balanceHistory(aSubscription.sdilRef, false, identifier)
+          } yield result
+
+          whenReady(res.value) { result =>
+            result mustBe Right(allFinicialItems)
+          }
+        }
+      }
+    }
+  }
+
+  "checkDirectDebitStatus" - {
+    "when the user has a direct debit setup" - {
+      "should call the backend" - {
+        "and return true" in {
+          given
+            .sdilBackend
+            .checkDirectDebitStatus(SDIL_REF, true)
+
+          val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)
+
+          whenReady(res.value) { result =>
+            result mustBe Right(true)
+          }
+        }
+      }
+      "when the user has no direct debit setup" - {
+        "should call the backend" - {
+          "and return false" in {
+            given
+              .sdilBackend
+              .checkDirectDebitStatus(SDIL_REF, false)
+
+            val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)
+
+            whenReady(res.value) { result =>
+              result mustBe Right(false)
+            }
+          }
+        }
+        "should return UnexpectedResponseFromSDIL when the backend returns an unexpectedResponse code" in {
+          given
+            .sdilBackend
+            .checkDirectDebitStatusfailure(SDIL_REF)
+
+          val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)
+
+          whenReady(res.value) { result =>
+            result mustBe Left(UnexpectedResponseFromSDIL)
+          }
+        }
+      }
+    }
+  }
 }

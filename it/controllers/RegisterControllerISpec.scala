@@ -5,9 +5,9 @@ import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
-import testSupport.ReturnsITHelper
+import testSupport.ServicePageITHelper
 
-class RegisterControllerISpec extends ReturnsITHelper {
+class RegisterControllerISpec extends ServicePageITHelper {
 
   val startPath = "/register/start"
 

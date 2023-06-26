@@ -10,7 +10,7 @@ case class DirectDebitStub()
 
   def successCall() = {
     stubFor(
-      post(urlPathEqualTo("/direct-debit-backend"))
+      post(urlPathEqualTo("/direct-debit-backend/sdil-frontend/zsdl/journey/start"))
         .willReturn(
           ok(
             Json.toJson(nextUrlResponse).toString()
