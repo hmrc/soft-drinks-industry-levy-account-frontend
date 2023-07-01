@@ -31,6 +31,8 @@ import play.api.test.Helpers.{await, _}
 import utilities.GenericLogger
 import views.html.ServiceView
 
+import scala.concurrent.Future
+
 class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHelper{
 
   lazy val mockOrchestrator = mock[RegisteredOrchestrator]
@@ -38,6 +40,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
   val servicePageRoute = routes.ServicePageController.onPageLoad
   def startAReturnRoute(isNilReturn: Boolean) = routes.ServicePageController.startAReturn(isNilReturn)
+  val makeAChangeRoute = routes.ServicePageController.makeAChange
 
   "onPageLoad" - {
     "must return OK and the correct view for a GET" in {
@@ -155,6 +158,25 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
               event.getMessage mustEqual "Unable to start return - no returns pending"
           }.getOrElse(fail("No logging captured"))
         }
+      }
+    }
+  }
+
+  "makeAChange" - {
+    "must empty the cache redirect to sdilVariations" in {
+
+      val application = applicationBuilder()
+        .overrides(
+          bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, makeAChangeRoute.url)
+        val config = application.injector.instanceOf[FrontendAppConfig]
+        when(mockOrchestrator.emptyCache(any())).thenReturn(Future.successful(true))
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual config.makeAChangeUrl
       }
     }
   }

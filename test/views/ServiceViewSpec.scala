@@ -51,6 +51,9 @@ class ServiceViewSpec extends ServiceViewHelper {
   val htmlWithLastReturn = view(servicePageViewModelWithLastReturn)(request, messages(application), config)
   val documentLastReturn = doc(htmlWithLastReturn)
 
+  val htmlForVolunaryRegistration = view(servicePageViewModelForVoluntaryRegistration)(request, messages(application), config)
+  val documentForVolunaryRegistration = doc(htmlForVolunaryRegistration)
+
   "View" - {
     "should contain the expected title" in {
       documentNoReturn.title() must include("Your Soft Drinks Industry Levy account")
@@ -62,6 +65,22 @@ class ServiceViewSpec extends ServiceViewHelper {
 
     "should include the expected h1 heading" in {
       documentNoReturn.getElementsByTag("h1").text() mustBe "Your Soft Drinks Industry Levy account"
+    }
+
+    "should include inset text for about being a small producer and not requiring to send a return" - {
+      "when the user has voluntary registration activity" in {
+        val insetText = documentForVolunaryRegistration.getElementById("voluntaryOnly")
+        insetText.className() mustBe "govuk-inset-text"
+        insetText.text() mustBe "You are registered as a small producer," +
+          " so you do not have to send returns." +
+          " Make sure you give your reference number to your third-party packagers" +
+          " so they will not have to pay the levy for your drinks." +
+          " If you stop being a small producer," +
+          " you must update your registered details and send a return on time." +
+          " After changing your details, allow 15 days for your Soft Drinks Industry Levy account to be updated." +
+          " You will also receive a new reference number."
+        insetText.getElementsByTag("a").attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/make-a-change"
+      }
     }
 
     "should include a returns section" - {
@@ -164,6 +183,9 @@ class ServiceViewSpec extends ServiceViewHelper {
     }
 
     "should not include a returns section" - {
+      "when the user has voluntaryRegistration activity" in {
+        documentForVolunaryRegistration.getElementsByClass(Selectors.heading).eachText() mustNot contain("Returns")
+      }
       "when there is no pending returns or return submitted for previous period" in {
         documentNoReturn.getElementsByClass(Selectors.heading).eachText() mustNot contain("Returns")
       }
@@ -346,8 +368,8 @@ class ServiceViewSpec extends ServiceViewHelper {
           document.getElementById("delayInAccountUpdate") mustBe null
         }
 
-        "that includes a secondary button that links to payments" in {
-          document.getElementsByClass("govuk-button govuk-button--secondary").size() mustBe 0
+        "that does not include a secondary button that links to payments" in {
+          document.getElementsByClass("govuk-button govuk-button--secondary").eachText() mustNot contain("Pay now")
         }
 
         "that includes a link to transaction history" in {
@@ -389,8 +411,8 @@ class ServiceViewSpec extends ServiceViewHelper {
           document.getElementById("delayInAccountUpdate") mustBe null
         }
 
-        "that includes a secondary button that links to payments" in {
-          document.getElementsByClass("govuk-button govuk-button--secondary").size() mustBe 0
+        "that does not include a secondary button that links to payments" in {
+          document.getElementsByClass("govuk-button govuk-button--secondary").eachText() mustNot contain("Pay now")
         }
 
         "that includes a link to transaction history" in {
@@ -398,6 +420,72 @@ class ServiceViewSpec extends ServiceViewHelper {
           transHistoryLink.text() mustBe "View your transaction history"
           transHistoryLink.attr("href") mustBe "#"
         }
+      }
+    }
+
+    "include a manage your account section" - {
+      "that has the expected subheader" in {
+        val subHeader = document1Return.getElementById("manageYourAccount")
+        subHeader.text() mustBe "Manage your account"
+        subHeader.className() mustBe "govuk-heading-m"
+      }
+
+      "that has the expected body including list items" in {
+        document1Return.getElementById("manageYourAccountChangesTellWhen").text() mustBe "You should tell HMRC when you:"
+        val listItems = document1Return.getElementById("manageYourAccountChanges").getElementsByTag("li")
+        listItems.size() mustBe 4
+        listItems.eachText().get(0) mustBe "updated contact, address, packaging site or warehouse details"
+        listItems.eachText().get(1) mustBe "change the amount of liable drinks produced"
+        listItems.eachText().get(2) mustBe "cancel Soft Drinks Industry Levy registration"
+        listItems.eachText().get(3) mustBe "correct an error in a previous return"
+      }
+
+      "that includes a secondary button that links to makeAChange" in {
+        val button = document1Return.getElementsByClass("govuk-button govuk-button--secondary")
+        button.eachText() must contain("Tell HMRC about a change")
+        button.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/make-a-change"
+      }
+    }
+
+    "includes the business details section" - {
+      "that has the expected subheader" in {
+        val subHeader = document1Return.getElementById("businessDetails")
+        subHeader.text() mustBe "Business details"
+        subHeader.className() mustBe "govuk-heading-m"
+      }
+
+      "that has the expected body including business address" in {
+       val businessDetailsForUTR = document1Return.getElementById("businessDetailsForUTR")
+         businessDetailsForUTR.text() mustBe s"These are the details we hold for Unique Taxpayer Reference (UTR) ${aSubscription.utr}:"
+        val address = document1Return.getElementById("businessAddress")
+        address.className mustBe "govuk-inset-text"
+        address.text() mustBe "Super Lemonade Plc 63 Clifton Roundabout Worcester WR53 7CX"
+      }
+    }
+
+    "includes a need help section" - {
+      "that has the expected subheader" in {
+        val subHeader = document1Return.getElementById("needHelp")
+        subHeader.text() mustBe "Need help"
+        subHeader.className() mustBe "govuk-heading-m"
+      }
+
+      "that has a link to sdil guidance" in {
+        val link = document1Return.getElementById("sdilGuidance")
+        link.text() mustBe "SDIL guidance (opens in a new tab)"
+        link.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/topic/business-tax/soft-drinks-industry-levy"
+      }
+
+      "that has a link to sdil regulations" in {
+        val link = document1Return.getElementById("sdilRegulations")
+        link.text() mustBe "The Soft Drinks Industry Levy Regulations 2018 (opens in a new tab)"
+        link.getElementsByTag("a").attr("href") mustBe "https://www.legislation.gov.uk/uksi/2018/41/made"
+      }
+
+      "that has a link to sdil contact" in {
+        val link = document1Return.getElementById("sdilContact")
+        link.text() mustBe "Contact HMRC about your SDIL (opens in a new tab)"
+        link.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/soft-drinks-industry-levy"
       }
     }
   }

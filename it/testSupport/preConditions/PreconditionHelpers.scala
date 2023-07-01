@@ -30,6 +30,12 @@ trait PreconditionHelpers {
       .sdilBackend.retrieveSubscriptionWithDeRegDate("utr", UTR)
   }
 
+  def authorisedSmallProducer = {
+    builder
+      .user.isAuthorisedAndEnrolled
+      .sdilBackend.retrieveSubscriptionSmallProducer("utr", UTR)
+  }
+
 
   def authorisedWithNoSubscriptionPrecondition = {
     builder

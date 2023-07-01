@@ -9,6 +9,7 @@ GET         /home                controllers.ServicePageController.onPageLoad
 GET         /register/start                          controllers.RegisterController.start
 
 GET        /start-a-return/nilReturn/:isNilReturn        controllers.ServicePageController.startAReturn(isNilReturn: Boolean)
+GET        /make-a-change                               controllers.ServicePageController.makeAChange
 
 GET       /start-direct-debit-journey                    controllers.DirectDebitController.setup()
 

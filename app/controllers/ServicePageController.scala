@@ -62,4 +62,10 @@ class ServicePageController @Inject()(
       case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
     }
   }
+
+  def makeAChange = (authenticated andThen registered).async { implicit request =>
+    registeredOrchestrator.emptyCache.map { _ =>
+      Redirect(config.makeAChangeUrl)
+    }
+  }
 }
