@@ -18,7 +18,7 @@ package views.helpers
 
 import config.FrontendAppConfig
 import controllers.routes
-import models.{RetrievedSubscription, ReturnPeriod, RosmRegistration, SdilReturn}
+import models.{RetrievedSubscription, ReturnPeriod, SdilReturn}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.insettext.InsetText
