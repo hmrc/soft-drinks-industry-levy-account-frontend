@@ -81,6 +81,11 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     }
   }
 
+  def emptyCache(implicit request: RegisteredRequest[AnyContent]): Future[Boolean] = {
+    val internalId = request.internalId
+    sessionCache.removeRecord(internalId)
+  }
+
   private def getAndCalculateInterestIfReq(internalId: String)(implicit request: RegisteredRequest[AnyContent],
                                   hc: HeaderCarrier,
                                   ec: ExecutionContext): AccountResult[BigDecimal] =

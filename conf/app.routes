@@ -9,6 +9,7 @@ GET         /home                controllers.ServicePageController.onPageLoad
 GET         /register/start                          controllers.RegisterController.start
 
 GET        /start-a-return/nilReturn/:isNilReturn        controllers.ServicePageController.startAReturn(isNilReturn: Boolean)
+GET        /make-a-change                               controllers.ServicePageController.makeAChange
 
 GET       /start-direct-debit-journey                    controllers.DirectDebitController.setup()
 
@@ -18,8 +19,8 @@ GET         /assets/*file                                controllers.Assets.vers
 
 GET         /refresh-session                             controllers.KeepAliveController.keepAlive
 
-GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut
-GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey
-GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad
+GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut()
+GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey()
+GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad

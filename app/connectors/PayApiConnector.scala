@@ -24,6 +24,7 @@ import models.{NextUrl, SetupPayApiRequest}
 import service.AccountResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utilities.GenericLogger
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.ExecutionContext
 

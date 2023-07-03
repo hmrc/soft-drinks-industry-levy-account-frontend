@@ -58,6 +58,11 @@ object ITCoreTestData extends TryValues {
   val aSubscriptionWithDeRegDate = aSubscription.copy(
     deregDate = Some(LocalDate.of(2022, 2, 11)))
 
+  val aSmallProducerSubscription = {
+    val activity = aSubscription.activity.copy(voluntaryRegistration = true)
+    aSubscription.copy(activity = activity)
+  }
+
 
   def identifier = "some-id"
 
