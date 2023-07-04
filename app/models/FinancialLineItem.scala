@@ -17,7 +17,6 @@
 package models
 
 import play.api.libs.json._
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Content
 
 import java.time.{LocalDate => Date}
 

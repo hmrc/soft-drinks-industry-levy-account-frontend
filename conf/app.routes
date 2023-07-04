@@ -8,7 +8,7 @@ GET         /home                controllers.ServicePageController.onPageLoad
 
 GET         /register/start                          controllers.RegisterController.start
 
-GET        /transaction-history                          controllers.ServicePageController.transactionHistory
+GET        /transaction-history                          controllers.TransactionHistoryController.onPageLoad
 
 GET        /start-a-return/nilReturn/:isNilReturn        controllers.ServicePageController.startAReturn(isNilReturn: Boolean)
 

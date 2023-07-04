@@ -114,6 +114,7 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     val transactionHistoryItem = balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]){(transactionHistory, finicialListItem) =>
       List(new TransactionHistoryItem(finicialListItem, transactionHistory)) ++ transactionHistory
     }
+
     transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]){
       (transactionHistoryForYears, transactionHistoryItem) =>
         val transactionYear = transactionHistoryItem.finincialLineItem.date.getYear

@@ -114,7 +114,7 @@ trait ServicePageITHelper extends ControllerITTestHelper {
 
     val transHistoryLink = page.getElementById("viewTransactionHistory")
     transHistoryLink.text() mustBe "View your transaction history"
-    transHistoryLink.attr("href") mustBe "#"
+    transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
 
   }
 

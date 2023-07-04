@@ -21,7 +21,7 @@ import base.TestData._
 import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import errors.{NoPendingReturns, UnexpectedResponseFromSDIL}
-import models.{FinancialLineItem, PaymentOnAccount, ReturnCharge, ReturnPeriod, TransactionHistoryItem}
+import models.{CentralAssessment, CentralAsstInterest, FinancialLineItem, OfficerAssessment, OfficerAsstInterest, PaymentOnAccount, ReturnCharge, ReturnChargeInterest, ReturnPeriod, TransactionHistoryItem, Unknown}
 import models.requests.RegisteredRequest
 import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -252,12 +252,27 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
       "should return the expected" - {
         val year = 2022
-        val date1 = LocalDate.of(year, 1, 30)
+        val year2 = 2021
+        val year3 = 2020
+        val date1 = LocalDate.of(year, 12, 1)
         val date2 = LocalDate.of(year, 6, 20)
-        val date3 = LocalDate.of(year, 12, 1)
-        val fi1 = ReturnCharge(ReturnPeriod.apply(date1), BigDecimal(-123.00))
-        val fi2 = PaymentOnAccount(date2, "test", BigDecimal(123.00))
-        val fi3 = finincialItemUnknown.copy(date = date3)
+        val date3 = LocalDate.of(year, 1, 30)
+        val date4 = LocalDate.of(year2, 12, 1)
+        val date5 = LocalDate.of(year2, 6, 20)
+        val date6 = LocalDate.of(year2, 1, 30)
+        val date7 = LocalDate.of(year3, 12, 1)
+        val date8 = LocalDate.of(year3, 6, 20)
+        val date9 = LocalDate.of(year3, 1, 30)
+        val fi1 = PaymentOnAccount(date1, "test", BigDecimal(132.00))
+        val fi2 = ReturnCharge(ReturnPeriod.apply(date2), BigDecimal(-120.00))
+        val fi3 = ReturnChargeInterest(date3, BigDecimal(-12.00))
+        val fi4 = Unknown(date4, "test", BigDecimal(300.00))
+        val fi5 = CentralAssessment(date5, BigDecimal(-100.00))
+        val fi6 = CentralAsstInterest(date6, BigDecimal(-10.00))
+        val fi7 = OfficerAssessment(date7, BigDecimal(-130.00))
+        val fi8 = OfficerAsstInterest(date8, BigDecimal(-13.00))
+        val fi9 = ReturnCharge(ReturnPeriod.apply(date9), BigDecimal(-47.00))
+
 
         "when the user only has one fininicial items" in {
           val balanceHistoryList = List(fi1)
@@ -271,12 +286,27 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
           }
         }
 
+
+        "with the duplicates removed" - {
+          "when the user only has multiple fininicial items that are all identical" in {
+            val balanceHistoryList = List(fi1)
+            val expectedResult = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
+            when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+
+            val res = orchestrator.getTransactionHistoryForAllYears(registeredRequest, hc, ec)
+
+            whenReady(res.value) { result =>
+              result mustBe Right(expectedResult)
+            }
+          }
+        }
+
         "when the user only has multiple fininicial items for the same year" in {
           val balanceHistoryList = List(fi1, fi2, fi3)
           val expectedTransactionHistoryItems = List(
-            TransactionHistoryItem(fi3, fi3.amount),
-            TransactionHistoryItem(fi2, BigDecimal(0)),
-            TransactionHistoryItem(fi1, fi1.amount)
+            TransactionHistoryItem(fi1, BigDecimal(0.00)),
+            TransactionHistoryItem(fi2, BigDecimal(-132.00)),
+            TransactionHistoryItem(fi3, fi3.amount)
           )
           val expectedResult = Map(year -> expectedTransactionHistoryItems)
           when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
@@ -289,19 +319,73 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         }
 
         "when the user only has multiple fininicial items for different years" in {
-          val balanceHistoryList = List(fi1, fi2, fi3)
-          val expectedTransactionHistoryItems = List(
-            TransactionHistoryItem(fi3, fi3.amount),
-            TransactionHistoryItem(fi2, BigDecimal(0)),
-            TransactionHistoryItem(fi1, fi1.amount)
+          val balanceHistoryList = List( fi9, fi8, fi7, fi6, fi5, fi4, fi3, fi2, fi1)
+          val expectedTransactionHistoryItemsForYear1 = List(
+            TransactionHistoryItem(fi1, BigDecimal(0)),
+            TransactionHistoryItem(fi2, BigDecimal(-132.00)),
+            TransactionHistoryItem(fi3, fi3.amount)
           )
-          val expectedResult = Map(year -> expectedTransactionHistoryItems)
+          val expectedTransactionHistoryItemsForYear2 = List(
+            TransactionHistoryItem(fi4, BigDecimal(0.00)),
+            TransactionHistoryItem(fi5, BigDecimal(-300.00)),
+            TransactionHistoryItem(fi6, BigDecimal(-200.00))
+          )
+
+          val expectedTransactionHistoryItemsForYear3 = List(
+            TransactionHistoryItem(fi7, BigDecimal(-190.00)),
+            TransactionHistoryItem(fi8, BigDecimal(-60.00)),
+            TransactionHistoryItem(fi9, BigDecimal(-47.00))
+          )
+
+          val expectedResult = Map(
+            year -> expectedTransactionHistoryItemsForYear1,
+            year2 -> expectedTransactionHistoryItemsForYear2,
+            year3 -> expectedTransactionHistoryItemsForYear3
+
+          )
           when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
 
           val res = orchestrator.getTransactionHistoryForAllYears(registeredRequest, hc, ec)
 
           whenReady(res.value) { result =>
             result mustBe Right(expectedResult)
+          }
+        }
+
+        "with transaction ordered from newest to oldest" - {
+
+          "when the user has multiple fininicial items for different years but are not in date order" in {
+            val balanceHistoryList = List(fi9, fi1, fi5, fi6, fi7, fi2, fi3, fi4, fi8)
+            val expectedTransactionHistoryItemsForYear1 = List(
+              TransactionHistoryItem(fi1, BigDecimal(0)),
+              TransactionHistoryItem(fi2, BigDecimal(-132.00)),
+              TransactionHistoryItem(fi3, fi3.amount)
+            )
+            val expectedTransactionHistoryItemsForYear2 = List(
+              TransactionHistoryItem(fi4, BigDecimal(0.00)),
+              TransactionHistoryItem(fi5, BigDecimal(-300.00)),
+              TransactionHistoryItem(fi6, BigDecimal(-200.00))
+            )
+
+            val expectedTransactionHistoryItemsForYear3 = List(
+              TransactionHistoryItem(fi7, BigDecimal(-190.00)),
+              TransactionHistoryItem(fi8, BigDecimal(-60.00)),
+              TransactionHistoryItem(fi9, BigDecimal(-47.00))
+            )
+
+            val expectedResult = Map(
+              year -> expectedTransactionHistoryItemsForYear1,
+              year2 -> expectedTransactionHistoryItemsForYear2,
+              year3 -> expectedTransactionHistoryItemsForYear3,
+
+            )
+            when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+
+            val res = orchestrator.getTransactionHistoryForAllYears(registeredRequest, hc, ec)
+
+            whenReady(res.value) { result =>
+              result mustBe Right(expectedResult)
+            }
           }
         }
       }
