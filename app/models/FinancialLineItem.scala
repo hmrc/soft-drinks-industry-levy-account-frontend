@@ -17,33 +17,58 @@
 package models
 
 import play.api.libs.json._
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Content
 
 import java.time.{LocalDate => Date}
 
 sealed trait FinancialLineItem {
   def date: Date
   def amount: BigDecimal
+
+  def messageKey: String
+
 }
 
 sealed trait Interest
 
 case class ReturnCharge(period: ReturnPeriod, amount: BigDecimal) extends FinancialLineItem {
   def date = period.deadline
+  override def messageKey: String = "returnCharge"
 }
 
-case class ReturnChargeInterest(date: Date, amount: BigDecimal) extends FinancialLineItem with Interest
+case class ReturnChargeInterest(date: Date, amount: BigDecimal) extends FinancialLineItem with Interest {
+  override def messageKey: String = "returnChargeInterest"
 
-case class CentralAssessment(date: Date, amount: BigDecimal) extends FinancialLineItem
+}
 
-case class CentralAsstInterest(date: Date, amount: BigDecimal) extends FinancialLineItem with Interest
+case class CentralAssessment(date: Date, amount: BigDecimal) extends FinancialLineItem {
+  override def messageKey: String = "returnChargeInterest"
 
-case class OfficerAssessment(date: Date, amount: BigDecimal) extends FinancialLineItem
+}
 
-case class OfficerAsstInterest(date: Date, amount: BigDecimal) extends FinancialLineItem with Interest
+case class CentralAsstInterest(date: Date, amount: BigDecimal) extends FinancialLineItem with Interest {
+  override def messageKey: String = "centralAsstInterest"
 
-case class PaymentOnAccount(date: Date, reference: String, amount: BigDecimal) extends FinancialLineItem
+}
 
-case class Unknown(date: Date, title: String, amount: BigDecimal) extends FinancialLineItem
+case class OfficerAssessment(date: Date, amount: BigDecimal) extends FinancialLineItem {
+  override def messageKey: String = "officerAssessment"
+
+}
+
+case class OfficerAsstInterest(date: Date, amount: BigDecimal) extends FinancialLineItem with Interest {
+  override def messageKey: String = "officerAsstInterest"
+}
+
+case class PaymentOnAccount(date: Date, reference: String, amount: BigDecimal) extends FinancialLineItem {
+  override def messageKey: String = "paymentOnAccount"
+
+}
+
+case class Unknown(date: Date, title: String, amount: BigDecimal) extends FinancialLineItem {
+  override def messageKey: String = title
+
+}
 
 object FinancialLineItem {
 

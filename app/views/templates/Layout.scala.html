@@ -30,10 +30,10 @@
     hmrcTimeoutDialog: HmrcTimeoutDialog,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
     hmrcScripts: HmrcScripts,
-    alphaBanner: StandardAlphaBanner
+    betaBanner: StandardBetaBanner
 )
 
-@(pageTitle: String, timeout: Boolean = true, showSignOut: Boolean = true)(contentBlock: Html)(implicit request: Request[_], messages: Messages)
+@(pageTitle: String, timeout: Boolean = true, showSignOut: Boolean = true, fullGrid: Boolean = false)(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
 
@@ -73,11 +73,12 @@
     headerBlock = Some(hmrcStandardHeader(
         serviceUrl  = Some(routes.IndexController.onPageLoad.url),
         signOutUrl  = if(showSignOut) Some(controllers.auth.routes.AuthController.signOut.url) else None,
-        phaseBanner = Some(alphaBanner(appConfig.feedbackUrl))
+        phaseBanner = Some(betaBanner(appConfig.feedbackUrl))
     )),
     beforeContentBlock = None,
     footerBlock        = Some(hmrcStandardFooter()),
     scriptsBlock       = Some(hmrcScripts(
         scriptsBlock = Some(additionalScripts)
-    ))
+    )),
+    mainContentLayout = if (fullGrid) Some(_ => Html(s"<div class='govuk-grid-row'><div class='govuk-grid-column-full'>$content</div></div>")) else Some(_ => Html(s"<div class='govuk-grid-row'><div class='govuk-grid-column-two-thirds'>$content</div></div>"))
 )(content)

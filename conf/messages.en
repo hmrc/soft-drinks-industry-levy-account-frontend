@@ -113,3 +113,21 @@ directDebit.manage.existing.link = Change or cancel your Direct Debit and view y
 directDebit.manage.setup.subHeader = Pay by Direct Debit
 directDebit.manage.setup.link = set up a Direct Debit
 directDebit.manage.setup.p1 = to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date.
+
+transactionHistory.title = Transaction history
+transactionHistory.heading = Transaction history
+transactionHistory.table.date = Date
+transactionHistory.table.transaction = Transaction
+transactionHistory.table.credits = Credits
+transactionHistory.table.debits = Debits
+transactionHistory.table.balance = Balance
+
+transactionHistory.transaction.returnCharge= Return
+transactionHistory.transaction.returnCharge.hint= for {0} to {1}
+transactionHistory.transaction.returnChargeInterest= Interest Charged
+transactionHistory.transaction.returnChargeInterest.hint= up to {0}
+transactionHistory.transaction.centralAssessment=Central Assessment
+transactionHistory.transaction.centralAsstInterest=Interest on Central Assessment
+transactionHistory.transaction.officerAssessment=Officers Assessment
+transactionHistory.transaction.officerAsstInterest=Interest on Officers Assessment
+transactionHistory.transaction.paymentOnAccount=Payment on account

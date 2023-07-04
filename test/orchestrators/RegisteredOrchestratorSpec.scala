@@ -21,6 +21,7 @@ import base.TestData._
 import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import errors.{NoPendingReturns, UnexpectedResponseFromSDIL}
+import models.{FinancialLineItem, PaymentOnAccount, ReturnCharge, ReturnPeriod, TransactionHistoryItem}
 import models.requests.RegisteredRequest
 import org.mockito.MockitoSugar.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -29,6 +30,7 @@ import play.api.test.FakeRequest
 import repositories.SessionCache
 import uk.gov.hmrc.auth.core.Enrolments
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
@@ -229,6 +231,78 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         whenReady(res.value) { result =>
           result mustBe Left(UnexpectedResponseFromSDIL)
+        }
+      }
+    }
+  }
+
+  "getTransactionHistoryForAllYears" - {
+    "when the call to get balance history is successful" - {
+      "and the user has no fininicial items" - {
+        "should return an empty map" in {
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(List.empty[FinancialLineItem]))
+
+          val res = orchestrator.getTransactionHistoryForAllYears(registeredRequest, hc, ec)
+
+          whenReady(res.value) { result =>
+            result mustBe Right(Map.empty[Int, List[TransactionHistoryItem]])
+          }
+        }
+      }
+
+      "should return the expected" - {
+        val year = 2022
+        val date1 = LocalDate.of(year, 1, 30)
+        val date2 = LocalDate.of(year, 6, 20)
+        val date3 = LocalDate.of(year, 12, 1)
+        val fi1 = ReturnCharge(ReturnPeriod.apply(date1), BigDecimal(-123.00))
+        val fi2 = PaymentOnAccount(date2, "test", BigDecimal(123.00))
+        val fi3 = finincialItemUnknown.copy(date = date3)
+
+        "when the user only has one fininicial items" in {
+          val balanceHistoryList = List(fi1)
+          val expectedResult = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+
+          val res = orchestrator.getTransactionHistoryForAllYears(registeredRequest, hc, ec)
+
+          whenReady(res.value) { result =>
+            result mustBe Right(expectedResult)
+          }
+        }
+
+        "when the user only has multiple fininicial items for the same year" in {
+          val balanceHistoryList = List(fi1, fi2, fi3)
+          val expectedTransactionHistoryItems = List(
+            TransactionHistoryItem(fi3, fi3.amount),
+            TransactionHistoryItem(fi2, BigDecimal(0)),
+            TransactionHistoryItem(fi1, fi1.amount)
+          )
+          val expectedResult = Map(year -> expectedTransactionHistoryItems)
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+
+          val res = orchestrator.getTransactionHistoryForAllYears(registeredRequest, hc, ec)
+
+          whenReady(res.value) { result =>
+            result mustBe Right(expectedResult)
+          }
+        }
+
+        "when the user only has multiple fininicial items for different years" in {
+          val balanceHistoryList = List(fi1, fi2, fi3)
+          val expectedTransactionHistoryItems = List(
+            TransactionHistoryItem(fi3, fi3.amount),
+            TransactionHistoryItem(fi2, BigDecimal(0)),
+            TransactionHistoryItem(fi1, fi1.amount)
+          )
+          val expectedResult = Map(year -> expectedTransactionHistoryItems)
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+
+          val res = orchestrator.getTransactionHistoryForAllYears(registeredRequest, hc, ec)
+
+          whenReady(res.value) { result =>
+            result mustBe Right(expectedResult)
+          }
         }
       }
     }

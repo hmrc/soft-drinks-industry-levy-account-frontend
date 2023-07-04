@@ -26,7 +26,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utilities.GenericLogger
-import views.html.ServiceView
+import views.html.{ServiceView, TransactionHistoryView}
 
 import scala.concurrent.ExecutionContext
 
@@ -36,7 +36,8 @@ class ServicePageController @Inject()(
                                        authenticated: AuthenticatedAction,
                                        registered: RegisteredAction,
                                        registeredOrchestrator: RegisteredOrchestrator,
-                                       view: ServiceView,
+                                       serviceView: ServiceView,
+                                       transactionHistoryView: TransactionHistoryView,
                                        errorHandler: ErrorHandler
                                     )(implicit config: FrontendAppConfig, ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
@@ -44,9 +45,19 @@ class ServicePageController @Inject()(
 
     registeredOrchestrator.handleServicePageRequest.value.map{
       case Right(viewModel) =>
-        Ok(view(
+        Ok(serviceView(
           viewModel)
         (implicitly, implicitly, implicitly))
+      case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
+    }
+  }
+
+  def transactionHistory: Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
+
+    registeredOrchestrator.getTransactionHistoryForAllYears.value.map {
+      case Right(transactionHistoryForYears) =>
+        Ok(transactionHistoryView(request.subscription.orgName,
+          transactionHistoryForYears)(implicitly, implicitly, implicitly))
       case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
     }
   }
