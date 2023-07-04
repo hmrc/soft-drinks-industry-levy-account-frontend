@@ -37,7 +37,15 @@ pageTitle = titleNoForm(messages("transactionHistory.title")),
  <h1 class="govuk-heading-m">@messages("transactionHistory.heading")</h1>
 
 
- @govukTabs(
-  transactionHistoryTabGenerator.generateTabs(transactionHistoryForYears)
- )
+ @if(transactionHistoryForYears.nonEmpty) {
+  @govukTabs(
+   transactionHistoryTabGenerator.generateTabs(transactionHistoryForYears)
+  )
+ }
+
+ <p class="govuk-body">
+  <a class="govuk-link" id="returnToServicePage" href="@routes.ServicePageController.onPageLoad.url">
+  @messages("transactionHistory.accountPage.link")
+  </a>
+ </p>
 }

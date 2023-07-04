@@ -29,6 +29,70 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
               }
             }
           }
+
+          "when the user has several fininical item in balance history that are all the same" in {
+            given
+              .commonPrecondition
+              .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryDuplicates)
+
+            WsTestClient.withClient { client =>
+              val result1 = createClientRequestGet(client, baseUrl + transactionHistoryPath)
+
+              whenReady(result1) { res =>
+                res.status mustBe 200
+                validatePage(res.body, transitionHistoryItems1Item)
+              }
+            }
+          }
+        }
+
+        "with one tab containing the expected items" - {
+          "when the user has multiple fininical item in balance history for the same year" in {
+            given
+              .commonPrecondition
+              .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryMultiItemsSameYear)
+
+            WsTestClient.withClient { client =>
+              val result1 = createClientRequestGet(client, baseUrl + transactionHistoryPath)
+
+              whenReady(result1) { res =>
+                res.status mustBe 200
+                validatePage(res.body, transitionHistoryItemsSameYear)
+              }
+            }
+          }
+        }
+
+        "with multiple tabs containing the expected items" - {
+          "when the user has multiple fininical item in balance history for different years" in {
+            given
+              .commonPrecondition
+              .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryMultiItemsDiffYears)
+
+            WsTestClient.withClient { client =>
+              val result1 = createClientRequestGet(client, baseUrl + transactionHistoryPath)
+
+              whenReady(result1) { res =>
+                res.status mustBe 200
+                validatePage(res.body, transitionHistoryItemsDiffYears)
+              }
+            }
+          }
+
+          "when the user has multiple fininical item in balance history for different years that are not ordered" in {
+            given
+              .commonPrecondition
+              .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryMultiItemsDiffYearsNotOrder)
+
+            WsTestClient.withClient { client =>
+              val result1 = createClientRequestGet(client, baseUrl + transactionHistoryPath)
+
+              whenReady(result1) { res =>
+                res.status mustBe 200
+                validatePage(res.body, transitionHistoryItemsDiffYears)
+              }
+            }
+          }
         }
       }
     }

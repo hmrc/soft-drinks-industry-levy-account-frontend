@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package testSupport
+package views
 
-import controllers.ControllerITTestHelper
 import models._
-import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
-import play.api.i18n.Messages
-
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-trait TransactionHistoryITHelper extends ControllerITTestHelper {
+trait TransactionHistoryViewHelper extends ViewSpecHelper {
 
   lazy val dateFormatter = DateTimeFormatter.ofPattern("d MMM")
   lazy val monthFormatter = DateTimeFormatter.ofPattern("MMMM")
@@ -55,11 +50,6 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
   val fi8 = OfficerAsstInterest(date8, BigDecimal(-13.00))
   val fi9 = ReturnCharge(ReturnPeriod.apply(date9), BigDecimal(-47.00))
 
-  val balanceHistory1Item = List(fi1)
-  val balanceHistoryDuplicates = List(fi1, fi1, fi1)
-  val balanceHistoryMultiItemsSameYear = List(fi3, fi2, fi1)
-  val balanceHistoryMultiItemsDiffYears = List(fi9, fi8, fi7, fi6, fi5, fi4, fi3, fi2, fi1)
-  val balanceHistoryMultiItemsDiffYearsNotOrder = List(fi9, fi1, fi5, fi6, fi7, fi2, fi3, fi4, fi8)
 
   val transitionHistoryItems1Item = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
   val transitionHistoryItemsSameYear = {
@@ -97,58 +87,11 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
     )
   }
 
-
-  def validatePage(body: String, expectedTransactionHistory: Map[Int, List[TransactionHistoryItem]]) = {
-    val page = Jsoup.parse(body)
-    page.title must include(Messages("Transaction history"))
-    page.getElementsByClass("govuk-caption-m").text() mustBe "Super Lemonade Plc"
-    page.getElementsByTag("h1").text() mustBe "Transaction history"
-    val tabs = page.getElementsByClass("govuk-tabs").first()
-    tabs.getElementsByClass("govuk-tabs__title").first().text() mustBe "Contents"
-    val tabList = tabs.getElementsByClass("govuk-tabs__list").first().getElementsByTag("li")
-    tabList.size() mustBe expectedTransactionHistory.size
-    expectedTransactionHistory.zipWithIndex.foreach{
-      case((year, transactionHistoryItems), index) =>
-        val tabLink = tabList.get(index).getElementsByTag("a").first()
-        tabLink.text() mustBe year.toString
-        tabLink.attr("href") mustBe s"#year-$year"
-        val panel = tabs.getElementById(s"year-$year")
-
-        val expectedPanelClassName = if(index == 0) {"govuk-tabs__panel"} else {"govuk-tabs__panel govuk-tabs__panel--hidden"}
-        panel.className() mustBe expectedPanelClassName
-        panel.getElementsByClass("govuk-heading-m").text() mustBe year.toString
-        val table = panel.getElementsByClass("govuk-table").first()
-        val tableHeaders = table.getElementsByClass("govuk-table__header")
-        tableHeaders.size() mustBe 5
-        tableHeaders.get(0).text() mustBe "Date"
-        tableHeaders.get(1).text() mustBe "Transaction"
-        tableHeaders.get(2).text() mustBe "Credits"
-        tableHeaders.get(3).text() mustBe "Debits"
-        tableHeaders.get(4).text() mustBe "Balance"
-        val tableRows = table.getElementsByClass("govuk-table__body").first().getElementsByTag("tr")
-        tableRows.size() mustBe transactionHistoryItems.size
-        transactionHistoryItems.zipWithIndex.foreach{
-          case (transactionHistoryItem, index1) =>
-            val tableRow = tableRows.get(index1)
-            val rowValues = tableRow.getElementsByTag("td")
-            rowValues.get(0).text() mustBe expectedDateField(transactionHistoryItem)
-            rowValues.get(1).text() mustBe expectedTransactionField(transactionHistoryItem)
-            rowValues.get(2).text() mustBe expectedCredit(transactionHistoryItem)
-            rowValues.get(3).text() mustBe expectedDebit(transactionHistoryItem)
-            rowValues.get(4).text() mustBe formatPounds(transactionHistoryItem.balance)
-        }
-    }
-
-    val homeLink = page.getElementById("returnToServicePage")
-    homeLink.text() mustBe "You can go to your Soft Drinks Industry Levy account"
-    homeLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/home"
-  }
-
-  private def expectedDateField(transactionHistoryItem: TransactionHistoryItem): String = {
+  def expectedDateField(transactionHistoryItem: TransactionHistoryItem): String = {
     transactionHistoryItem.finincialLineItem.date.format(dateFormatter)
   }
 
-  private def expectedTransactionField(transactionHistoryItem: TransactionHistoryItem): String = {
+  def expectedTransactionField(transactionHistoryItem: TransactionHistoryItem): String = {
     transactionHistoryItem.finincialLineItem match {
       case fli: Unknown => fli.title
       case fli: ReturnCharge =>
@@ -166,7 +109,7 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
     }
   }
 
-  private def expectedCredit(transactionHistoryItem: TransactionHistoryItem): String = {
+  def expectedCredit(transactionHistoryItem: TransactionHistoryItem): String = {
     if (transactionHistoryItem.finincialLineItem.amount > 0) {
       formatPounds(transactionHistoryItem.finincialLineItem.amount)
     } else {
@@ -174,7 +117,7 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
     }
   }
 
-  private def expectedDebit(transactionHistoryItem: TransactionHistoryItem): String = {
+  def expectedDebit(transactionHistoryItem: TransactionHistoryItem): String = {
     if (transactionHistoryItem.finincialLineItem.amount < 0) {
       s"${formatPounds(transactionHistoryItem.finincialLineItem.amount)}"
     } else {
@@ -183,5 +126,6 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
   }
 
   def formatPounds(bd: BigDecimal): String = f"£$bd%,.2f".replace("£-", "−£")
+
 
 }

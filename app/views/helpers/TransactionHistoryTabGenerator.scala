@@ -38,16 +38,18 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
   def generateTabs(transactionHistoryForYears: Map[Int, List[TransactionHistoryItem]])
                   (implicit messages: Messages): Tabs = {
     val tabItems: Seq[TabItem] = transactionHistoryForYears.map {
-      case (year, transactionHistoryItems) => TabItem(
-        id = Some(s"year-${year.toString}"),
-        label = year.toString,
-        panel = TabPanel(
-          HtmlContent(
-            govukTable(getTableHistoryForYear(transactionHistoryItems))
-          ))
-      )
+      case (year, transactionHistoryItems) =>
+        val panelH2 = s"<h2 class=\"govuk-heading-m\">${year.toString}</h2>"
+        val panelTable = s"${govukTable(getTableHistoryForYear(transactionHistoryItems))}"
+        TabItem(
+          id = Some(s"year-${year.toString}"),
+          label = year.toString,
+          panel = TabPanel(
+            HtmlContent(s"$panelH2 $panelTable")
+          )
+        )
     }.toSeq
-    Tabs(title = "", items = tabItems, idPrefix = Some("year"))
+    Tabs(title = messages("transactionHistory.contents"), items = tabItems, idPrefix = Some("year"))
   }
 
 
@@ -115,7 +117,6 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
         val formattedDate = fli.date.format(fullDateFormatter)
         val hint = s"""<div class ="govuk-hint">${messages(s"transactionHistory.transaction.${fli.messageKey}.hint", formattedDate)}</div>"""
         HtmlContent(s"$message <br/>$hint")
-
       case fli => Text(messages(s"transactionHistory.transaction.${fli.messageKey}"))
     }
   }

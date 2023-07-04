@@ -41,7 +41,7 @@ case class ReturnChargeInterest(date: Date, amount: BigDecimal) extends Financia
 }
 
 case class CentralAssessment(date: Date, amount: BigDecimal) extends FinancialLineItem {
-  override def messageKey: String = "returnChargeInterest"
+  override def messageKey: String = "centralAssessment"
 
 }
 
