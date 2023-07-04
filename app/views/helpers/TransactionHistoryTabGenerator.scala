@@ -42,12 +42,12 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
         id = Some(s"year-${year.toString}"),
         label = year.toString,
         panel = TabPanel(
-          HtmlContent(
-            govukTable(getTableHistoryForYear(transactionHistoryItems))
+          HtmlContent(     
+            s"<h2 class=\"govuk-heading-m\">${year.toString}</h2> ${govukTable(getTableHistoryForYear(transactionHistoryItems))}"
           ))
       )
     }.toSeq
-    Tabs(title = "", items = tabItems, idPrefix = Some("year"))
+    Tabs(title = messages("transactionHistory.contents"), items = tabItems, idPrefix = Some("year"))
   }
 
 
