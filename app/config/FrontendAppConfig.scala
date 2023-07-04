@@ -35,14 +35,17 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"
   val returnsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-returns-frontend")
   val registrationBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-registration-frontend")
+  val variationsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-variations-frontend")
 
 
   def startReturnUrl(year: Int, quarter: Int, isNilReturn: Boolean) = {
     s"$returnsBaseUrl/soft-drinks-industry-levy-returns-frontend/submit-return/year/$year/quarter/$quarter/nil-return/$isNilReturn"
   }
 
+  val makeAChangeUrl = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/select-change"
+
   val startRegistrationUrl: String = {
-    s"$returnsBaseUrl/soft-drinks-industry-levy-registration/start"
+    s"$registrationBaseUrl/soft-drinks-industry-levy-registration/start"
   }
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
@@ -78,6 +81,9 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
   val cacheTtl: Int = configuration.getInt("mongodb.timeToLiveInSeconds")
 
+  val sdilGuidance = configuration.getString("sdilGuidance")
+  val sdilRegulations = configuration.getString("sdilRegulations")
+  val sdilContact = configuration.getString("sdilContact")
   val creditForExportGuidance = configuration.getString("creditForExportGuidance")
   val howToPayGuidance = configuration.getString("howToPayGuidance")
 

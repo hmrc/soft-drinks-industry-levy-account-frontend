@@ -11,6 +11,7 @@ site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
 site.payNow = Pay now
+site.tellAboutChange = Tell HMRC about a change
 
 common.youCan = You can
 
@@ -70,6 +71,12 @@ unauthorised.heading = You can’t access this service with this account
 
 servicePage.title = Your Soft Drinks Industry Levy account
 servicePage.heading = Your Soft Drinks Industry Levy account
+
+servicePage.voluntaryOnly.p1 = You are registered as a small producer, so you do not have to send returns. Make sure you give your reference number to your third-party packagers so they will not have to pay the levy for your drinks.
+servicePage.voluntaryOnly.p2 = If you stop being a small producer, you must
+servicePage.voluntaryOnly.link = update your registered details
+servicePage.voluntaryOnly.p3 = and send a return on time. After changing your details, allow 15 days for your Soft Drinks Industry Levy account to be updated. You will also receive a new reference number.
+
 servicePage.returns.heading = Returns
 servicePage.returnsOverdue1.warning = The return for {0} from {1} to {2} is due by {3}.
 servicePage.returnsOverdue.warning = You have {0} overdue returns
@@ -113,6 +120,21 @@ directDebit.manage.existing.link = Change or cancel your Direct Debit and view y
 directDebit.manage.setup.subHeader = Pay by Direct Debit
 directDebit.manage.setup.link = set up a Direct Debit
 directDebit.manage.setup.p1 = to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date.
+
+servicePage.manageYourAccount.heading = Manage your account
+servicePage.manageYourAccount.tellWhen = You should tell HMRC when you:
+servicePage.manageYourAccount.contactDetails = updated contact, address, packaging site or warehouse details
+servicePage.manageYourAccount.activity = change the amount of liable drinks produced
+servicePage.manageYourAccount.cancel = cancel Soft Drinks Industry Levy registration
+servicePage.manageYourAccount.return = correct an error in a previous return
+
+servicePage.businessDetails.heading = Business details
+servicePage.businessDetails.detailsForUTR = These are the details we hold for Unique Taxpayer Reference (UTR)
+
+servicePage.needHelp.heading = Need help
+servicePage.needHelp.sdilGuidance = SDIL guidance (opens in a new tab)
+servicePage.needHelp.sdilRegulations = The Soft Drinks Industry Levy Regulations 2018 (opens in a new tab)
+servicePage.needHelp.sdilContact = Contact HMRC about your SDIL (opens in a new tab)
 
 transactionHistory.title = Transaction history
 transactionHistory.heading = Transaction history

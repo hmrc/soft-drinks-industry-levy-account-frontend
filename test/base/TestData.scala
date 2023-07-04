@@ -106,6 +106,10 @@ object TestData {
     None
   )
 
+  val activityWithVoluntaryRegistration = aSubscription.activity.copy(voluntaryRegistration = true)
+  val subscription = aSubscription.copy(activity = activityWithVoluntaryRegistration)
+  val servicePageViewModelForVoluntaryRegistration = servicePageViewModel1PendingReturns.copy(sdilSubscription = subscription)
+
   val finincialItemReturnCharge = ReturnCharge(currentReturnPeriod, BigDecimal(123.45))
   val finincialItemReturnChargeInterest = ReturnChargeInterest(localDate, BigDecimal(12.45))
   val finincialItemCentralAssessment = CentralAssessment(localDate, BigDecimal(1))

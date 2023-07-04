@@ -33,8 +33,8 @@ package controllers
  */
 
 import base.SpecBase
-import connectors.{DirectDebitConnector, PayApiConnector, SoftDrinksIndustryLevyConnector}
-import errors.{UnexpectedResponseFromDirectDebit, UnexpectedResponseFromPayAPI}
+import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
+import errors.UnexpectedResponseFromPayAPI
 import models.NextUrl
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when

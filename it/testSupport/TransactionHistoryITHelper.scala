@@ -105,5 +105,19 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
     page.getElementsByTag("h1").text() mustBe "Transaction history"
     println("$$$$$$$$$$$$$$$$$$")
     println(page)
+    val tabs = page.getElementsByClass("govuk-tabs").first()
+    tabs.getElementsByClass("govuk-tabs__title").first() mustBe ""
+    val tabList = tabs.getElementsByClass("govuk-tabs__list").first().getElementsByTag("li")
+    tabList.size() mustBe expectedTransactionHistory.size
+    expectedTransactionHistory.zipWithIndex.foreach{
+      case((year, transactionHistoryItems), index) =>
+        val tabLink = tabList.get(index).getElementsByTag("a").first()
+        tabLink.text() mustBe year.toString
+        tabLink.attr("href") mustBe s"#year-$year"
+        val panel = tabs.getElementById(s"year-$year")
+        val expectedPanelClassName = if(index == 0) {"govuk-tabs__panel"} else {"govuk-tabs__panel govuk-tabs__panel--hidden"}
+        panel.className() mustBe expectedPanelClassName
+
+    }
   }
 }

@@ -17,9 +17,10 @@
 package views.helpers
 
 import config.FrontendAppConfig
-import models.{ReturnPeriod, SdilReturn}
+import controllers.routes
+import models.{RetrievedSubscription, ReturnPeriod, SdilReturn}
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.insettext.InsetText
 import uk.gov.hmrc.govukfrontend.views.viewmodels.warningtext.WarningText
 
@@ -32,6 +33,18 @@ object ServicePageHelper {
   lazy val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
   lazy val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
   lazy val timeFormatter = DateTimeFormatter.ofPattern("h:mma")
+
+  def createVoluntaryRegistrationInsetMessage(implicit messages: Messages): InsetText = {
+    val htmlMessage = s"<p>${messages("servicePage.voluntaryOnly.p1")}</p>" +
+      s"<p>${messages("servicePage.voluntaryOnly.p2")}" +
+      s" <a href = ${routes.ServicePageController.makeAChange.url}>${messages("servicePage.voluntaryOnly.link")}</a>" +
+      s" ${messages("servicePage.voluntaryOnly.p3")}</p>"
+
+    InsetText(
+      id = Some("voluntaryOnly"),
+      content = HtmlContent(htmlMessage)
+    )
+  }
 
   def createWarningForOverdueReturns(pendingReturns: List[ReturnPeriod],
                                      orgName: String)
@@ -98,5 +111,14 @@ object ServicePageHelper {
   }
 
   def formatAbsPounds(bd: BigDecimal): String = f"£${bd.abs}%,.2f"
+
+  def businessAddress(subscription: RetrievedSubscription): InsetText = {
+    val address = subscription.address
+    val formattedAddress = s"${subscription.orgName}<br>${address.lines.mkString("<br>")}<br>${address.postCode}"
+    InsetText(
+      id = Some("businessAddress"),
+      content = HtmlContent(formattedAddress)
+    )
+  }
 
 }

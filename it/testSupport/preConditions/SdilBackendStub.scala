@@ -28,6 +28,15 @@ case class SdilBackendStub()
     builder
   }
 
+  def retrieveSubscriptionSmallProducer(identifier: String, refNum: String) = {
+    stubFor(
+      get(
+        urlEqualTo(s"/subscription/$identifier/$refNum"))
+        .willReturn(
+          ok(Json.toJson(aSmallProducerSubscription).toString())))
+    builder
+  }
+
   def retrieveSubscriptionNone(identifier: String, refNum: String) = {
     stubFor(
       get(

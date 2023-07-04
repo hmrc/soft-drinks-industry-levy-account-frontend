@@ -12,6 +12,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
   val servicePagePath = "/home"
   val startAReturnPath = "/start-a-return/nilReturn/false"
   val startANilReturnPath = "/start-a-return/nilReturn/true"
+  val makeAChangePath = "/make-a-change"
 
   s"GET $servicePagePath" - {
     "when the user is authenticated and has a subscription" - {
@@ -94,6 +95,27 @@ class ServicePageControllerISpec extends ServicePageITHelper {
                   res.status mustBe 200
                   validatePage(res.body, List.empty, Some(emptyReturn), 1000, 0, false)
                 }
+              }
+            }
+          }
+        }
+
+        "that has 5 sections which includes a message about small producers not submitting returns instead of a returns, account with correct balance and interest, manage your account, business details and need help" - {
+          "when there are no pending returns or lastReturn and balance history returns duplicate items" in {
+            given
+              .authorisedSmallProducer
+              .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
+              .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+              .sdilBackend.balance(SDIL_REF, true, -1000)
+              .sdilBackend.balanceHistory(SDIL_REF, true, allFinicialItems ++ allFinicialItems)
+              .sdilBackend.checkDirectDebitStatus(SDIL_REF, true)
+
+            WsTestClient.withClient { client =>
+              val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+              whenReady(result1) { res =>
+                res.status mustBe 200
+                validatePage(res.body, List.empty, None, -1000, -20.45, true, true)
               }
             }
           }
@@ -356,6 +378,58 @@ class ServicePageControllerISpec extends ServicePageITHelper {
 
         WsTestClient.withClient { client =>
           val result1 = createClientRequestGet(client, baseUrl + startANilReturnPath)
+
+          whenReady(result1) { res =>
+            res.status mustBe 500
+            val page = Jsoup.parse(res.body)
+            page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+          }
+        }
+      }
+    }
+  }
+
+  s"GET $makeAChangePath" - {
+    "when the user is authenticated and has a subscription" - {
+      "should redirect to sdilVariations" in {
+        given
+          .commonPrecondition
+
+        WsTestClient.withClient { client =>
+          val result1 = createClientRequestGet(client, baseUrl + makeAChangePath)
+
+          whenReady(result1) { res =>
+            res.status mustBe 303
+            res.header(HeaderNames.LOCATION).get must include(
+              s"/soft-drinks-industry-levy-variations-frontend/select-change")
+          }
+        }
+      }
+    }
+    "render the error page" - {
+      "when the backend call to get sdilSubscription fails with UTR" in {
+        given
+          .user.isAuthorisedAndEnrolled
+          .sdilBackend.retrieveSubscriptionError("utr", UTR)
+
+        WsTestClient.withClient { client =>
+          val result1 = createClientRequestGet(client, baseUrl + makeAChangePath)
+
+          whenReady(result1) { res =>
+            res.status mustBe 500
+            val page = Jsoup.parse(res.body)
+            page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+          }
+        }
+      }
+
+      "when the backend call to get sdilSubscription fails with SDIL_REF" in {
+        given
+          .user.isAuthorisedAndEnrolledSDILRef
+          .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
+
+        WsTestClient.withClient { client =>
+          val result1 = createClientRequestGet(client, baseUrl + makeAChangePath)
 
           whenReady(result1) { res =>
             res.status mustBe 500

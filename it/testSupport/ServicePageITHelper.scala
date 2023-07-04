@@ -38,13 +38,36 @@ trait ServicePageITHelper extends ControllerITTestHelper {
                    lastReturn: Option[SdilReturn],
                    balance: BigDecimal,
                    interest: BigDecimal,
-                   hasDirectDebit: Boolean) = {
+                   hasDirectDebit: Boolean,
+                   isSmallProducer: Boolean = false) = {
     val page = Jsoup.parse(body)
     page.title must include(Messages("Your Soft Drinks Industry Levy account"))
     page.getElementsByClass("govuk-caption-m").text() mustBe "Super Lemonade Plc"
     page.getElementsByTag("h1").text() mustBe "Your Soft Drinks Industry Levy account"
-    validateReturnsSection(page, pendingReturns, lastReturn)
+    if(isSmallProducer) {
+      validateSmallProducer(page)
+    } else {
+      validateReturnsSection(page, pendingReturns, lastReturn)
+    }
     validateAccountBalance(page, balance, interest, hasDirectDebit, pendingReturns)
+    validateManageAccount(page)
+    validateBusinessDetails(page)
+    validateNeedNelp(page)
+  }
+
+  def validateSmallProducer(page: Document) = {
+    val buttons = page.getElementsByClass("govuk-button")
+    page.getElementsByClass("govuk-heading-m").eachText() mustNot contain("Returns")
+    buttons.eachText() mustNot contain("Start a return")
+    val expectedText = "You are registered as a small producer," +
+      " so you do not have to send returns." +
+      " Make sure you give your reference number to your third-party packagers" +
+      " so they will not have to pay the levy for your drinks." +
+      " If you stop being a small producer," +
+      " you must update your registered details and send a return on time." +
+      " After changing your details, allow 15 days for your Soft Drinks Industry Levy account to be updated." +
+      " You will also receive a new reference number."
+    page.getElementById("voluntaryOnly").text() mustBe expectedText
   }
 
   def validateReturnsSection(page: Document, pendingReturns: List[ReturnPeriod],
@@ -116,6 +139,39 @@ trait ServicePageITHelper extends ControllerITTestHelper {
     transHistoryLink.text() mustBe "View your transaction history"
     transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
 
+  }
+
+  def validateManageAccount(page: Document) = {
+    page.getElementsByClass("govuk-heading-m").eachText() must contain("Manage your account")
+    page.getElementById("manageYourAccountChangesTellWhen").text() mustBe "You should tell HMRC when you:"
+    val listItems = page.getElementById("manageYourAccountChanges").getElementsByTag("li")
+    listItems.size() mustBe 4
+    listItems.eachText().get(0) mustBe "updated contact, address, packaging site or warehouse details"
+    listItems.eachText().get(1) mustBe "change the amount of liable drinks produced"
+    listItems.eachText().get(2) mustBe "cancel Soft Drinks Industry Levy registration"
+    listItems.eachText().get(3) mustBe "correct an error in a previous return"
+  }
+
+  def validateBusinessDetails(page: Document) = {
+    page.getElementsByClass("govuk-heading-m").eachText() must contain("Business details")
+    val businessDetailsForUTR = page.getElementById("businessDetailsForUTR")
+    businessDetailsForUTR.text() mustBe s"These are the details we hold for Unique Taxpayer Reference (UTR) ${aSubscription.utr}:"
+    val address = page.getElementById("businessAddress")
+    address.className mustBe "govuk-inset-text"
+    address.text() mustBe "Super Lemonade Plc 63 Clifton Roundabout Worcester WR53 7CX"
+  }
+
+  def validateNeedNelp(page: Document) = {
+    page.getElementsByClass("govuk-heading-m").eachText() must contain("Need help")
+    val link1 = page.getElementById("sdilGuidance")
+    link1.text() mustBe "SDIL guidance (opens in a new tab)"
+    link1.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/topic/business-tax/soft-drinks-industry-levy"
+    val link2 = page.getElementById("sdilRegulations")
+    link2.text() mustBe "The Soft Drinks Industry Levy Regulations 2018 (opens in a new tab)"
+    link2.getElementsByTag("a").attr("href") mustBe "https://www.legislation.gov.uk/uksi/2018/41/made"
+    val link3 = page.getElementById("sdilContact")
+    link3.text() mustBe "Contact HMRC about your SDIL (opens in a new tab)"
+    link3.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/soft-drinks-industry-levy"
   }
 
   def warningMessageForPendingReturns(pendingReturns: List[ReturnPeriod]): String = {

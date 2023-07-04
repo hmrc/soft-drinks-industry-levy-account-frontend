@@ -19,7 +19,6 @@ package views
 import base.TestData._
 import models.{ReturnPeriod, SdilReturn}
 import org.jsoup.nodes.{Document, Element}
-import play.api.i18n.Messages
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneId}
