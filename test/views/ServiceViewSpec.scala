@@ -488,6 +488,10 @@ class ServiceViewSpec extends ServiceViewHelper {
         link.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/soft-drinks-industry-levy"
       }
     }
+
+    testNoBackLink(document1Return)
+    validateTimeoutDialog(document1Return)
+    validateAccessibilityStatementLinkPresent(document1Return)
   }
 
 }

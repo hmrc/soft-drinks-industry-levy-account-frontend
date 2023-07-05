@@ -149,6 +149,10 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
           homeLink.text() mustBe "You can go to your Soft Drinks Industry Levy account"
           homeLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/home"
         }
+
+        testBackLink(document)
+        validateTimeoutDialog(document)
+        validateAccessibilityStatementLinkPresent(document)
       }
     }
   }

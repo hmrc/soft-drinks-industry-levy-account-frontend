@@ -23,4 +23,5 @@ package object govuk {
       with ButtonFluency
       with LabelFluency
       with SummaryListFluency
+      with BackLinkFluency
 }
