@@ -240,7 +240,7 @@ class ServiceViewSpec extends ServiceViewHelper {
         "that includes a link to transaction history" in {
           val transHistoryLink = document.getElementById("viewTransactionHistory")
           transHistoryLink.text() mustBe "View your transaction history"
-          transHistoryLink.attr("href") mustBe "#"
+          transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
         }
       }
 
@@ -287,7 +287,7 @@ class ServiceViewSpec extends ServiceViewHelper {
         "that includes a link to transaction history" in {
           val transHistoryLink = document.getElementById("viewTransactionHistory")
           transHistoryLink.text() mustBe "View your transaction history"
-          transHistoryLink.attr("href") mustBe "#"
+          transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
         }
       }
 
@@ -332,7 +332,7 @@ class ServiceViewSpec extends ServiceViewHelper {
         "that includes a link to transaction history" in {
           val transHistoryLink = document.getElementById("viewTransactionHistory")
           transHistoryLink.text() mustBe "View your transaction history"
-          transHistoryLink.attr("href") mustBe "#"
+          transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
         }
       }
 
@@ -375,7 +375,7 @@ class ServiceViewSpec extends ServiceViewHelper {
         "that includes a link to transaction history" in {
           val transHistoryLink = document.getElementById("viewTransactionHistory")
           transHistoryLink.text() mustBe "View your transaction history"
-          transHistoryLink.attr("href") mustBe "#"
+          transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
         }
       }
 
@@ -418,7 +418,7 @@ class ServiceViewSpec extends ServiceViewHelper {
         "that includes a link to transaction history" in {
           val transHistoryLink = document.getElementById("viewTransactionHistory")
           transHistoryLink.text() mustBe "View your transaction history"
-          transHistoryLink.attr("href") mustBe "#"
+          transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
         }
       }
     }
@@ -488,6 +488,10 @@ class ServiceViewSpec extends ServiceViewHelper {
         link.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/soft-drinks-industry-levy"
       }
     }
+
+    testNoBackLink(document1Return)
+    validateTimeoutDialog(document1Return)
+    validateAccessibilityStatementLinkPresent(document1Return)
   }
 
 }

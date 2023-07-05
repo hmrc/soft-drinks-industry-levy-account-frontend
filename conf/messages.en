@@ -135,3 +135,23 @@ servicePage.needHelp.heading = Need help
 servicePage.needHelp.sdilGuidance = SDIL guidance (opens in a new tab)
 servicePage.needHelp.sdilRegulations = The Soft Drinks Industry Levy Regulations 2018 (opens in a new tab)
 servicePage.needHelp.sdilContact = Contact HMRC about your SDIL (opens in a new tab)
+
+transactionHistory.contents = Contents
+transactionHistory.title = Transaction history
+transactionHistory.heading = Transaction history
+transactionHistory.table.date = Date
+transactionHistory.table.transaction = Transaction
+transactionHistory.table.credits = Credits
+transactionHistory.table.debits = Debits
+transactionHistory.table.balance = Balance
+
+transactionHistory.transaction.returnCharge= Return
+transactionHistory.transaction.returnCharge.hint= for {0} to {1}
+transactionHistory.transaction.returnChargeInterest= Interest Charged
+transactionHistory.transaction.returnChargeInterest.hint= up to {0}
+transactionHistory.transaction.centralAssessment=Central Assessment
+transactionHistory.transaction.centralAsstInterest=Interest on Central Assessment
+transactionHistory.transaction.officerAssessment=Officers Assessment
+transactionHistory.transaction.officerAsstInterest=Interest on Officers Assessment
+transactionHistory.transaction.paymentOnAccount=Payment on account
+transactionHistory.accountPage.link = You can go to your Soft Drinks Industry Levy account

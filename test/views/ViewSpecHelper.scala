@@ -115,7 +115,7 @@ trait ViewSpecHelper extends SpecBase {
   def validateAccessibilityStatementLinkPresent(doc: Document): Unit = {
     val footerItems = doc.getElementsByClass("govuk-footer__inline-list-item")
     "accessibility statement exists, text and link are correct" in {
-      footerItems.html() must include("/accessibility-statement/soft-drinks-industry-levy-registration-frontend?referrerUrl=%2F")
+      footerItems.html() must include("/accessibility-statement/soft-drinks-industry-levy-account-frontend?referrerUrl=%2F")
       footerItems.eachText() must contain("Accessibility statement")
     }
   }

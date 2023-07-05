@@ -23,7 +23,7 @@ import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import errors.{AccountErrors, NoPendingReturns}
 import models.requests.RegisteredRequest
-import models.{Interest, ReturnPeriod, ServicePageViewModel}
+import models.{FinancialLineItem, Interest, ReturnPeriod, ServicePageViewModel, TransactionHistoryItem}
 import play.api.mvc.AnyContent
 import repositories.SessionCache
 import service.AccountResult
@@ -66,6 +66,15 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     }
   }
 
+  def getTransactionHistoryForAllYears(implicit request: RegisteredRequest[AnyContent],
+                                      hc: HeaderCarrier,
+                                      ec: ExecutionContext): AccountResult[Map[Int, List[TransactionHistoryItem]]] = {
+    sdilConnector.balanceHistory(request.subscription.sdilRef, true, request.internalId)
+      .map {
+        convertBalanceHistoryToTransactionHistory
+      }
+  }
+
   def handleStartAReturn(implicit request: RegisteredRequest[AnyContent],
                          hc: HeaderCarrier,
                          ec: ExecutionContext): AccountResult[ReturnPeriod] = EitherT {
@@ -103,6 +112,20 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
       sdilConnector.checkDirectDebitStatus(request.subscription.sdilRef).map(Some(_))
     } else {
       EitherT.right[AccountErrors](Future.successful[Option[Boolean]](None))
+    }
+  }
+
+  private def convertBalanceHistoryToTransactionHistory(balanceHistory: List[FinancialLineItem]): Map[Int, List[TransactionHistoryItem]] = {
+    val transactionHistoryItem = balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]){(transactionHistory, finicialListItem) =>
+      List(new TransactionHistoryItem(finicialListItem, transactionHistory)) ++ transactionHistory
+    }
+
+    transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]){
+      (transactionHistoryForYears, transactionHistoryItem) =>
+        val transactionYear = transactionHistoryItem.finincialLineItem.date.getYear
+        val updatedTransactionItemsForYear = transactionHistoryForYears.get(transactionYear)
+        .fold(List(transactionHistoryItem))(_ ++ List(transactionHistoryItem))
+        transactionHistoryForYears ++ Map(transactionYear -> updatedTransactionItemsForYear)
     }
   }
 

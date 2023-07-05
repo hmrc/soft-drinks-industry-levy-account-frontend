@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package viewmodels
+package models
 
-package object govuk {
-
-  object all
-    extends ImplicitConversions
-      with ButtonFluency
-      with LabelFluency
-      with SummaryListFluency
-      with BackLinkFluency
+case class TransactionHistoryItem(finincialLineItem: FinancialLineItem, balance: BigDecimal) {
+  def this(financialLineItem: FinancialLineItem,
+           currentTransactionHistory: List[TransactionHistoryItem]) = this(
+    finincialLineItem = financialLineItem,
+    balance = currentTransactionHistory.headOption.fold(financialLineItem.amount)(_.balance + financialLineItem.amount)
+  )
 }
