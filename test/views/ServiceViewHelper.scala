@@ -75,7 +75,7 @@ trait ServiceViewHelper extends ViewSpecHelper {
       }
 
       "which includes a bold message about claiming credit" in {
-        element.getElementsByClass("govuk-body govuk-!-font-weight-bold").text() mustBe "You can only claim credit if youve registered for the levy and paid it directly to HMRC. Claiming credits youre not entitled to is a criminal offence."
+        element.getElementsByClass("govuk-body govuk-!-font-weight-bold").text() mustBe "You can only claim credit if you've registered for the levy and paid it directly to HMRC. Claiming credits you're not entitled to is a criminal offence."
       }
 
       "which includes you need to tell about liable credit drinks message" in {
