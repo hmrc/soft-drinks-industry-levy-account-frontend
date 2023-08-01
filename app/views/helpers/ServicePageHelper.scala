@@ -106,7 +106,7 @@ object ServicePageHelper {
   }
 
   def otherPaymentsContent(sdilReference: String)(implicit messages: Messages, config: FrontendAppConfig): String = {
-    val guidanceLink = s"""<a href="${config.howToPayGuidance}" target="_blank">${messages("howToPay.link")}</a>"""
+    val guidanceLink = s"""<a class="govuk-link" href="${config.howToPayGuidance}" target="_blank">${messages("howToPay.link")}</a>"""
     s"${messages("howToPay.details.1")} <b>$sdilReference</b>.<br>$guidanceLink"
   }
 
