@@ -32,7 +32,6 @@ class ServiceViewSpec extends ServiceViewHelper {
 
   object Selectors {
     val heading = "govuk-heading-m"
-    val caption = "govuk-caption-m"
     val body = "govuk-body"
     val warning = "govuk-warning-text"
     val li = "li"
@@ -60,7 +59,7 @@ class ServiceViewSpec extends ServiceViewHelper {
     }
 
     "should include a caption containing the orgName" in {
-      documentNoReturn.getElementsByClass(Selectors.caption).text() mustBe "Super Lemonade Plc"
+      documentNoReturn.getElementById("caption").text() mustBe "Company is Super Lemonade Plc"
     }
 
     "should include the expected h1 heading" in {
