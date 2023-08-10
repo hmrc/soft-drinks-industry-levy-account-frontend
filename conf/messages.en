@@ -71,6 +71,7 @@ unauthorised.heading = You can’t access this service with this account
 
 servicePage.title = Your Soft Drinks Industry Levy account
 servicePage.heading = Your Soft Drinks Industry Levy account
+servicePage.company = Company is {0}
 
 servicePage.voluntaryOnly.p1 = You are registered as a small producer, so you do not have to send returns. Make sure you give your reference number to your third-party packagers so they will not have to pay the levy for your drinks.
 servicePage.voluntaryOnly.p2 = If you stop being a small producer, you must

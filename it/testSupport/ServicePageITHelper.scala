@@ -42,7 +42,7 @@ trait ServicePageITHelper extends ControllerITTestHelper {
                    isSmallProducer: Boolean = false) = {
     val page = Jsoup.parse(body)
     page.title must include(Messages("Your Soft Drinks Industry Levy account"))
-    page.getElementsByClass("govuk-caption-m").text() mustBe "Super Lemonade Plc"
+    page.getElementById("caption").text() mustBe "Company is Super Lemonade Plc"
     page.getElementsByTag("h1").text() mustBe "Your Soft Drinks Industry Levy account"
     if(isSmallProducer) {
       validateSmallProducer(page)
