@@ -59,7 +59,7 @@ object ServicePageHelper {
       messages("servicePage.returnsOverdue.warning", pendingReturns.size)
     }
     WarningText(
-      iconFallbackText = "Warning",
+      iconFallbackText = Some("Warning"),
       content = Text(content)
     )
   }
