@@ -207,6 +207,72 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
     }
   }
 
+  "returns_variable" - {
+    "when the no variable returns in the cache" - {
+      "should call the backend" - {
+        "and return None when no variable returns" in {
+          given
+            .sdilBackend
+            .retrieveVariableReturns(UTR, List.empty)
+
+          val res = sdilConnector.returns_variable(identifier, UTR)
+
+          whenReady(res.value) { result =>
+            result mustBe Right(List.empty)
+          }
+        }
+        "and return the list of variable return when exist" in {
+          given
+            .sdilBackend
+            .retrieveVariableReturns(UTR, pendingReturns3)
+
+          val res = sdilConnector.returns_variable(identifier, UTR)
+
+          whenReady(res.value) { result =>
+            result mustBe Right(pendingReturns3)
+          }
+        }
+
+        "and return UnexpectedResponseFromSDIL when the backend returns an unexpectedResponse code" in {
+          given
+            .sdilBackend
+            .retrieveVariableReturnsError(UTR)
+
+          val res = sdilConnector.returns_variable(identifier, UTR)
+
+          whenReady(res.value) { result =>
+            result mustBe Left(UnexpectedResponseFromSDIL)
+          }
+        }
+      }
+    }
+
+    "when a pending returns record is in the cache" - {
+      "should read the value from the cache" - {
+        "and return None when no variable returns" in {
+          val res = for {
+            _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.variableReturn(UTR), List.empty[ReturnPeriod]))
+            result <- sdilConnector.returns_variable(identifier, UTR)
+          } yield result
+
+          whenReady(res.value) { result =>
+            result mustBe Right(List.empty)
+          }
+        }
+        "and return the list of variable return when exist" in {
+          val res = for {
+            _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.variableReturn(UTR), pendingReturns3))
+            result <- sdilConnector.returns_variable(identifier, UTR)
+          } yield result
+
+          whenReady(res.value) { result =>
+            result mustBe Right(pendingReturns3)
+          }
+        }
+      }
+    }
+  }
+
 
   "returns_get" - {
     "when the no previous submitted returns in the cache" - {

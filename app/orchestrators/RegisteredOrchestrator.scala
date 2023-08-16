@@ -23,7 +23,7 @@ import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import errors.{AccountErrors, NoPendingReturns}
 import models.requests.RegisteredRequest
-import models.{FinancialLineItem, Interest, ReturnPeriod, ServicePageViewModel, TransactionHistoryItem}
+import models._
 import play.api.mvc.AnyContent
 import repositories.SessionCache
 import service.AccountResult
@@ -40,29 +40,10 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
   def handleServicePageRequest(implicit request: RegisteredRequest[AnyContent],
                                hc: HeaderCarrier,
                                ec: ExecutionContext): AccountResult[ServicePageViewModel] = {
-    val internalId = request.internalId
-    val utr = request.subscription.utr
-    val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
-    val getPendingReturns = sdilConnector.returns_pending(internalId, utr).map(_.sortBy(_.start))
-    val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
-    val getBalance = sdilConnector.balance(request.subscription.sdilRef, true, internalId)
-    val getInterest  = getAndCalculateInterestIfReq(internalId)
-    val optHasDDSetup = checkExistingDDIfEnabled
-
-    for {
-      returnsPending <- getPendingReturns
-      optLastReturn <- getOptLastReturn
-      balance <- getBalance
-      interest <- getInterest
-      hasExistingDD <- optHasDDSetup
-    } yield {
-      ServicePageViewModel(
-        returnsPending,
-        request.subscription,
-        optLastReturn,
-        balance,
-        interest,
-        hasExistingDD)
+    val subscription = request.subscription
+    subscription.deregDate match {
+      case Some(deregDate) => getServiceViewModelForDeregisteredUser(subscription, deregDate)
+      case None => getServiceViewModelForRegisteredUser(subscription)
     }
   }
 
@@ -93,6 +74,66 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
   def emptyCache(implicit request: RegisteredRequest[AnyContent]): Future[Boolean] = {
     val internalId = request.internalId
     sessionCache.removeRecord(internalId)
+  }
+
+  private def getServiceViewModelForRegisteredUser(subscription: RetrievedSubscription)
+                                                  (implicit request: RegisteredRequest[AnyContent],
+                                                   hc: HeaderCarrier,
+                                                   ec: ExecutionContext): AccountResult[ServicePageViewModel] = {
+    val internalId = request.internalId
+    val utr = subscription.utr
+    val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
+    val getPendingReturns = sdilConnector.returns_pending(internalId, utr).map(_.sortBy(_.start))
+    val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
+    val getBalance = sdilConnector.balance(subscription.sdilRef, true, internalId)
+    val getInterest = getAndCalculateInterestIfReq(internalId)
+    val optHasDDSetup = checkExistingDDIfEnabled
+
+    for {
+      returnsPending <- getPendingReturns
+      optLastReturn <- getOptLastReturn
+      balance <- getBalance
+      interest <- getInterest
+      hasExistingDD <- optHasDDSetup
+    } yield {
+      RegisteredUserServicePageViewModel(
+        returnsPending,
+        request.subscription,
+        optLastReturn,
+        balance,
+        interest,
+        hasExistingDD)
+    }
+  }
+
+  private def getServiceViewModelForDeregisteredUser(subscription: RetrievedSubscription, deregDate: LocalDate)
+                                                    (implicit request: RegisteredRequest[AnyContent],
+                                                     hc: HeaderCarrier,
+                                                     ec: ExecutionContext): AccountResult[ServicePageViewModel] = {
+    val internalId = request.internalId
+    val utr = subscription.utr
+    val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
+    val deregReturnPeriod = ReturnPeriod(deregDate)
+    val checkIfHasVariableReturns = sdilConnector.returns_variable(internalId, utr).map(_.nonEmpty)
+    val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
+    val getOptDeRegReturn = sdilConnector.returns_get(utr, deregReturnPeriod, internalId)
+    val getBalance = sdilConnector.balance(subscription.sdilRef, true, internalId)
+
+    for {
+      optLastReturn <- getOptLastReturn
+      hasVariableReturns <- checkIfHasVariableReturns
+      balance <- getBalance
+      optDeregReturn <- getOptDeRegReturn
+    } yield {
+      DeregisteredUserServicePageViewModel(
+        subscription,
+        deregDate,
+        hasVariableReturns,
+        optLastReturn,
+        balance,
+        optDeregReturn.isEmpty
+      )
+    }
   }
 
   private def getAndCalculateInterestIfReq(internalId: String)(implicit request: RegisteredRequest[AnyContent],

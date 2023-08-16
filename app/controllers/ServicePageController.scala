@@ -21,12 +21,13 @@ import config.FrontendAppConfig
 import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import errors.NoPendingReturns
 import handlers.ErrorHandler
+import models.{DeregisteredUserServicePageViewModel, RegisteredUserServicePageViewModel}
 import orchestrators.RegisteredOrchestrator
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utilities.GenericLogger
-import views.html.ServiceView
+import views.html.{ServiceView, DeregisteredUserServiceView}
 
 import scala.concurrent.ExecutionContext
 
@@ -37,14 +38,19 @@ class ServicePageController @Inject()(
                                        registered: RegisteredAction,
                                        registeredOrchestrator: RegisteredOrchestrator,
                                        serviceView: ServiceView,
+                                       deregServiceView: DeregisteredUserServiceView,
                                        errorHandler: ErrorHandler
                                     )(implicit config: FrontendAppConfig, ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
 
     registeredOrchestrator.handleServicePageRequest.value.map{
-      case Right(viewModel) =>
+      case Right(viewModel: RegisteredUserServicePageViewModel) =>
         Ok(serviceView(
+          viewModel)
+        (implicitly, implicitly, implicitly))
+      case Right(viewModel: DeregisteredUserServicePageViewModel) =>
+        Ok(deregServiceView(
           viewModel)
         (implicitly, implicitly, implicitly))
       case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
@@ -66,6 +72,12 @@ class ServicePageController @Inject()(
   def makeAChange = (authenticated andThen registered).async { implicit request =>
     registeredOrchestrator.emptyCache.map { _ =>
       Redirect(config.makeAChangeUrl)
+    }
+  }
+
+  def correctAReturn = (authenticated andThen registered).async { implicit request =>
+    registeredOrchestrator.emptyCache.map { _ =>
+      Redirect(config.correctAReturnUrl)
     }
   }
 }

@@ -29,7 +29,7 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, _}
 import utilities.GenericLogger
-import views.html.ServiceView
+import views.html.{DeregisteredUserServiceView, ServiceView}
 
 import scala.concurrent.Future
 
@@ -41,28 +41,57 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
   val servicePageRoute = routes.ServicePageController.onPageLoad
   def startAReturnRoute(isNilReturn: Boolean) = routes.ServicePageController.startAReturn(isNilReturn)
   val makeAChangeRoute = routes.ServicePageController.makeAChange
+  val correctAReturnRoute = routes.ServicePageController.correctAReturn
 
   "onPageLoad" - {
-    "must return OK and the correct view for a GET" in {
+    "when the user is a registered user" - {
+      "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder()
-        .overrides(
-          bind[RegisteredOrchestrator].toInstance(mockOrchestrator)
-        ).build()
+        val application = applicationBuilder()
+          .overrides(
+            bind[RegisteredOrchestrator].toInstance(mockOrchestrator)
+          ).build()
 
-      running(application) {
-        val request = FakeRequest(GET, servicePageRoute.url)
+        running(application) {
+          val request = FakeRequest(GET, servicePageRoute.url)
 
-        val config = application.injector.instanceOf[FrontendAppConfig]
+          val config = application.injector.instanceOf[FrontendAppConfig]
 
-        when(mockOrchestrator.handleServicePageRequest(any(), any(), any())).thenReturn(createSuccessAccountResult(servicePageViewModel1PendingReturns))
+          when(mockOrchestrator.handleServicePageRequest(any(), any(), any())).thenReturn(createSuccessAccountResult(registeredUserServicePageViewModel1PendingReturns))
 
-        val result = route(application, request).value
+          val result = route(application, request).value
 
-        val view = application.injector.instanceOf[ServiceView]
+          val view = application.injector.instanceOf[ServiceView]
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(servicePageViewModel1PendingReturns)(request, messages(application), config).toString
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(registeredUserServicePageViewModel1PendingReturns)(request, messages(application), config).toString
+        }
+      }
+    }
+
+    "when the user is a deregistered user" - {
+      "must return OK and the correct view for a GET" in {
+
+        val application = applicationBuilder()
+          .overrides(
+            bind[RegisteredOrchestrator].toInstance(mockOrchestrator)
+          ).build()
+
+        running(application) {
+          val request = FakeRequest(GET, servicePageRoute.url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+          val deregUserSeviceModel = generateDeregUserServicePageModel(true, true, true, 100)
+
+          when(mockOrchestrator.handleServicePageRequest(any(), any(), any())).thenReturn(createSuccessAccountResult(deregUserSeviceModel))
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[DeregisteredUserServiceView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(deregUserSeviceModel)(request, messages(application), config).toString
+        }
       }
     }
   }
@@ -177,6 +206,25 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual config.makeAChangeUrl
+      }
+    }
+  }
+
+  "correctAReturn" - {
+    "must empty the cache redirect to sdilVariations" in {
+
+      val application = applicationBuilder()
+        .overrides(
+          bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, correctAReturnRoute.url)
+        val config = application.injector.instanceOf[FrontendAppConfig]
+        when(mockOrchestrator.emptyCache(any())).thenReturn(Future.successful(true))
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual config.correctAReturnUrl
       }
     }
   }

@@ -93,7 +93,7 @@ trait TestConfiguration
     "json.encryption.key" -> "fqpLDZ4sumDsekHkeEBlCA==",
     "json.encryption.previousKeys" -> "[]",
     "play.http.router" -> "testOnlyDoNotUseInAppConf.Routes",
-    "microservice.services.home-page-url" -> "http://www.example.com/home",
+    "soft-drinks-industry-levy-account-frontend.host" -> "http://www.example.com",
     "creditForExportGuidance" -> "https://www.gov.uk/guidance/soft-drinks-industry-levy-credit-for-exported-lost-or-destroyed-drinks-notice-4",
     "howToPayGuidance" -> "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
   )

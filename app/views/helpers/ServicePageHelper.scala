@@ -98,6 +98,35 @@ object ServicePageHelper {
     )
   }
 
+  def finalReturnSentMessage(lastReturn: SdilReturn)
+                     (implicit messages: Messages): InsetText = {
+    val currentReturnPeriod = ReturnPeriod(LocalDate.now)
+    val lastPeriodStart = currentReturnPeriod.previous.start.format(monthFormatter)
+    val lastPeriodEnd = currentReturnPeriod.previous.end.format(monthYearFormatter)
+    val submittedTime = lastReturn.submittedOn.getOrElse(Instant.now).atZone(ZoneId.of("Europe/London")).format(timeFormatter).toLowerCase
+    val submittedDate = lastReturn.submittedOn.getOrElse(Instant.now).atZone(ZoneId.of("Europe/London")).format(dateFormatter)
+    InsetText(
+      id = Some("finalReturnCompleted"),
+      content = Text(
+        messages("finalReturnCompleted",
+          lastPeriodStart,
+          lastPeriodEnd,
+          submittedTime,
+          submittedDate
+        )
+      )
+    )
+  }
+
+  def finalReturnRequiredMessage(deRegDate: LocalDate)
+                             (implicit messages: Messages) = {
+
+    val deregReturnPeriod = ReturnPeriod(deRegDate)
+    val deregPeriodStart = deregReturnPeriod.previous.start.format(monthYearFormatter)
+    val deregPeriodEnd = deregReturnPeriod.previous.end.format(monthYearFormatter)
+    messages("finalReturnRequired.dereg.paragraph", deregPeriodStart, deregPeriodEnd)
+  }
+
   def payBy(periodsDue: List[ReturnPeriod])(implicit messages: Messages): String = {
     val payByDate = periodsDue.map(_.deadline).min(Ordering.fromLessThan[LocalDate]((a, b) => a.isBefore(b)))
     val formattedDate = payByDate.format(dateFormatter)
@@ -118,6 +147,28 @@ object ServicePageHelper {
     InsetText(
       id = Some("businessAddress"),
       content = HtmlContent(formattedAddress)
+    )
+  }
+
+  def getDeregisteredContent(deregDate: LocalDate)(implicit messages: Messages): String = {
+    val formattedDeregDate = deregDate.format(dateFormatter)
+    val formattedAccessToDate = deregDate.plusYears(7L).format(dateFormatter)
+    messages("servicePage.deregistered.content", formattedDeregDate, formattedAccessToDate)
+  }
+
+  def deregContentForPendingP1(deregDate: LocalDate)(implicit messages: Messages): String = {
+    val deregReturnPeriod = ReturnPeriod(deregDate)
+    val formattedDeregStart = deregReturnPeriod.start.format(dateFormatter)
+    val formattedDeregEnd = deregReturnPeriod.end.format(dateFormatter)
+    val deregReturnPeriodNext = deregReturnPeriod.next
+    val formattedDeregNextStart = deregReturnPeriodNext.start.format(dateFormatter)
+    val formattedDeregNextEnd = deregReturnPeriodNext.end.format(dateFormatter)
+
+    messages("servicePage.deregistered.pending.content.p1",
+      formattedDeregStart,
+      formattedDeregEnd,
+      formattedDeregNextStart,
+      formattedDeregNextEnd
     )
   }
 

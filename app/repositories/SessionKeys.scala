@@ -22,6 +22,7 @@ object SessionKeys {
 
   val SUBSCRIPTION = "SUBSCRIPTION"
   def pendingReturn(utr: String) = s"PENDING_RETURNS_UTR_$utr"
+  def variableReturn(utr: String) = s"VARIABLE_RETURNS_UTR_$utr"
   def previousSubmittedReturn(utr: String, returnPeriod: ReturnPeriod) = {
     val year = returnPeriod.year
     val quarter = returnPeriod.quarter

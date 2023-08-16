@@ -12,6 +12,7 @@ GET        /transaction-history                          controllers.Transaction
 
 GET        /start-a-return/nilReturn/:isNilReturn        controllers.ServicePageController.startAReturn(isNilReturn: Boolean)
 GET        /make-a-change                               controllers.ServicePageController.makeAChange
+GET        /correct-a-return                               controllers.ServicePageController.correctAReturn
 
 GET       /start-direct-debit-journey                    controllers.DirectDebitController.setup()
 

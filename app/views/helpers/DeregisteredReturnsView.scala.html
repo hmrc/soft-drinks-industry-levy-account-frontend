@@ -1,0 +1,73 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.helpers.ServicePageHelper._
+@import models._
+@import config.FrontendAppConfig
+@import views.html.helpers.NeedInReturnDetails
+@import java.time.LocalDate
+
+@this(govukWarningText : GovukWarningText,
+      govukInsetText : GovukInsetText,
+      needInReturnDetails: NeedInReturnDetails,
+      govukButton: GovukButton,
+      formHelper: FormWithCSRF)
+
+@(viewModel: DeregisteredUserServicePageViewModel)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
+
+@sendFinalReturn(deregDate: LocalDate) = {
+    <h2 class="govuk-heading-m" id="sendFinalReturn">@messages("servicePage.returns.dereg.heading")</h2>
+    <p class ="govuk-body" id="sendFinalReturnParagraph">@finalReturnRequiredMessage(deregDate)</p>
+    @needInReturnDetails()
+    @formHelper(action = routes.ServicePageController.startAReturn(false), Symbol("autoComplete") -> "off") {
+        @govukButton(
+            Button(
+                preventDoubleClick = Some(true),
+                content = Text(messages("returns.sendFinal")),
+                href = Some(routes.ServicePageController.startAReturn(false).url)
+            )
+        )
+    }
+    <p class="govuk-body">
+        <a class="govuk-link" id="startNilReturn" href="@routes.ServicePageController.startAReturn(true)">
+            @messages("returns.startNilReturn")
+        </a>
+    </p>
+}
+
+@finalReturnDueInFuture(lastReturn: SdilReturn) = {
+    @govukInsetText(noReturnsPendingMessage(lastReturn))
+}
+
+@finalReturnSent(lastReturn: SdilReturn) = {
+    @govukInsetText(finalReturnSentMessage(lastReturn))
+}
+
+@returnSectionWhenFinalReturnRequired = @{
+    viewModel.optLastReturn match {
+        case Some(lastReturn) => finalReturnDueInFuture(lastReturn)
+        case None => sendFinalReturn(viewModel.deregDate)
+    }
+}
+
+@if(viewModel.needsToSendFinalReturn) {
+    @returnSectionWhenFinalReturnRequired
+} else {
+    @viewModel.optLastReturn.map{ lastReturn =>
+        @finalReturnSent(lastReturn)
+    }
+}
+

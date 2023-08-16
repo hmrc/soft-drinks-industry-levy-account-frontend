@@ -55,6 +55,31 @@ trait ServicePageITHelper extends ControllerITTestHelper {
     validateNeedNelp(page)
   }
 
+  def validatePageDeregistered(body: String, hasVariableReturns: Boolean,
+                               sentFinalReturn: Boolean,
+                               optLastReturn: Option[SdilReturn],
+                                balance: BigDecimal) = {
+    val page = Jsoup.parse(body)
+    page.title must include(Messages("Your Soft Drinks Industry Levy account"))
+    page.getElementsByTag("h1").text() mustBe "Super Lemonade Plc Your Soft Drinks Industry Levy account"
+    validateNotificationBanner(page, sentFinalReturn)
+    optLastReturn match{
+      case Some(_) if sentFinalReturn =>
+        validateFinalAndLastReturnSentSection(page)
+      case Some(lastReturn) => page.getElementById("lastReturnInset").text() mustBe noReturnsPendingMessage(lastReturn)
+      case None if sentFinalReturn => page.toString mustNot include("Send final return")
+      case None => validateSendFinalReturnWhenOverdue(page)
+    }
+    validateAccountBalance(page, balance, sentFinalReturn)
+    if(hasVariableReturns) {
+      validateManageAccount(page, true)
+    } else {
+      page.getElementsByClass("govuk-heading-m").eachText() mustNot contain("Manage your account")
+    }
+    validateBusinessDetails(page)
+    validateNeedNelp(page)
+  }
+
   def validateSmallProducer(page: Document) = {
     val buttons = page.getElementsByClass("govuk-button")
     page.getElementsByClass("govuk-heading-m").eachText() mustNot contain("Returns")
@@ -68,6 +93,35 @@ trait ServicePageITHelper extends ControllerITTestHelper {
       " After changing your details, allow 15 days for your Soft Drinks Industry Levy account to be updated." +
       " You will also receive a new reference number."
     page.getElementById("voluntaryOnly").text() mustBe expectedText
+  }
+
+  def validateNotificationBanner(page: Document, sentFinalReturn: Boolean) = {
+    val notificationBanner = page.getElementsByClass("govuk-notification-banner").first()
+    val expectedHeading = if (sentFinalReturn) {
+      "This account is no longer registered with the Soft Drinks Industry Levy."
+    } else {
+      "Your request to cancel your registration is on hold."
+    }
+    val expectedContent = if (sentFinalReturn) {
+      val formattedDeregDate = deregDate.format(dateFormatter)
+      val formattedAccessToDate = deregDate.plusYears(7L).format(dateFormatter)
+      s"The registration was cancelled on the $formattedDeregDate. You will be able to access this account until $formattedAccessToDate."
+    } else {
+      val deregReturnPeriod = ReturnPeriod(deregDate)
+      val formattedDeregStart = deregReturnPeriod.start.format(dateFormatter)
+      val formattedDeregEnd = deregReturnPeriod.end.format(dateFormatter)
+      val deregReturnPeriodNext = deregReturnPeriod.next
+      val formattedDeregNextStart = deregReturnPeriodNext.start.format(dateFormatter)
+      val formattedDeregNextEnd = deregReturnPeriodNext.end.format(dateFormatter)
+      s"Before we can cancel your registration, you must send a final return for the current period," +
+        s" $formattedDeregStart to $formattedDeregEnd and make any outstanding payments." +
+        s" You will be able to send the final return from $formattedDeregNextStart until $formattedDeregNextEnd." +
+        s" You will be able to access your account for 7 years from when you send your final return." +
+        s" If you do not want to cancel your registration, call the Soft Drinks Industry Levy helpline on 0300 200 3700."
+    }
+
+    notificationBanner.getElementsByClass("govuk-notification-banner__heading").first().text() mustBe expectedHeading
+    notificationBanner.getElementsByClass("govuk-body").text() mustBe expectedContent
   }
 
   def validateReturnsSection(page: Document, pendingReturns: List[ReturnPeriod],
@@ -92,6 +146,25 @@ trait ServicePageITHelper extends ControllerITTestHelper {
       buttons.eachText() mustNot contain("Start a return")
 
     }
+  }
+
+  def validateSendFinalReturnWhenOverdue(page: Document) = {
+    val deregReturnPeriod = ReturnPeriod(deregDate)
+    val deregPeriodStart = deregReturnPeriod.previous.start.format(monthYearFormatter)
+    val deregPeriodEnd = deregReturnPeriod.previous.end.format(monthYearFormatter)
+    page.getElementById("sendFinalReturn").text() mustBe "Send final return"
+    page.getElementById("sendFinalReturnParagraph").text() mustBe s"You must send a return for $deregPeriodStart to $deregPeriodEnd before we can cancel your registration."
+    page.getElementsByClass("govuk-button").get(0).text() mustBe "Send a final return"
+  }
+
+  def validateFinalAndLastReturnSentSection(page: Document) = {
+      val currentReturnPeriod = ReturnPeriod(localDate)
+      val lastPeriodStart = currentReturnPeriod.previous.start.format(monthFormatter)
+      val lastPeriodEnd = currentReturnPeriod.previous.end.format(monthYearFormatter)
+      val submittedTime = submittedDateTime.format(timeFormatter).toLowerCase
+      val submittedDate = submittedDateTime.format(dateFormatter)
+      val expectedText = s"Your return for $lastPeriodStart to $lastPeriodEnd was submitted at $submittedTime on $submittedDate."
+      page.getElementById("finalReturnCompleted").text() mustBe expectedText
   }
   def validateAccountBalance(page: Document,
                              balance: BigDecimal,
@@ -141,15 +214,40 @@ trait ServicePageITHelper extends ControllerITTestHelper {
 
   }
 
-  def validateManageAccount(page: Document) = {
+def validateAccountBalance(page: Document,
+                           balance: BigDecimal,
+                           sentFinalReturn: Boolean) = {
+  page.getElementsByClass("govuk-heading-m").eachText() must contain("Account balance")
+  val expectedContent = if (balance < 0) {
+    "Your balance is £100.00."
+  } else if (balance > 0 && sentFinalReturn) {
+    "Your balance is £100.00 in credit. Call the Soft Drinks Industry Levy helpline to arrange repayment."
+  } else if (balance > 0) {
+    "You are £100.00 in credit. This account is closed."
+  } else {
+    "Your balance is £0. This account is closed."
+  }
+  page.getElementsByClass("govuk-body").text() must include(expectedContent)
+
+  val transHistoryLink = page.getElementById("viewTransactionHistory")
+  transHistoryLink.text() mustBe "View your transaction history"
+  transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
+
+}
+
+  def validateManageAccount(page: Document, isDeregistered: Boolean = false) = {
     page.getElementsByClass("govuk-heading-m").eachText() must contain("Manage your account")
-    page.getElementById("manageYourAccountChangesTellWhen").text() mustBe "You should tell HMRC when you:"
-    val listItems = page.getElementById("manageYourAccountChanges").getElementsByTag("li")
-    listItems.size() mustBe 4
-    listItems.eachText().get(0) mustBe "updated contact, address, packaging site or warehouse details"
-    listItems.eachText().get(1) mustBe "change the amount of liable drinks produced"
-    listItems.eachText().get(2) mustBe "cancel Soft Drinks Industry Levy registration"
-    listItems.eachText().get(3) mustBe "correct an error in a previous return"
+    if (isDeregistered) {
+      page.getElementsByClass("govuk-button govuk-button--secondary").text() mustBe "Correct an error in a previous return"
+    } else {
+      page.getElementById("manageYourAccountChangesTellWhen").text() mustBe "You should tell HMRC when you:"
+      val listItems = page.getElementById("manageYourAccountChanges").getElementsByTag("li")
+      listItems.size() mustBe 4
+      listItems.eachText().get(0) mustBe "updated contact, address, packaging site or warehouse details"
+      listItems.eachText().get(1) mustBe "change the amount of liable drinks produced"
+      listItems.eachText().get(2) mustBe "cancel Soft Drinks Industry Levy registration"
+      listItems.eachText().get(3) mustBe "correct an error in a previous return"
+    }
   }
 
   def validateBusinessDetails(page: Document) = {

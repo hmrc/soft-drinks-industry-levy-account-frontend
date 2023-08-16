@@ -22,7 +22,7 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import views.html.ServiceView
 
-class ServiceViewSpec extends ServiceViewHelper {
+class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
 
   val application = applicationBuilder().build()
   val view = application.injector.instanceOf[ServiceView]
@@ -38,19 +38,19 @@ class ServiceViewSpec extends ServiceViewHelper {
     val button = "govuk-button"
   }
 
-  val htmlNoReturn = view(servicePageViewModelWithNoReturnInfo)(request, messages(application), config)
+  val htmlNoReturn = view(registeredUserServicePageViewModelWithNoReturnInfo)(request, messages(application), config)
   val documentNoReturn = doc(htmlNoReturn)
 
-  val html1Return = view(servicePageViewModel1PendingReturns)(request, messages(application), config)
+  val html1Return = view(registeredUserServicePageViewModel1PendingReturns)(request, messages(application), config)
   val document1Return = doc(html1Return)
 
-  val html3Return = view(servicePageViewModel3PendingReturns)(request, messages(application), config)
+  val html3Return = view(registeredUserServicePageViewModel3PendingReturns)(request, messages(application), config)
   val document3Return = doc(html3Return)
 
-  val htmlWithLastReturn = view(servicePageViewModelWithLastReturn)(request, messages(application), config)
+  val htmlWithLastReturn = view(registeredUserServicePageViewModelWithLastReturn)(request, messages(application), config)
   val documentLastReturn = doc(htmlWithLastReturn)
 
-  val htmlForVolunaryRegistration = view(servicePageViewModelForVoluntaryRegistration)(request, messages(application), config)
+  val htmlForVolunaryRegistration = view(registeredUserServicePageViewModelForVoluntaryRegistration)(request, messages(application), config)
   val documentForVolunaryRegistration = doc(htmlForVolunaryRegistration)
 
   "View" - {
@@ -197,7 +197,7 @@ class ServiceViewSpec extends ServiceViewHelper {
       "when the users balance is negative, has no interest, has a DD setup and has a return pending" - {
         val balance = BigDecimal(-123.45)
         val interest = BigDecimal(0)
-        val viewModel = servicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
+        val viewModel = registeredUserServicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
         val html = view(viewModel)(request, messages(application), config)
         val document = doc(html)
 
@@ -246,7 +246,7 @@ class ServiceViewSpec extends ServiceViewHelper {
       "when the users balance is negative, has no interest, has no DD setup and has no returns pending" - {
         val balance = BigDecimal(-123.45)
         val interest = BigDecimal(0)
-        val viewModel = servicePageViewModel(List.empty, None, balance, interest, Some(false))
+        val viewModel = registeredUserServicePageViewModel(List.empty, None, balance, interest, Some(false))
         val html = view(viewModel)(request, messages(application), config)
         val document = doc(html)
         "that include the amount owed message not including interest" in {
@@ -293,7 +293,7 @@ class ServiceViewSpec extends ServiceViewHelper {
       "when the users balance and interest is negative, direct debit is disabled and has multiple returns pending" - {
         val balance = BigDecimal(-123.45)
         val interest = BigDecimal(-10)
-        val viewModel = servicePageViewModel(pendingReturns3, None, balance, interest, None)
+        val viewModel = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, None)
         val html = view(viewModel)(request, messages(application), config)
         val document = doc(html)
         "that include the amount owed message in bold not including interest" in {
@@ -338,7 +338,7 @@ class ServiceViewSpec extends ServiceViewHelper {
       "when the users balance is positive, has no interest, has a DD setup and has returns pending" - {
         val balance = BigDecimal(123.45)
         val interest = BigDecimal(0)
-        val viewModel = servicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
+        val viewModel = registeredUserServicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
         val html = view(viewModel)(request, messages(application), config)
         val document = doc(html)
         "that include the amount in credit in normal text" in {
@@ -381,7 +381,7 @@ class ServiceViewSpec extends ServiceViewHelper {
       "when the users balance is zero, has no interest, has a DD setup and has no returns pending" - {
         val balance = BigDecimal(0)
         val interest = BigDecimal(0)
-        val viewModel = servicePageViewModel(List.empty, None, balance, interest, Some(true))
+        val viewModel = registeredUserServicePageViewModel(List.empty, None, balance, interest, Some(true))
         val html = view(viewModel)(request, messages(application), config)
         val document = doc(html)
         "that include nothing owed message in normal text" in {

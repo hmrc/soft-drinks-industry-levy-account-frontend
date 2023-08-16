@@ -24,14 +24,29 @@
       govukButton: GovukButton,
       formHelper: FormWithCSRF)
 
-@(sdilRef: String, balance: BigDecimal, interest: BigDecimal, periodsDue: List[ReturnPeriod], optHasExistingDD: Option[Boolean])(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
+@(sdilRef: String, isDeregistered: Boolean, balance: BigDecimal, interest: BigDecimal = 0, periodsDue: List[ReturnPeriod] = List(), optHasExistingDD: Option[Boolean] = None, needsToSendFinalReturn: Boolean = false)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @balanceIsZero = {
     <p class ="govuk-body" id="balanceZero">@messages("balance.zero")</p>
+    @if(isDeregistered) {
+        <p class ="govuk-body" id="accountClosed">@messages("balance.accountClosed")</p>
+    }
 }
 
 @balanceInCredit = {
-    <p class ="govuk-body" id="balanceCredit">@messages("balance.inCredit", formatAbsPounds(balance))</p>
+    @if(isDeregistered && !needsToSendFinalReturn) {
+        <p class ="govuk-body" id="balanceCreditWithPendingDeregReturn">
+            @messages("balance.deregWithPendingReturn.inCredit", formatAbsPounds(balance))
+            <a href="@config.sdilContact" target="_blank">
+            @messages("servicePage.needHelp.call")</a>
+            @messages("balance.inCredit.arrangeRepayment")
+        </p>
+    } else {
+        <p class ="govuk-body" id="balanceCredit">@messages("balance.inCredit", formatAbsPounds(balance))</p>
+        @if(isDeregistered) {
+            <p class ="govuk-body" id="accountClosedInCredit">@messages("balance.accountClosed")</p>
+        }
+    }
 }
 
 @balanceNeedToPay = {
@@ -61,27 +76,30 @@
     @balanceNeedToPay
 }
 
-@optHasExistingDD.map { hasExistingDD =>
-    @manageDirectDebit(hasExistingDD)
-}
+@if(!isDeregistered) {
 
-@if(balance < 0) {
-    @govukInsetText(InsetText(
-        id = Some("otherPaymentOptions"),
-        content = HtmlContent(otherPaymentsContent(sdilRef))
-    ))
+    @optHasExistingDD.map { hasExistingDD =>
+        @manageDirectDebit(hasExistingDD)
+    }
 
-    <p class="govuk-body" id="delayInAccountUpdate">@messages("balance.delayInAccountUpdate")</p>
+    @if(balance < 0) {
+        @govukInsetText(InsetText(
+            id = Some("otherPaymentOptions"),
+            content = HtmlContent(otherPaymentsContent(sdilRef))
+        ))
 
-    @formHelper(action = routes.PaymentsController.setup(), Symbol("autoComplete") -> "off") {
-        @govukButton(
-            Button(
-                preventDoubleClick = Some(true),
-                content = Text(messages("site.payNow")),
-                href = Some(routes.PaymentsController.setup().url),
-                classes = "govuk-button--secondary"
+        <p class="govuk-body" id="delayInAccountUpdate">@messages("balance.delayInAccountUpdate")</p>
+
+        @formHelper(action = routes.PaymentsController.setup(), Symbol("autoComplete") -> "off") {
+            @govukButton(
+                Button(
+                    preventDoubleClick = Some(true),
+                    content = Text(messages("site.payNow")),
+                    href = Some(routes.PaymentsController.setup().url),
+                    classes = "govuk-button--secondary"
+                )
             )
-        )
+        }
     }
 }
 
@@ -90,6 +108,5 @@
       @messages("balance.viewTransactionHistory")
     </a>
 </p>
-
 
 

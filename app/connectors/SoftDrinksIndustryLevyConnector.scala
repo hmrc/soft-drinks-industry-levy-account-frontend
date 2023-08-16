@@ -76,6 +76,22 @@ class SoftDrinksIndustryLevyConnector @Inject()(
     }
   }
 
+  def returns_variable(internalId: String, utr: String)
+                     (implicit hc: HeaderCarrier): AccountResult[List[ReturnPeriod]] = EitherT {
+    sdilSessionCache.fetchEntry[List[ReturnPeriod]](internalId, SessionKeys.variableReturn(utr)).flatMap {
+      case Some(pendingReturns) => Future.successful(Right(pendingReturns))
+      case None =>
+        http.GET[List[ReturnPeriod]](s"$sdilUrl/returns/$utr/variable")
+          .flatMap { pendingReturns =>
+            sdilSessionCache.save[List[ReturnPeriod]](internalId, SessionKeys.variableReturn(utr), pendingReturns)
+              .map(_ => Right(pendingReturns))
+          }.recover {
+          case _ => genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][returns_variable] - unexpected response for $internalId")
+            Left(UnexpectedResponseFromSDIL)
+        }
+    }
+  }
+
   def returns_get(
                    utr: String,
                    period: ReturnPeriod,
