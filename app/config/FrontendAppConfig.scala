@@ -26,7 +26,7 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
   val host: String = configuration.getString("soft-drinks-industry-levy-account-frontend.host")
   val appName: String = configuration.getString("appName")
-  lazy val homePage: String = s"$host/soft-drinks-industry-levy-account-frontend/home"
+  lazy val homePage: String = configuration.getString("home-page-url")
 
   private val contactHost = configuration.getString("contact-frontend.host")
   private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"

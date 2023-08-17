@@ -17,7 +17,7 @@ class TestOnlyControllerISpec extends ControllerITTestHelper {
   val initialisePayPath = "/bta/sdil/journey/start"
   val journeyPayPath = "/simulate-pay-api-journey"
 
-  val homeUrl = "http://www.example.com/home"
+  val homeUrl = "http://www.example.com/soft-drinks-industry-levy-account-frontend/home"
 
   s"POST $initialiseDDPath" - {
     "should return OK with the url for direct debit journey" in {
