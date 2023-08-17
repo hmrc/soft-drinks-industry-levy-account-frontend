@@ -24,9 +24,9 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
-  val host: String = configuration.getString("soft-drinks-industry-levy-account-frontend.host")
+  val host: String = configuration.getString("microservice.services.soft-drinks-industry-levy-account-frontend.host")
   val appName: String = configuration.getString("appName")
-  lazy val homePage: String = configuration.getString("home-page-url")
+  lazy val homePage: String = configuration.getString("microservice.services.home-page-url")
 
   private val contactHost = configuration.getString("contact-frontend.host")
   private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"

@@ -35,6 +35,8 @@ trait TestConfiguration
 
   val wiremockHost: String = "localhost"
   val wiremockPort: Int = Port.randomAvailable
+  val homeUrl = "http://www.example.com/soft-drinks-industry-levy-account-frontend/home"
+
 
   val baseUrl = s"http://localhost:$port/soft-drinks-industry-levy-account-frontend"
   val testOnlyBaseUrl = s"http://localhost:$port/test-only"
@@ -95,7 +97,8 @@ trait TestConfiguration
     "play.http.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "soft-drinks-industry-levy-account-frontend.host" -> "http://www.example.com",
     "creditForExportGuidance" -> "https://www.gov.uk/guidance/soft-drinks-industry-levy-credit-for-exported-lost-or-destroyed-drinks-notice-4",
-    "howToPayGuidance" -> "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
+    "howToPayGuidance" -> "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5",
+    "microservice.services.home-page-url" -> s"$homeUrl"
   )
 
   override implicit lazy val app: Application = appBuilder().build()
