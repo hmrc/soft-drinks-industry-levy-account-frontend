@@ -30,13 +30,13 @@
         needHelpView: NeedHelpView
 )
 
-@(viewModel: ServicePageViewModel)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
+@(viewModel: RegisteredUserServicePageViewModel)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
     pageTitle = titleNoForm(messages("servicePage.title"))
 ) {
 
-    <h1 class="govuk-heading-m">@messages("servicePage.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("servicePage.heading")</h1>
 
     <p class="govuk-body" id="caption">@messages("servicePage.company",viewModel.sdilSubscription.orgName)</p>
 
@@ -48,7 +48,7 @@
         <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
     }
 
-    @accountBalance(viewModel.sdilSubscription.sdilRef, viewModel.balance, viewModel.interest, viewModel.overdueReturns, viewModel.optHasExistingDD)
+    @accountBalance(viewModel.sdilSubscription.sdilRef, false, viewModel.balance, viewModel.interest, viewModel.overdueReturns, viewModel.optHasExistingDD)
 
     <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 

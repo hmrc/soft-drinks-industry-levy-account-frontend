@@ -33,11 +33,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class SessionRepository @Inject()(
                                    mongoComponent: MongoComponent,
                                    appConfig: FrontendAppConfig)
-                                 (implicit ec: ExecutionContext)
+                                 (implicit ec: ExecutionContext, encryption: Encryption)
   extends PlayMongoRepository[DatedCacheMap](
     collectionName = "session-cache",
     mongoComponent = mongoComponent,
-    domainFormat   = DatedCacheMap.formats,
+    domainFormat   = DatedCacheMap.MongoFormats.formats,
     indexes        = Seq(
       IndexModel(
         Indexes.ascending("lastUpdated"),

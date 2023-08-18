@@ -12,6 +12,8 @@ site.signIn = Sign in
 site.govuk = GOV.UK
 site.payNow = Pay now
 site.tellAboutChange = Tell HMRC about a change
+site.correctReturn = Correct an error in a previous return
+site.registerAgain = Register again
 
 common.youCan = You can
 
@@ -79,6 +81,7 @@ servicePage.voluntaryOnly.link = update your registered details
 servicePage.voluntaryOnly.p3 = and send a return on time. After changing your details, allow 15 days for your Soft Drinks Industry Levy account to be updated. You will also receive a new reference number.
 
 servicePage.returns.heading = Returns
+servicePage.returns.dereg.heading = Send final return
 servicePage.returnsOverdue1.warning = The return for {0} from {1} to {2} is due by {3}.
 servicePage.returnsOverdue.warning = You have {0} overdue returns
 servicePage.accountBalance.heading = Account balance
@@ -86,6 +89,8 @@ servicePage.accountBalance.heading = Account balance
 overdueReturns.paragraph = You must send your {0} overdue returns in this order, oldest first:
 overdueReturn.bullet = {0} to {1}
 noOverdueReturns.paragraph = Your return for {0} to {1} was submitted at {2} on {3}. Your next return will be for {4} to {5}. You must submit this return and make any payments due by {6}.
+finalReturnRequired.dereg.paragraph = You must send a return for {0} to {1} before we can cancel your registration.
+finalReturnCompleted=Your return for {0} to {1} was submitted at {2} on {3}.
 returns.paragraph = You need to send a return to HMRC every quarter, even if you have nothing to report for the period.
 
 needInReturnDetails.details = What you will need to tell us in your return
@@ -102,6 +107,7 @@ needInReturnDetails.bullet6 = lost or destroyed
 needInReturnDetails.creditForExportGuidance.link = You must get and keep certain types of evidence to be able to claim a credit (opens in a new tab).
 
 returns.start = Start a return
+returns.sendFinal = Send a final return
 returns.startNilReturn = I have no activity to report for this quarter.
 
 balance.heading = Account balance
@@ -110,6 +116,9 @@ balance.inCredit = You are {0} in credit.
 balance.need-to-pay = Your balance is {0}.
 balance.need-to-pay.interest = Your balance is {0} including {1} of interest.
 balance.need-to-pay-by = You need to pay by {0}.
+balance.accountClosed = This account is closed.
+balance.deregWithPendingReturn.inCredit = Your balance is {0} in credit.
+balance.inCredit.arrangeRepayment = to arrange repayment.
 balance.delayInAccountUpdate = Your account balance may not reflect payments made in the last 3 days.
 balance.viewTransactionHistory = View your transaction history
 
@@ -122,6 +131,8 @@ directDebit.manage.setup.subHeader = Pay by Direct Debit
 directDebit.manage.setup.link = set up a Direct Debit
 directDebit.manage.setup.p1 = to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date.
 
+servicePage.changeBusinessActivity.heading = Changed your business activity?
+servicePage.changeBusinessActivity.p1 = If you become liable to register for the Soft Drinks Industry Levy, you must register again.
 servicePage.manageYourAccount.heading = Manage your account
 servicePage.manageYourAccount.tellWhen = You should tell HMRC when you:
 servicePage.manageYourAccount.contactDetails = updated contact, address, packaging site or warehouse details
@@ -136,6 +147,8 @@ servicePage.needHelp.heading = Need help
 servicePage.needHelp.sdilGuidance = SDIL guidance (opens in a new tab)
 servicePage.needHelp.sdilRegulations = The Soft Drinks Industry Levy Regulations 2018 (opens in a new tab)
 servicePage.needHelp.sdilContact = Contact HMRC about your SDIL (opens in a new tab)
+servicePage.needHelp.call = Call the Soft Drinks Industry Levy helpline
+
 
 transactionHistory.contents = Contents
 transactionHistory.title = Transaction history
@@ -156,3 +169,10 @@ transactionHistory.transaction.officerAssessment=Officers Assessment
 transactionHistory.transaction.officerAsstInterest=Interest on Officers Assessment
 transactionHistory.transaction.paymentOnAccount=Payment on account
 transactionHistory.accountPage.link = You can go to your Soft Drinks Industry Levy account
+
+servicePage.deregistered.subHeader = This account is no longer registered with the Soft Drinks Industry Levy.
+servicePage.deregistered.content = The registration was cancelled on the {0}. You will be able to access this account until {1}.
+servicePage.deregistered.pending.subHeader = Your request to cancel your registration is on hold.
+servicePage.deregistered.pending.content.p1 = Before we can cancel your registration, you must send a final return for the current period, {0} to {1} and make any outstanding payments. You will be able to send the final return from {2} until {3}.
+servicePage.deregistered.pending.content.p2 = You will be able to access your account for 7 years from when you send your final return.
+servicePage.deregistered.pending.content.p3 = If you do not want to cancel your registration, call the Soft Drinks Industry Levy helpline on {0}.

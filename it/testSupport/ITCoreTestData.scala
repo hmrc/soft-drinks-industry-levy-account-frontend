@@ -11,6 +11,9 @@ object ITCoreTestData extends TryValues {
   val UTR = "0000001611"
   val SDIL_REF = "XKSDIL000000022"
 
+  val deregDate = localDate.minusWeeks(2)
+
+
   val aSubscription = RetrievedSubscription(
     utr = UTR,
     sdilRef = SDIL_REF,
@@ -50,13 +53,14 @@ object ITCoreTestData extends TryValues {
     deregDate = None
   )
 
+
   val submittedDateTime = LocalDateTime.of(2023, 1, 1, 11, 0)
 
   val emptyReturn = SdilReturn((0, 0), (0, 0), List.empty, (0, 0), (0, 0), (0, 0), (0, 0), submittedOn = Some(submittedDateTime.toInstant(ZoneOffset.UTC)))
 
 
   val aSubscriptionWithDeRegDate = aSubscription.copy(
-    deregDate = Some(LocalDate.of(2022, 2, 11)))
+    deregDate = Some(deregDate))
 
   val aSmallProducerSubscription = {
     val activity = aSubscription.activity.copy(voluntaryRegistration = true)

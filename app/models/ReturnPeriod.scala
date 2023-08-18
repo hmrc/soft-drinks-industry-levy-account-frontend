@@ -23,22 +23,41 @@ import java.time.LocalDate
 case class ReturnPeriod(year: Int, quarter: Int) {
   require(quarter <= 3 && quarter >= 0)
   require(year >= 2018)
-  def start: LocalDate = LocalDate.of(year, quarter * 3 + 1, if (count == 0) 5 else 1)
+  def start: LocalDate = {
+    val dayOfWeek = if (year == 2018 && quarter == 1) {
+      5
+    } else {
+      1
+    }
+    LocalDate.of(year, quarter * 3 + 1, dayOfWeek)
+  }
+
   def end: LocalDate = next.start.minusDays(1)
+
   def deadline: LocalDate = end.plusDays(30)
-  def next: ReturnPeriod = ReturnPeriod(count + 1)
-  def previous: ReturnPeriod = ReturnPeriod(count - 1)
-  def count: Int = year * 4 + quarter - 2018 * 4 - 1
+
+  def next: ReturnPeriod = {
+    val nextReturnQuarter = (quarter + 1) % 4
+    val nextReturnYear = if (nextReturnQuarter < quarter) {
+      year + 1
+    } else {
+      year
+    }
+    ReturnPeriod(nextReturnYear, nextReturnQuarter)
+  }
+
+  def previous: ReturnPeriod = {
+    if (quarter == 0) {
+      ReturnPeriod((year - 1), 3)
+    } else {
+      ReturnPeriod(year, (quarter - 1))
+    }
+  }
 }
 
 object ReturnPeriod {
 
   implicit val format = Json.format[ReturnPeriod]
-  def apply(o: Int): ReturnPeriod = {
-    val i = o + 1
-    ReturnPeriod(2018 + i / 4, i % 4)
-  }
-
   def apply(date: LocalDate): ReturnPeriod = ReturnPeriod(date.getYear, quarter(date))
 
   def quarter(date: LocalDate): Int = {

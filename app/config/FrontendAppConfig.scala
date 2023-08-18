@@ -24,14 +24,11 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
-  val host: String = configuration.getConfString("soft-drinks-industry-levy-account-frontend.host",
-    throw new Exception("missing config soft-drinks-industry-levy-account-frontend.host"))
+  val host: String = configuration.getString("microservice.services.soft-drinks-industry-levy-account-frontend.host")
   val appName: String = configuration.getString("appName")
-  lazy val homePage: String = configuration.getConfString("home-page-url",
-    throw new Exception("missing config home-page-url"))
+  lazy val homePage: String = configuration.getString("microservice.services.home-page-url")
 
-  private val contactHost = configuration.getConfString("contact-frontend.host",
-    throw new Exception("missing config contact-frontend.host"))
+  private val contactHost = configuration.getString("contact-frontend.host")
   private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"
   val returnsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-returns-frontend")
   val registrationBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-registration-frontend")
@@ -43,6 +40,7 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   }
 
   val makeAChangeUrl = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/select-change"
+  val correctAReturnUrl = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/correct-return/select"
 
   val startRegistrationUrl: String = {
     s"$registrationBaseUrl/soft-drinks-industry-levy-registration/start"
@@ -86,6 +84,7 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val sdilContact = configuration.getString("sdilContact")
   val creditForExportGuidance = configuration.getString("creditForExportGuidance")
   val howToPayGuidance = configuration.getString("howToPayGuidance")
+  val sdilContactNumber = configuration.getString("sdilContactNumber")
 
 }
 

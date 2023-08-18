@@ -23,6 +23,7 @@ import java.time.{LocalDate, LocalDateTime, ZoneOffset}
 object TestData {
 
   val localDate = LocalDate.now
+  val deregDate = localDate.minusWeeks(2)
 
   val currentReturnPeriod = ReturnPeriod(localDate)
   val pendingReturn1 = currentReturnPeriod.previous
@@ -64,16 +65,18 @@ object TestData {
     deregDate = None
   )
 
+  val deregSubscription = aSubscription.copy(deregDate = Some(deregDate))
+
   val submittedDateTime = LocalDateTime.of(2023, 1, 1, 11, 0)
 
   val emptyReturn = SdilReturn((0, 0), (0, 0), List.empty, (0, 0), (0, 0), (0, 0), (0, 0), submittedOn = Some(submittedDateTime.toInstant(ZoneOffset.UTC)))
 
-  def servicePageViewModel(pendingReturns: List[ReturnPeriod],
-                           optLastReturn: Option[SdilReturn],
-                           balance: BigDecimal,
-                           interest: BigDecimal,
-                           optHasDD: Option[Boolean]) =
-    ServicePageViewModel(
+  def registeredUserServicePageViewModel(pendingReturns: List[ReturnPeriod],
+                                         optLastReturn: Option[SdilReturn],
+                                         balance: BigDecimal,
+                                         interest: BigDecimal,
+                                         optHasDD: Option[Boolean]) =
+    RegisteredUserServicePageViewModel(
       pendingReturns,
       aSubscription,
       optLastReturn,
@@ -82,33 +85,47 @@ object TestData {
       optHasDD
   )
 
-  val servicePageViewModel3PendingReturns = ServicePageViewModel(
+  val registeredUserServicePageViewModel3PendingReturns = RegisteredUserServicePageViewModel(
     pendingReturns3,
     aSubscription,
     None
   )
 
-  val servicePageViewModel1PendingReturns = ServicePageViewModel(
+  val registeredUserServicePageViewModel1PendingReturns = RegisteredUserServicePageViewModel(
     pendingReturns1,
     aSubscription,
     None
   )
 
-  val servicePageViewModelWithLastReturn = ServicePageViewModel(
+  val registeredUserServicePageViewModelWithLastReturn = RegisteredUserServicePageViewModel(
     List.empty,
     aSubscription,
     Some(emptyReturn)
   )
 
-  val servicePageViewModelWithNoReturnInfo = ServicePageViewModel(
+  val registeredUserServicePageViewModelWithNoReturnInfo = RegisteredUserServicePageViewModel(
     List.empty,
     aSubscription,
     None
   )
 
+  def generateDeregUserServicePageModel(hasVariableReturns: Boolean,
+                                        needsToSendFinalReturn: Boolean,
+                                        hasSentLastReturn: Boolean,
+                                        balance: BigDecimal): DeregisteredUserServicePageViewModel = {
+    DeregisteredUserServicePageViewModel(
+      deregSubscription,
+      deregDate,
+      hasVariableReturns,
+      if(hasSentLastReturn) {Some(emptyReturn)} else {None},
+      balance,
+      needsToSendFinalReturn
+    )
+  }
+
   val activityWithVoluntaryRegistration = aSubscription.activity.copy(voluntaryRegistration = true)
   val subscription = aSubscription.copy(activity = activityWithVoluntaryRegistration)
-  val servicePageViewModelForVoluntaryRegistration = servicePageViewModel1PendingReturns.copy(sdilSubscription = subscription)
+  val registeredUserServicePageViewModelForVoluntaryRegistration = registeredUserServicePageViewModel1PendingReturns.copy(sdilSubscription = subscription)
 
   val finincialItemReturnCharge = ReturnCharge(currentReturnPeriod, BigDecimal(123.45))
   val finincialItemReturnChargeInterest = ReturnChargeInterest(localDate, BigDecimal(12.45))

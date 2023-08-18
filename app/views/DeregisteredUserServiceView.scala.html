@@ -1,0 +1,81 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.helpers.ServicePageHelper._
+@import models._
+@import config.FrontendAppConfig
+@import views.html.helpers.ReturnsView
+@import views.html.helpers._
+
+@this(
+        layout: templates.Layout,
+        deregisteredNotification: DeregisteredNotificationView,
+        deregisteredReturns: DeregisteredReturnsView,
+        changeBusinessActivity: ChangeBusinessActivityView,
+        govukInsetText : GovukInsetText,
+        accountBalance: AccountBalanceView,
+        businessDetails: BusinessDetailsView,
+        needHelpView: NeedHelpView,
+        govukButton: GovukButton,
+        formHelper: FormWithCSRF
+        )
+
+@(viewModel: DeregisteredUserServicePageViewModel)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
+
+@layout(
+    pageTitle = titleNoForm(messages("servicePage.title"))
+) {
+    <h1 class="govuk-heading-l">
+        <span class="govuk-caption-m" id="pre-header-caption">@viewModel.sdilSubscription.orgName</span>
+        @messages("servicePage.heading")
+    </h1>
+
+    @deregisteredNotification(viewModel)
+
+    @deregisteredReturns(viewModel)
+
+    @if(!viewModel.needsToSendFinalReturn) {
+        <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+        @changeBusinessActivity()
+    }
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+    @accountBalance(viewModel.sdilSubscription.sdilRef, true, viewModel.balance, needsToSendFinalReturn = viewModel.needsToSendFinalReturn)
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+    @if(viewModel.hasVariableReturns) {
+        <h2 class="govuk-heading-m" id="manageYourAccount">@messages("servicePage.manageYourAccount.heading")</h2>
+        @formHelper(action = routes.ServicePageController.makeAChange, Symbol("autoComplete") -> "off") {
+            @govukButton(
+                Button(
+                preventDoubleClick = Some(true),
+                content = Text(messages("site.correctReturn")),
+                href = Some(routes.ServicePageController.correctAReturn.url),
+                classes = "govuk-button--secondary"
+                )
+            )
+        }
+
+        <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+    }
+
+    @businessDetails(viewModel.sdilSubscription)
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+    @needHelpView()
+
+}

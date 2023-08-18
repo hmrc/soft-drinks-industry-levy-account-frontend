@@ -102,6 +102,24 @@ case class SdilBackendStub()
     builder
   }
 
+  def retrieveVariableReturns(utr: String, variableReturns: List[ReturnPeriod]) = {
+    stubFor(
+      get(
+        urlPathEqualTo(s"/returns/$utr/variable"))
+        .willReturn(
+          ok(Json.toJson(variableReturns).toString())))
+    builder
+  }
+
+  def retrieveVariableReturnsError(utr: String) = {
+    stubFor(
+      get(
+        urlPathEqualTo(s"/returns/$utr/variable"))
+        .willReturn(
+          serverError()))
+    builder
+  }
+
   def retrieveReturn(utr: String, period: ReturnPeriod, resp: Option[SdilReturn]) = {
     val uri = s"/returns/$utr/year/${period.year}/quarter/${period.quarter}"
     val response = resp match {

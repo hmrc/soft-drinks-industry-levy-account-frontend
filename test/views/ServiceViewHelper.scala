@@ -17,8 +17,8 @@
 package views
 
 import base.TestData._
-import models.{ReturnPeriod, SdilReturn}
-import org.jsoup.nodes.{Document, Element}
+import models.SdilReturn
+import org.jsoup.nodes.Element
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneId}
@@ -30,22 +30,19 @@ trait ServiceViewHelper extends ViewSpecHelper {
   lazy val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
   lazy val timeFormatter = DateTimeFormatter.ofPattern("h:mma")
 
-  def warningMessageForPendingReturns(pendingReturns: List[ReturnPeriod]): String = {
-    if(pendingReturns.size == 1) {
-      val pendingReturn = pendingReturns.head
-      val startMonth = pendingReturn.start.format(monthFormatter)
-      val endDate = pendingReturn.end.format(monthYearFormatter)
-      val deadline = pendingReturn.deadline.format(dateFormatter)
-      s"! Warning The return for Super Lemonade Plc from $startMonth to $endDate is due by $deadline."
-    } else {
-      s"! Warning You have ${pendingReturns.size} overdue returns"
-    }
-  }
+  def noReturnsPendingMessage(lastReturn: SdilReturn): String = {
+    val submittedOn = lastReturn.submittedOn.getOrElse(Instant.now).atZone(ZoneId.of("Europe/London"))
+    val lastPeriodStart = pendingReturn1.start.format(monthFormatter)
+    val lastPeriodEnd = pendingReturn1.end.format(monthYearFormatter)
+    val submittedTime = submittedOn.format(timeFormatter).toLowerCase
+    val submittedDate = submittedOn.format(dateFormatter)
+    val currentPeriodStart = currentReturnPeriod.start.format(monthFormatter)
+    val currentPeriodEnd = currentReturnPeriod.end.format(monthYearFormatter)
+    val nextReturnDueDate = currentReturnPeriod.deadline.format(dateFormatter)
 
-  def overdueBulletMessage(returnPeriod: ReturnPeriod): String = {
-    val startMonth = returnPeriod.start.format(monthFormatter)
-    val endDate = returnPeriod.end.format(monthYearFormatter)
-    s"$startMonth to $endDate"
+    s"Your return for $lastPeriodStart to $lastPeriodEnd was submitted at $submittedTime on $submittedDate." +
+      s" Your next return will be for $currentPeriodStart to $currentPeriodEnd." +
+      s" You must submit this return and make any payments due by $nextReturnDueDate."
   }
 
   def testReturnDetailsSection(element: Element) = {
@@ -97,35 +94,6 @@ trait ServiceViewHelper extends ViewSpecHelper {
     }
   }
 
-  def getExpectedBalanceMessage(page: Document, balance: BigDecimal, interest: BigDecimal): String = {
-    val formattedBalance = f"£${balance.abs}%,.2f"
-    val formattedInterest = f"£${interest.abs}%,.2f"
-    if (balance == 0) {
-      "Your balance is £0."
-    } else if(balance > 0) {
-      s"You are ${formattedBalance} in credit."
-    } else {
-      if (interest < 0) {
-        s"Your balance is ${formattedBalance} including ${formattedInterest} of interest."
-      } else {
-        s"Your balance is ${formattedBalance}."
-      }
-    }
-  }
 
-  def noReturnsPendingMessage(lastReturn: SdilReturn): String = {
-    val submittedOn = lastReturn.submittedOn.getOrElse(Instant.now).atZone(ZoneId.of("Europe/London"))
-    val lastPeriodStart = pendingReturn1.start.format(monthFormatter)
-    val lastPeriodEnd = pendingReturn1.end.format(monthYearFormatter)
-    val submittedTime = submittedOn.format(timeFormatter).toLowerCase
-    val submittedDate = submittedOn.format(dateFormatter)
-    val currentPeriodStart = currentReturnPeriod.start.format(monthFormatter)
-    val currentPeriodEnd = currentReturnPeriod.end.format(monthYearFormatter)
-    val nextReturnDueDate = currentReturnPeriod.deadline.format(dateFormatter)
-
-    s"Your return for $lastPeriodStart to $lastPeriodEnd was submitted at $submittedTime on $submittedDate." +
-      s" Your next return will be for $currentPeriodStart to $currentPeriodEnd." +
-      s" You must submit this return and make any payments due by $nextReturnDueDate."
-  }
 
 }

@@ -1,5 +1,6 @@
 package controllers
 
+import models.ReturnPeriod
 import org.jsoup.Jsoup
 import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
 import play.api.http.HeaderNames
@@ -13,9 +14,10 @@ class ServicePageControllerISpec extends ServicePageITHelper {
   val startAReturnPath = "/start-a-return/nilReturn/false"
   val startANilReturnPath = "/start-a-return/nilReturn/true"
   val makeAChangePath = "/make-a-change"
+  val correctAReturnPath = "/correct-a-return"
 
   s"GET $servicePagePath" - {
-    "when the user is authenticated and has a subscription" - {
+    "when the user is authenticated, registered and has a subscription" - {
       "should render the service page" - {
         "that includes a returns section and account balance section" - {
           "with a list of pending returns, and an amount to pay message" - {
@@ -143,9 +145,275 @@ class ServicePageControllerISpec extends ServicePageITHelper {
         }
       }
     }
+
+    "when the user is authenticated but deregistered" - {
+      "should render the deregistered service page that includes the business details, how to get help" - {
+        "a notification banner stating the user is no longer registered," - {
+          "no returns section, a register again section," - {
+            "a correct error in previous return section, and a manage account section that has nothing owed" - {
+              "when the user has submitted their final return, has no last return, has variable returns and a balance of 0" in {
+                given
+                  .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                  .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
+                  .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+                  .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), Some(emptyReturn))
+                  .sdilBackend.balance(SDIL_REF, true, 0)
+
+                WsTestClient.withClient { client =>
+                  val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                  whenReady(result1) { res =>
+                    res.status mustBe 200
+                    validatePageDeregistered(res.body, true, true, None, 0)
+                  }
+                }
+              }
+            }
+            "no correct error in previous return section, and a manage account section that has shows account in credit" - {
+              "when the user has submitted their final return, has no last return, has no variable returns and a balance of 100" in {
+                given
+                  .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                  .sdilBackend.retrieveVariableReturns(UTR, List())
+                  .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+                  .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), Some(emptyReturn))
+                  .sdilBackend.balance(SDIL_REF, true, 100)
+
+                WsTestClient.withClient { client =>
+                  val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                  whenReady(result1) { res =>
+                    res.status mustBe 200
+                    validatePageDeregistered(res.body, false, true, None, 100)
+                  }
+                }
+              }
+            }
+          }
+
+          "has message about the last return sent, a register again section," - {
+            "a correct error in previous return section, and a manage account section that states they owe money" - {
+              "when the user has submitted their final return, has last return, has variable returns and a balance of -100" in {
+                given
+                  .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                  .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
+                  .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+                  .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), Some(emptyReturn))
+                  .sdilBackend.balance(SDIL_REF, true, -100)
+
+                WsTestClient.withClient { client =>
+                  val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                  whenReady(result1) { res =>
+                    res.status mustBe 200
+                    validatePageDeregistered(res.body, true, true, Some(emptyReturn), -100)
+                  }
+                }
+              }
+            }
+            "no correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
+              "when the user has submitted their final return, has last return, has no variable returns and a balance of 0" in {
+                given
+                  .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                  .sdilBackend.retrieveVariableReturns(UTR, List())
+                  .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+                  .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), Some(emptyReturn))
+                  .sdilBackend.balance(SDIL_REF, true, 0)
+
+                WsTestClient.withClient { client =>
+                  val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                  whenReady(result1) { res =>
+                    res.status mustBe 200
+                    validatePageDeregistered(res.body, false, true, Some(emptyReturn), 0)
+                  }
+                }
+              }
+            }
+          }
+
+          "a notification banner stating the final return needs to be sent to cancel" - {
+            "has message about the last return sent with the deadline for the final return, a register again section," - {
+              "a correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
+                "when the user has not submitted their final return, has last return, has variable returns and a balance of 0" in {
+                  given
+                    .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                    .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
+                    .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+                    .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), None)
+                    .sdilBackend.balance(SDIL_REF, true, 0)
+
+                  WsTestClient.withClient { client =>
+                    val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                    whenReady(result1) { res =>
+                      res.status mustBe 200
+                      validatePageDeregistered(res.body, true, false, Some(emptyReturn), 0)
+                    }
+                  }
+                }
+              }
+              "no correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
+                "when the user has not submitted their final return, has last return, has no variable returns and a balance of 0" in {
+                  given
+                    .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                    .sdilBackend.retrieveVariableReturns(UTR, List())
+                    .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+                    .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), None)
+                    .sdilBackend.balance(SDIL_REF, true, 0)
+
+                  WsTestClient.withClient { client =>
+                    val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                    whenReady(result1) { res =>
+                      res.status mustBe 200
+                      validatePageDeregistered(res.body, false, false, Some(emptyReturn), 0)
+                    }
+                  }
+                }
+              }
+            }
+
+            "has a section to send final return, no register again section," - {
+              "a correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
+                "when the user has not submitted their final return, has no last return, has variable returns and a balance of 0" in {
+                  given
+                    .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                    .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
+                    .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+                    .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), None)
+                    .sdilBackend.balance(SDIL_REF, true, 0)
+
+                  WsTestClient.withClient { client =>
+                    val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                    whenReady(result1) { res =>
+                      res.status mustBe 200
+                      validatePageDeregistered(res.body, true, false, None, 0)
+                    }
+                  }
+                }
+              }
+              "no correct error in previous return section, and a manage account section that has shows account in credit" - {
+                "when the user has not submitted their final return, has no last return, has no variable returns and a balance of 100" in {
+                  given
+                    .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+                    .sdilBackend.retrieveVariableReturns(UTR, List())
+                    .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+                    .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), None)
+                    .sdilBackend.balance(SDIL_REF, true, 100)
+
+                  WsTestClient.withClient { client =>
+                    val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+                    whenReady(result1) { res =>
+                      res.status mustBe 200
+                      validatePageDeregistered(res.body, false, false, None, 100)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     testUnauthorisedUser(baseUrl + servicePagePath)
 
     "render the error page" - {
+      "for a deregistered user" - {
+        "when the backend call to get variable enrolments fails" in {
+          given
+            .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+            .sdilBackend.retrieveVariableReturnsError(UTR)
+            .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+            .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), None)
+            .sdilBackend.balance(SDIL_REF, true, 100)
+
+          WsTestClient.withClient { client =>
+            val result1 = createClientRequestGet(client, baseUrl + startANilReturnPath)
+
+            whenReady(result1) { res =>
+              res.status mustBe 500
+              val page = Jsoup.parse(res.body)
+              page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+            }
+          }
+        }
+
+        "when the backend call to get last return fails" in {
+          given
+            .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+            .sdilBackend.retrieveVariableReturns(UTR, List())
+            .sdilBackend.retrieveReturnError(UTR, currentReturnPeriod.previous)
+            .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), None)
+            .sdilBackend.balance(SDIL_REF, true, 100)
+
+          WsTestClient.withClient { client =>
+            val result1 = createClientRequestGet(client, baseUrl + startANilReturnPath)
+
+            whenReady(result1) { res =>
+              res.status mustBe 500
+              val page = Jsoup.parse(res.body)
+              page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+            }
+          }
+        }
+        "when the backend call to get final return fails" in {
+          given
+            .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+            .sdilBackend.retrieveVariableReturns(UTR, List())
+            .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+            .sdilBackend.retrieveReturnError(UTR, ReturnPeriod(deregDate))
+            .sdilBackend.balance(SDIL_REF, true, 100)
+
+          WsTestClient.withClient { client =>
+            val result1 = createClientRequestGet(client, baseUrl + startANilReturnPath)
+
+            whenReady(result1) { res =>
+              res.status mustBe 500
+              val page = Jsoup.parse(res.body)
+              page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+            }
+          }
+        }
+
+        "when the backend call to get balance fails" in {
+          given
+            .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+            .sdilBackend.retrieveVariableReturns(UTR, List())
+            .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
+            .sdilBackend.retrieveReturn(UTR, ReturnPeriod(deregDate), None)
+            .sdilBackend.balancefailure(SDIL_REF, true)
+
+          WsTestClient.withClient { client =>
+            val result1 = createClientRequestGet(client, baseUrl + startANilReturnPath)
+
+            whenReady(result1) { res =>
+              res.status mustBe 500
+              val page = Jsoup.parse(res.body)
+              page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+            }
+          }
+        }
+        "when all the backend calls fail" in {
+          given
+            .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+            .sdilBackend.retrieveVariableReturnsError(UTR)
+            .sdilBackend.retrieveReturnError(UTR, currentReturnPeriod.previous)
+            .sdilBackend.retrieveReturnError(UTR, ReturnPeriod(deregDate))
+            .sdilBackend.balancefailure(SDIL_REF, true)
+
+          WsTestClient.withClient { client =>
+            val result1 = createClientRequestGet(client, baseUrl + startANilReturnPath)
+
+            whenReady(result1) { res =>
+              res.status mustBe 500
+              val page = Jsoup.parse(res.body)
+              page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+            }
+          }
+        }
+      }
       "when the backend call to get pending enrolments fails" in {
         given
           .commonPrecondition
@@ -430,6 +698,58 @@ class ServicePageControllerISpec extends ServicePageITHelper {
 
         WsTestClient.withClient { client =>
           val result1 = createClientRequestGet(client, baseUrl + makeAChangePath)
+
+          whenReady(result1) { res =>
+            res.status mustBe 500
+            val page = Jsoup.parse(res.body)
+            page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+          }
+        }
+      }
+    }
+  }
+
+  s"GET $correctAReturnPath" - {
+    "when the user is authenticated and has a subscription" - {
+      "should redirect to sdilVariations" in {
+        given
+          .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
+
+        WsTestClient.withClient { client =>
+          val result1 = createClientRequestGet(client, baseUrl + correctAReturnPath)
+
+          whenReady(result1) { res =>
+            res.status mustBe 303
+            res.header(HeaderNames.LOCATION).get must include(
+              s"/soft-drinks-industry-levy-variations-frontend/correct-return/select")
+          }
+        }
+      }
+    }
+    "render the error page" - {
+      "when the backend call to get sdilSubscription fails with UTR" in {
+        given
+          .user.isAuthorisedAndEnrolled
+          .sdilBackend.retrieveSubscriptionError("utr", UTR)
+
+        WsTestClient.withClient { client =>
+          val result1 = createClientRequestGet(client, baseUrl + correctAReturnPath)
+
+          whenReady(result1) { res =>
+            res.status mustBe 500
+            val page = Jsoup.parse(res.body)
+            page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+          }
+        }
+      }
+
+      "when the backend call to get sdilSubscription fails with SDIL_REF" in {
+        given
+          .user.isAuthorisedAndEnrolledSDILRef
+          .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
+
+        WsTestClient.withClient { client =>
+          val result1 = createClientRequestGet(client, baseUrl + correctAReturnPath)
 
           whenReady(result1) { res =>
             res.status mustBe 500
