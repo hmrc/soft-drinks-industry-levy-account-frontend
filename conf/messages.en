@@ -132,9 +132,9 @@ servicePage.businessDetails.heading = Business details
 servicePage.businessDetails.detailsForUTR = These are the details we hold for Unique Taxpayer Reference (UTR)
 
 servicePage.needHelp.heading = Need help
-servicePage.needHelp.sdilGuidance = SDIL guidance (opens in a new tab)
+servicePage.needHelp.sdilGuidance = Soft Drinks Industry Levy guidance (opens in a new tab)
 servicePage.needHelp.sdilRegulations = The Soft Drinks Industry Levy Regulations 2018 (opens in a new tab)
-servicePage.needHelp.sdilContact = Contact HMRC about your SDIL (opens in a new tab)
+servicePage.needHelp.sdilContact = Contact HMRC about your Soft Drinks Industry Levy (opens in a new tab)
 
 transactionHistory.contents = Contents
 transactionHistory.title = Transaction history
