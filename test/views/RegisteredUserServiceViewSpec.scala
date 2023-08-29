@@ -483,7 +483,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
 
       "that has a link to sdil contact" in {
         val link = document1Return.getElementById("sdilContact")
-        link.text() mustBe "Contact HMRC about your cccc (opens in a new tab)"
+        link.text() mustBe "Contact HMRC about your Soft Drinks Industry Levy (opens in a new tab)"
         link.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/soft-drinks-industry-levy"
       }
     }
