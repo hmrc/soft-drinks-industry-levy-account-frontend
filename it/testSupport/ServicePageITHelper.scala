@@ -262,13 +262,13 @@ def validateAccountBalance(page: Document,
   def validateNeedNelp(page: Document) = {
     page.getElementsByClass("govuk-heading-m").eachText() must contain("Need help")
     val link1 = page.getElementById("sdilGuidance")
-    link1.text() mustBe "SDIL guidance (opens in a new tab)"
+    link1.text() mustBe "Soft Drinks Industry Levy guidance (opens in a new tab)"
     link1.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/topic/business-tax/soft-drinks-industry-levy"
     val link2 = page.getElementById("sdilRegulations")
     link2.text() mustBe "The Soft Drinks Industry Levy Regulations 2018 (opens in a new tab)"
     link2.getElementsByTag("a").attr("href") mustBe "https://www.legislation.gov.uk/uksi/2018/41/made"
     val link3 = page.getElementById("sdilContact")
-    link3.text() mustBe "Contact HMRC about your SDIL (opens in a new tab)"
+    link3.text() mustBe "Contact HMRC about your Soft Drinks Industry Levy (opens in a new tab)"
     link3.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/soft-drinks-industry-levy"
   }
 

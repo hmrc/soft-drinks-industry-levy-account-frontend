@@ -171,7 +171,7 @@ class DeregisteredUserServiceViewSpec extends DeregisteredUserServiceViewHelper 
 
                 "that has a link to sdil guidance" in {
                   val link = document.getElementById("sdilGuidance")
-                  link.text() mustBe "SDIL guidance (opens in a new tab)"
+                  link.text() mustBe "Soft Drinks Industry Levy guidance (opens in a new tab)"
                   link.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/topic/business-tax/soft-drinks-industry-levy"
                 }
 
@@ -183,7 +183,7 @@ class DeregisteredUserServiceViewSpec extends DeregisteredUserServiceViewHelper 
 
                 "that has a link to sdil contact" in {
                   val link = document.getElementById("sdilContact")
-                  link.text() mustBe "Contact HMRC about your SDIL (opens in a new tab)"
+                  link.text() mustBe "Contact HMRC about your Soft Drinks Industry Levy (opens in a new tab)"
                   link.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/soft-drinks-industry-levy"
                 }
               }
