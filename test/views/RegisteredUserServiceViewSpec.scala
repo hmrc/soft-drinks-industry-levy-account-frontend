@@ -433,7 +433,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         document1Return.getElementById("manageYourAccountChangesTellWhen").text() mustBe "You should tell HMRC when you:"
         val listItems = document1Return.getElementById("manageYourAccountChanges").getElementsByTag("li")
         listItems.size() mustBe 4
-        listItems.eachText().get(0) mustBe "updated contact, address, packaging site or warehouse details"
+        listItems.eachText().get(0) mustBe "update contact, address, packaging site or warehouse details"
         listItems.eachText().get(1) mustBe "change the amount of liable drinks produced"
         listItems.eachText().get(2) mustBe "cancel Soft Drinks Industry Levy registration"
         listItems.eachText().get(3) mustBe "correct an error in a previous return"
