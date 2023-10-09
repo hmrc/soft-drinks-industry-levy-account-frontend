@@ -23,7 +23,7 @@ import java.time.{LocalDate, LocalDateTime, ZoneOffset}
 object TestData {
 
   val localDate = LocalDate.now
-  val deregDate = localDate.minusWeeks(2)
+  val deregDate = localDate.minusMonths(6)
 
   val currentReturnPeriod = ReturnPeriod(localDate)
   val pendingReturn1 = currentReturnPeriod.previous
