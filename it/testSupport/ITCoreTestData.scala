@@ -11,7 +11,7 @@ object ITCoreTestData extends TryValues {
   val UTR = "0000001611"
   val SDIL_REF = "XKSDIL000000022"
 
-  val deregDate = localDate.minusWeeks(2)
+  val deregDate = localDate.minusMonths(6)
 
 
   val aSubscription = RetrievedSubscription(
