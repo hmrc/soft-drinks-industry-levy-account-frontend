@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
-  val host: String = configuration.getString("microservice.services.soft-drinks-industry-levy-account-frontend.host")
+  val accountBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy-account-frontend")
   val appName: String = configuration.getString("appName")
   lazy val homePage: String = configuration.getString("microservice.services.home-page-url")
 
@@ -46,14 +46,14 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
     s"$registrationBaseUrl/soft-drinks-industry-levy-registration/start"
   }
   def feedbackUrl(implicit request: RequestHeader): String =
-    s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
+    s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(accountBaseUrl + request.uri).encodedUrl}"
 
   val basGatewayBaseUrl: String = configuration.baseUrl("bas-gateway")
   val sdilBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy")
   val directDebitIsTest: Boolean = configuration.getBoolean("direct-debit.isTest")
   val payApiIsTest: Boolean = configuration.getBoolean("pay-api.isTest")
   val directDebitBaseUrl: String = if (directDebitIsTest) {
-    host + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
+    accountBaseUrl + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
   } else {
     configuration.baseUrl("direct-debit-backend") + "/direct-debit-backend/sdil-frontend/zsdl/journey/start"
   }
@@ -61,14 +61,14 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val directDebitEnabled = configuration.getBoolean("direct-debit.isEnabled")
 
   val payApiUrl: String = if (payApiIsTest) {
-    s"$host${controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url}"
+    s"$accountBaseUrl${controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url}"
   } else {
     s"${configuration.baseUrl("pay-api")}/pay-api/bta/sdil/journey/start"
   }
 
 
   val loginUrl: String         = s"$basGatewayBaseUrl/bas-gateway/sign-in"
-  val loginContinueUrl: String = s"$host/soft-drinks-industry-levy-account-frontend"
+  val loginContinueUrl: String = s"$accountBaseUrl/soft-drinks-industry-levy-account-frontend"
   val signOutUrl: String       = s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
 
   private val exitSurveyBaseUrl: String = configuration.baseUrl("feedback-frontend")
