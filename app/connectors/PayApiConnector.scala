@@ -36,6 +36,8 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
 
   def initJourney(sdilRef: String, balance: BigDecimal)(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
+    genericLogger.logger.info(s"INITIALISING PAYMENT JOURNEY")
+    genericLogger.logger.info(s"PAYMENT JOURNEY url is ${config.payApiUrl}")
     http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef))
       .map(Right(_))
       .recover{
