@@ -117,10 +117,8 @@ class SoftDrinksIndustryLevyConnector @Inject()(
                sdilRef: String,
                withAssessment: Boolean, internalId: String
              )(implicit hc: HeaderCarrier): AccountResult[BigDecimal] = EitherT{
-    genericLogger.logger.error("GETTING BALANCE")
     sdilSessionCache.fetchEntry[BigDecimal](internalId, SessionKeys.balance(withAssessment)).flatMap {
       case Some(b) =>
-        genericLogger.logger.error(s"BALANCE found and is ${b}")
         Future.successful(Right(b))
       case None =>
         http.GET[BigDecimal](s"$sdilUrl/balance/$sdilRef/$withAssessment")
@@ -129,8 +127,7 @@ class SoftDrinksIndustryLevyConnector @Inject()(
               .map(_ => Right(b))
 
           }.recover {
-          case _ => genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][balance] - unexpected response for $sdilRef")
-            Left(UnexpectedResponseFromSDIL)
+          case _ => Left(UnexpectedResponseFromSDIL)
         }
     }
   }
