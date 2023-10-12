@@ -39,7 +39,7 @@ class PayApiConnector @Inject()(val http: HttpClient,
     http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef))
       .map(Right(_))
       .recover{
-        case e =>
+        case _ =>
           genericLogger.logger.error(s"[PayApiConnector][initJourney] - unexpected response")
           Left(UnexpectedResponseFromPayAPI)
       }

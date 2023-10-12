@@ -127,7 +127,8 @@ class SoftDrinksIndustryLevyConnector @Inject()(
               .map(_ => Right(b))
 
           }.recover {
-          case _ => Left(UnexpectedResponseFromSDIL)
+          case _ => genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][balance] - unexpected response for $sdilRef")
+            Left(UnexpectedResponseFromSDIL)
         }
     }
   }
