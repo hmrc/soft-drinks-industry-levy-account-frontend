@@ -36,7 +36,7 @@ class DirectDebitConnector @Inject()(val http: HttpClient,
 
 
   def initJourney()(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    http.POST[SetupDirectDebitRequest, NextUrl](config.directDebitBaseUrl, new SetupDirectDebitRequest(config))
+    http.POST[SetupDirectDebitRequest, NextUrl](config.directDebitUrl, new SetupDirectDebitRequest(config))
       .map(Right(_))
       .recover{
         case _ =>

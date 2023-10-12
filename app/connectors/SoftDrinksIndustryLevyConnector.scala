@@ -118,7 +118,8 @@ class SoftDrinksIndustryLevyConnector @Inject()(
                withAssessment: Boolean, internalId: String
              )(implicit hc: HeaderCarrier): AccountResult[BigDecimal] = EitherT{
     sdilSessionCache.fetchEntry[BigDecimal](internalId, SessionKeys.balance(withAssessment)).flatMap {
-      case Some(b) => Future.successful(Right(b))
+      case Some(b) =>
+        Future.successful(Right(b))
       case None =>
         http.GET[BigDecimal](s"$sdilUrl/balance/$sdilRef/$withAssessment")
           .flatMap { b =>

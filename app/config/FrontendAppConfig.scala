@@ -52,18 +52,20 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val sdilBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy")
   val directDebitIsTest: Boolean = configuration.getBoolean("direct-debit.isTest")
   val payApiIsTest: Boolean = configuration.getBoolean("pay-api.isTest")
-  val directDebitBaseUrl: String = if (directDebitIsTest) {
-    accountBaseUrl + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
+  val directDebitBaseUrl: String = configuration.baseUrl("direct-debit-backend")
+  val payApiBaseUrl: String = configuration.baseUrl("pay-api")
+  val directDebitUrl: String = if (directDebitIsTest) {
+    directDebitBaseUrl + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
   } else {
-    configuration.baseUrl("direct-debit-backend") + "/direct-debit-backend/sdil-frontend/zsdl/journey/start"
+    directDebitBaseUrl + "/direct-debit-backend/sdil-frontend/zsdl/journey/start"
   }
 
   val directDebitEnabled = configuration.getBoolean("direct-debit.isEnabled")
 
   val payApiUrl: String = if (payApiIsTest) {
-    s"$accountBaseUrl${controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url}"
+    s"$payApiBaseUrl${controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url}"
   } else {
-    s"${configuration.baseUrl("pay-api")}/pay-api/bta/sdil/journey/start"
+    s"$payApiBaseUrl/pay-api/bta/sdil/journey/start"
   }
 
 

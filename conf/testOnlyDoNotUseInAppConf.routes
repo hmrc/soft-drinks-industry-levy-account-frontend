@@ -13,9 +13,9 @@
 ->         /                          prod.Routes
 
 +nocsrf
-POST    /test-only/direct-debit-backend               controllers.testOnly.TestOnlyController.stubDirectDebitInitialise()
-GET     /test-only/simulate-direct-debit-journey      controllers.testOnly.TestOnlyController.stubDirectDebitJourney()
+POST    /soft-drinks-industry-levy-account-frontend/test-only/direct-debit-backend               controllers.testOnly.TestOnlyController.stubDirectDebitInitialise()
+GET     /soft-drinks-industry-levy-account-frontend/test-only/simulate-direct-debit-journey      controllers.testOnly.TestOnlyController.stubDirectDebitJourney()
 
 +nocsrf
-POST    /test-only/bta/sdil/journey/start               controllers.testOnly.TestOnlyController.stubPayApiInitialise()
-GET     /test-only/simulate-pay-api-journey             controllers.testOnly.TestOnlyController.stubPayApiJourney()
+POST    /soft-drinks-industry-levy-account-frontend/test-only/bta/sdil/journey/start               controllers.testOnly.TestOnlyController.stubPayApiInitialise()
+GET     /soft-drinks-industry-levy-account-frontend/test-only/simulate-pay-api-journey             controllers.testOnly.TestOnlyController.stubPayApiJourney()
