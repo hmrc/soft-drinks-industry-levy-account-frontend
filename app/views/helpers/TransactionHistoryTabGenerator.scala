@@ -49,7 +49,7 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
           )
         )
     }.toSeq
-    Tabs(title = messages("transactionHistory.contents"), items = tabItems, idPrefix = Some("year"))
+    Tabs(items = tabItems, idPrefix = Some("year"))
   }
 
 
