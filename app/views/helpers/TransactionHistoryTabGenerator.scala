@@ -33,8 +33,6 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
   lazy val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
   lazy val fullDateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-
-
   def generateTabs(transactionHistoryForYears: Map[Int, List[TransactionHistoryItem]])
                   (implicit messages: Messages): Tabs = {
     val tabItems: Seq[TabItem] = transactionHistoryForYears.map {
@@ -78,7 +76,7 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
         content = getDebit(transactionHistoryItem)
       ),
       TableRow(
-        content = HtmlContent(formatPounds(transactionHistoryItem.balance))
+        content = formatPounds(transactionHistoryItem.balance)
       )
     )
   }
@@ -122,8 +120,8 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
   }
 
   private def getCredit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
-    if(transactionHistoryItem.finincialLineItem.amount > 0) {
-      HtmlContent(formatPounds(transactionHistoryItem.finincialLineItem.amount))
+    if (transactionHistoryItem.finincialLineItem.amount > 0) {
+      formatPounds(transactionHistoryItem.finincialLineItem.amount)
     } else {
       HtmlContent("£0.00")
     }
@@ -131,18 +129,15 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
 
   private def getDebit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
     if (transactionHistoryItem.finincialLineItem.amount < 0) {
-
-      HtmlContent(s"<span style='white-space: nowrap'>${formatPounds(transactionHistoryItem.finincialLineItem.amount)}</span>")
+      formatPounds(transactionHistoryItem.finincialLineItem.amount)
     } else {
       HtmlContent("£0.00")
     }
   }
 
-  def formatPounds(bd: BigDecimal): String = {
+  def formatPounds(bd: BigDecimal): HtmlContent = {
     val pounds = f"£$bd%,.2f".replace("£-", "&minus;£")
-    s"<span style='white-space: nowrap'>$pounds</span>"
+    HtmlContent(s"<span style='white-space: nowrap'>$pounds</span>")
   }
-
-
 
 }
