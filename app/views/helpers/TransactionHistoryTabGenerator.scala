@@ -137,7 +137,10 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
     }
   }
 
-  def formatPounds(bd: BigDecimal): String = f"<span style=\"white-space: nowrap\">£$bd%,.2f<span style=\"white-space: nowrap\">".replace("£-", "&minus;£")
+  def formatPounds(bd: BigDecimal): String = {
+    val pounds = f"£$bd%,.2f".replace("£-", "&minus;£")
+    s"<span style=\"white-space: nowrap\">$pounds</span>"
+  }
 
 
 
