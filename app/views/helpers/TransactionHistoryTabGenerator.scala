@@ -72,10 +72,10 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
         content = getTransaction(transactionHistoryItem.finincialLineItem)
       ),
       TableRow(
-        content = HtmlContent(getCredit(transactionHistoryItem))
+        content = getCredit(transactionHistoryItem)
       ),
       TableRow(
-        content = HtmlContent(getDebit(transactionHistoryItem))
+        content = getDebit(transactionHistoryItem)
       ),
       TableRow(
         content = HtmlContent(formatPounds(transactionHistoryItem.balance))
@@ -121,25 +121,26 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
     }
   }
 
-  private def getCredit(transactionHistoryItem: TransactionHistoryItem): String = {
+  private def getCredit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
     if(transactionHistoryItem.finincialLineItem.amount > 0) {
-      formatPounds(transactionHistoryItem.finincialLineItem.amount)
+      HtmlContent(formatPounds(transactionHistoryItem.finincialLineItem.amount))
     } else {
-      "£0.00"
+      HtmlContent("£0.00")
     }
   }
 
-  private def getDebit(transactionHistoryItem: TransactionHistoryItem): String = {
+  private def getDebit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
     if (transactionHistoryItem.finincialLineItem.amount < 0) {
-      s"<span style=\"white-space: nowrap\">${formatPounds(transactionHistoryItem.finincialLineItem.amount)}</span>"
+
+      HtmlContent(s"<span style='white-space: nowrap'>${formatPounds(transactionHistoryItem.finincialLineItem.amount)}</span>")
     } else {
-      "£0.00"
+      HtmlContent("£0.00")
     }
   }
 
   def formatPounds(bd: BigDecimal): String = {
     val pounds = f"£$bd%,.2f".replace("£-", "&minus;£")
-    s"<span style=\"white-space: nowrap\">$pounds</span>"
+    s"<span style='white-space: nowrap'>$pounds</span>"
   }
 
 
