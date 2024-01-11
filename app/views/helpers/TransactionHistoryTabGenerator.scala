@@ -131,13 +131,13 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
 
   private def getDebit(transactionHistoryItem: TransactionHistoryItem): String = {
     if (transactionHistoryItem.finincialLineItem.amount < 0) {
-      s"${formatPounds(transactionHistoryItem.finincialLineItem.amount)}"
+      s"<span style=\"white-space: nowrap\">${formatPounds(transactionHistoryItem.finincialLineItem.amount)}</span>"
     } else {
       "£0.00"
     }
   }
 
-  def formatPounds(bd: BigDecimal): String = f"£$bd%,.2f".replace("£-", "&minus;£")
+  def formatPounds(bd: BigDecimal): String = f"<span style=\"white-space: nowrap\">£$bd%,.2f<span style=\"white-space: nowrap\">".replace("£-", "&minus;£")
 
 
 
