@@ -101,8 +101,8 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
   def validatePage(body: String, expectedTransactionHistory: Map[Int, List[TransactionHistoryItem]]) = {
     val page = Jsoup.parse(body)
     page.title must include(Messages("Transaction history"))
-    page.getElementsByClass("govuk-caption-m").text() mustBe "Super Lemonade Plc"
     page.getElementsByTag("h1").text() mustBe "Transaction history"
+    page.getElementsByClass("govuk-body").first().text() mustBe "Super Lemonade Plc"
     val tabs = page.getElementsByClass("govuk-tabs").first()
     tabs.getElementsByClass("govuk-tabs__title").first().text() mustBe "Contents"
     val tabList = tabs.getElementsByClass("govuk-tabs__list").first().getElementsByTag("li")
