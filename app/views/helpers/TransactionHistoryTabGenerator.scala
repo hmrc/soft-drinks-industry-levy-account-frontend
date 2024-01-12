@@ -47,7 +47,7 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
           )
         )
     }.toSeq
-    Tabs(items = tabItems, idPrefix = Some("year"))
+    Tabs(items = tabItems, classes = "govuk-!-margin-top-4", idPrefix = Some("year"))
   }
 
 
