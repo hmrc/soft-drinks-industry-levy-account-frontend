@@ -23,14 +23,14 @@
 @(viewModel: DeregisteredUserServicePageViewModel)(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @deregistrationPendingContent = {
-    <h2 class="govuk-notification-banner__heading" id="deregisterPendingSubHeading">@messages("servicePage.deregistered.pending.subHeader")</h2>
+    <h3 class="govuk-notification-banner__heading" id="deregisterPendingSubHeading">@messages("servicePage.deregistered.pending.subHeader")</h3>
     <p class="govuk-body">@deregContentForPendingP1(viewModel.deregDate)</p>
     <p class="govuk-body">@messages("servicePage.deregistered.pending.content.p2")</p>
     <p class="govuk-body">@messages("servicePage.deregistered.pending.content.p3", config.sdilContactNumber)</p>
 }
 
 @deregisteredContent = {
-    <h2 class="govuk-notification-banner__heading" id="deregisteredSubHeading">@messages("servicePage.deregistered.subHeader")</h2>
+    <h3 class="govuk-notification-banner__heading" id="deregisteredSubHeading">@messages("servicePage.deregistered.subHeader")</h3>
     <p class="govuk-body">@getDeregisteredContent(viewModel.deregDate)</p>
 }
 
