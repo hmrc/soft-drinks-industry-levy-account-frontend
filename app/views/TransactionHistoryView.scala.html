@@ -18,35 +18,33 @@
 @import config.FrontendAppConfig
 @import views.helpers.TransactionHistoryTabGenerator
 
-
-
 @this(
-        layout: templates.Layout,
-        govukTabs : GovukTabs,
-        transactionHistoryTabGenerator: TransactionHistoryTabGenerator
+  layout: templates.Layout,
+  govukTabs : GovukTabs,
+  transactionHistoryTabGenerator: TransactionHistoryTabGenerator
 )
 
 @(orgName: String, transactionHistoryForYears: Map[Int, List[TransactionHistoryItem]])(implicit request: Request[_], messages: Messages, config: FrontendAppConfig)
 
 @layout(
-pageTitle = titleNoForm(messages("transactionHistory.title")),
- showBackLink = true,
- fullGrid = true
+  pageTitle = titleNoForm(messages("transactionHistory.title")),
+  showBackLink = true,
+  fullGrid = true
 ) {
 
- <span class="govuk-caption-m">@orgName</span>
- <h1 class="govuk-heading-m">@messages("transactionHistory.heading")</h1>
+<h1 class="govuk-heading-m">@messages("transactionHistory.heading")</h1>
+<span class="govuk-body">@orgName</span>
 
-
- @if(transactionHistoryForYears.nonEmpty) {
+@if(transactionHistoryForYears.nonEmpty) {
   @govukTabs(
-   transactionHistoryTabGenerator.generateTabs(transactionHistoryForYears)
+    transactionHistoryTabGenerator.generateTabs(transactionHistoryForYears)
   )
- }
+}
 
- <p class="govuk-body">
+<p class="govuk-body">
   <a class="govuk-link" id="returnToServicePage" href="@routes.ServicePageController.onPageLoad.url">
-  @messages("transactionHistory.accountPage.link")
+    @messages("transactionHistory.accountPage.link")
   </a>
- </p>
+</p>
+
 }

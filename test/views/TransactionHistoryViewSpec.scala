@@ -64,12 +64,12 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
           document.title() must include("Transaction history")
         }
 
-        "should include a caption containing the orgName" in {
-          document.getElementsByClass(Selectors.caption).text() mustBe "Super Lemonade Plc"
-        }
-
         "should include the expected h1 heading" in {
           document.getElementsByTag("h1").text() mustBe "Transaction history"
+        }
+
+        "should include a body containing the orgName" in {
+          document.getElementsByClass(Selectors.body).first().text() mustBe "Super Lemonade Plc"
         }
 
         if (transactionHistoryItemsForYears.isEmpty) {

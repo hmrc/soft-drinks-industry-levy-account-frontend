@@ -33,8 +33,6 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
   lazy val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
   lazy val fullDateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-
-
   def generateTabs(transactionHistoryForYears: Map[Int, List[TransactionHistoryItem]])
                   (implicit messages: Messages): Tabs = {
     val tabItems: Seq[TabItem] = transactionHistoryForYears.map {
@@ -49,7 +47,7 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
           )
         )
     }.toSeq
-    Tabs(items = tabItems, idPrefix = Some("year"))
+    Tabs(items = tabItems, classes = "govuk-!-margin-top-4", idPrefix = Some("year"))
   }
 
 
@@ -72,13 +70,13 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
         content = getTransaction(transactionHistoryItem.finincialLineItem)
       ),
       TableRow(
-        content = HtmlContent(getCredit(transactionHistoryItem))
+        content = getCredit(transactionHistoryItem)
       ),
       TableRow(
-        content = HtmlContent(getDebit(transactionHistoryItem))
+        content = getDebit(transactionHistoryItem)
       ),
       TableRow(
-        content = HtmlContent(formatPounds(transactionHistoryItem.balance))
+        content = formatPounds(transactionHistoryItem.balance)
       )
     )
   }
@@ -121,24 +119,25 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
     }
   }
 
-  private def getCredit(transactionHistoryItem: TransactionHistoryItem): String = {
-    if(transactionHistoryItem.finincialLineItem.amount > 0) {
+  private def getCredit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
+    if (transactionHistoryItem.finincialLineItem.amount > 0) {
       formatPounds(transactionHistoryItem.finincialLineItem.amount)
     } else {
-      "£0.00"
+      HtmlContent("£0.00")
     }
   }
 
-  private def getDebit(transactionHistoryItem: TransactionHistoryItem): String = {
+  private def getDebit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
     if (transactionHistoryItem.finincialLineItem.amount < 0) {
-      s"${formatPounds(transactionHistoryItem.finincialLineItem.amount)}"
+      formatPounds(transactionHistoryItem.finincialLineItem.amount)
     } else {
-      "£0.00"
+      HtmlContent("£0.00")
     }
   }
 
-  def formatPounds(bd: BigDecimal): String = f"£$bd%,.2f".replace("£-", "&minus;£")
-
-
+  def formatPounds(bd: BigDecimal): HtmlContent = {
+    val pounds = f"£$bd%,.2f".replace("£-", "&minus;£")
+    HtmlContent(s"<span style='white-space: nowrap'>$pounds</span>")
+  }
 
 }
