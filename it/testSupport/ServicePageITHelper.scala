@@ -202,7 +202,6 @@ trait ServicePageITHelper extends ControllerITTestHelper {
       manageExistingLink.text() mustBe "Change or cancel your Direct Debit and view your next payment collection date"
       manageExistingLink.getElementsByTag("a").attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/start-direct-debit-journey"
     } else {
-      page.getElementById("manageSetupDDSubHeader").text() mustBe "Pay by Direct Debit"
       val manageSetupDDContent = page.getElementById("manageSetupDD")
       manageSetupDDContent.text() mustBe "You can set up a Direct Debit to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date."
       manageSetupDDContent.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"

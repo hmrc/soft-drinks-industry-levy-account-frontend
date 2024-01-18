@@ -127,7 +127,6 @@ howToPay.link = Find out other ways to pay the levy (opens in a new tab).
 directDebit.manage.existing.subHeader = How you pay the levy
 directDebit.manage.existing.p1 = You have set up a Direct Debit to pay the levy. It will not collect any interest and penalties you owe.
 directDebit.manage.existing.link = Change or cancel your Direct Debit and view your next payment collection date
-directDebit.manage.setup.subHeader = Pay by Direct Debit
 directDebit.manage.setup.link = set up a Direct Debit
 directDebit.manage.setup.p1 = to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date.
 

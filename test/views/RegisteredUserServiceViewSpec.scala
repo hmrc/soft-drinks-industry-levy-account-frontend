@@ -260,7 +260,6 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         }
 
         "that includes how to setup direct debit" in {
-          document.getElementById("manageSetupDDSubHeader").text() mustBe "Pay by Direct Debit"
           val manageSetupDDContent = document.getElementById("manageSetupDD")
           manageSetupDDContent.text() mustBe "You can set up a Direct Debit to pay the Soft Drinks Industry Levy. You need to do this at least 3 working days before your return and payment due date."
           manageSetupDDContent.getElementsByTag("a").attr("href") mustBe "https://www.gov.uk/guidance/pay-the-soft-drinks-industry-levy-notice-5"
