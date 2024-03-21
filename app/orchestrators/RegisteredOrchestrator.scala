@@ -163,7 +163,7 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
 
     transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]){
       (transactionHistoryForYears, transactionHistoryItem) =>
-        val transactionYear = transactionHistoryItem.finincialLineItem.date.getYear
+        val transactionYear = transactionHistoryItem.financialLineItem.date.getYear
         val updatedTransactionItemsForYear = transactionHistoryForYears.get(transactionYear)
         .fold(List(transactionHistoryItem))(_ ++ List(transactionHistoryItem))
         transactionHistoryForYears ++ Map(transactionYear -> updatedTransactionItemsForYear)

@@ -64,10 +64,10 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
   def getTableRowForTransactionItem(transactionHistoryItem: TransactionHistoryItem)(implicit messages: Messages): Seq[TableRow] = {
     Seq(
       TableRow(
-        content = Text(transactionHistoryItem.finincialLineItem.date.format(dateFormatter))
+        content = Text(transactionHistoryItem.financialLineItem.date.format(dateFormatter))
       ),
       TableRow(
-        content = getTransaction(transactionHistoryItem.finincialLineItem)
+        content = getTransaction(transactionHistoryItem.financialLineItem)
       ),
       TableRow(
         content = getCredit(transactionHistoryItem)
@@ -120,16 +120,16 @@ class TransactionHistoryTabGenerator @Inject()(govukTable: GovukTable) {
   }
 
   private def getCredit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
-    if (transactionHistoryItem.finincialLineItem.amount > 0) {
-      formatPounds(transactionHistoryItem.finincialLineItem.amount)
+    if (transactionHistoryItem.financialLineItem.amount > 0) {
+      formatPounds(transactionHistoryItem.financialLineItem.amount)
     } else {
       HtmlContent("£0.00")
     }
   }
 
   private def getDebit(transactionHistoryItem: TransactionHistoryItem): HtmlContent = {
-    if (transactionHistoryItem.finincialLineItem.amount < 0) {
-      formatPounds(transactionHistoryItem.finincialLineItem.amount)
+    if (transactionHistoryItem.financialLineItem.amount < 0) {
+      formatPounds(transactionHistoryItem.financialLineItem.amount)
     } else {
       HtmlContent("£0.00")
     }

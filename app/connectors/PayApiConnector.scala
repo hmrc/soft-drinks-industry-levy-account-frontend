@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utilities.GenericLogger
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
 class PayApiConnector @Inject()(val http: HttpClient,
@@ -35,8 +36,8 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
 
 
-  def initJourney(sdilRef: String, balance: BigDecimal)(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef))
+  def initJourney(sdilRef: String, balance: BigDecimal, dueDate: Option[LocalDate])(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
+    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, dueDate))
       .map(Right(_))
       .recover{
         case _ =>
@@ -45,13 +46,15 @@ class PayApiConnector @Inject()(val http: HttpClient,
       }
   }
 
-  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String): SetupPayApiRequest = {
+  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, dueDate: Option[LocalDate]): SetupPayApiRequest = {
     val balanceInPence = balance * 100
     val amountOwed = balanceInPence * -1
     val exactAmountOwed = amountOwed.toLongExact
+
     SetupPayApiRequest(
       sdilRef,
       exactAmountOwed,
+      dueDate,
       config.homePage,
       config.homePage
     )

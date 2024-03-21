@@ -18,8 +18,11 @@ package models
 
 import play.api.libs.json.{Format, Json}
 
+import java.time.LocalDate
+
 case class SetupPayApiRequest(reference: String,
                               amountInPence: Long,
+                              dueDate: Option[LocalDate],
                               returnUrl: String,
                               backUrl: String)
 

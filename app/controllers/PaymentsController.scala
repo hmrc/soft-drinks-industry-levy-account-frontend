@@ -21,10 +21,12 @@ import com.google.inject.Inject
 import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
 import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
+import models.{FinancialLineItem, TransactionHistoryItem}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
 class PaymentsController @Inject()(
@@ -38,9 +40,11 @@ class PaymentsController @Inject()(
 
   def setup(): Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
     val sdilRef = request.subscription.sdilRef
+    val transactions: service.AccountResult[List[FinancialLineItem]] = sdilConnector.balanceHistory(sdilRef, true, request.internalId)
+    val dueDate: Option[LocalDate] = lastReturnDueDate(sdilRef, transactions)
     val res = for {
       balance <- sdilConnector.balance(sdilRef, true, request.internalId)
-      nextUrl <- paymentsConnector.initJourney(sdilRef, balance).map(_.nextUrl)
+      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, dueDate).map(_.nextUrl)
     } yield nextUrl
 
     res.value.map{
@@ -48,6 +52,22 @@ class PaymentsController @Inject()(
       case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
     }
   }
+
+  private def lastReturnDueDate(sdilRef: String, transactions: service.AccountResult[List[FinancialLineItem]]): Option[LocalDate] = {
+    val currentDate: LocalDate = new LocalDate.now()
+    val existingBalance: BigDecimal = transactions.head.balance
+    val returnChargeTransaction: FinancialLineItem = transactions.filter(_.financialLineItem.messageKey == "returnCharge").head
+    val returnChargeTotal: BigDecimal = returnChargeTransaction.amount
+
+    if (returnChargeTransaction.financialLineItem.date.after(currentDate) && isCurrentBasedOnAmount(existingBalance, returnChargeTotal)) {
+      returnChargeTransaction.financialLineItem.date
+    } else {
+      None
+    }
+  }
+
+  private def isCurrentBasedOnAmount(originalBalance: BigDecimal, returnTotal: BigDecimal): Boolean =
+    if (originalBalance - returnTotal <= 0) true else false
 
 
 }
