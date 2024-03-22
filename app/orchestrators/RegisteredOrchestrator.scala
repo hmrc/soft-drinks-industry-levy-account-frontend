@@ -85,7 +85,7 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
     val getPendingReturns = sdilConnector.returns_pending(internalId, utr).map(_.sortBy(_.start))
     val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
-    val getBalance = sdilConnector.balance(subscription.sdilRef, true, internalId)
+    val getBalance = sdilConnector.balance(subscription.sdilRef, withAssessment = true, internalId)
     val getInterest = getAndCalculateInterestIfReq(internalId)
     val optHasDDSetup = checkExistingDDIfEnabled
 
@@ -117,7 +117,7 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     val checkIfHasVariableReturns = sdilConnector.returns_variable(internalId, utr).map(_.nonEmpty)
     val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
     val getOptDeRegReturn = sdilConnector.returns_get(utr, deregReturnPeriod, internalId)
-    val getBalance = sdilConnector.balance(subscription.sdilRef, true, internalId)
+    val getBalance = sdilConnector.balance(subscription.sdilRef, withAssessment = true, internalId)
 
     for {
       optLastReturn <- getOptLastReturn
@@ -139,7 +139,7 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
   private def getAndCalculateInterestIfReq(internalId: String)(implicit request: RegisteredRequest[AnyContent],
                                   hc: HeaderCarrier,
                                   ec: ExecutionContext): AccountResult[BigDecimal] =
-    sdilConnector.balanceHistory(request.subscription.sdilRef, true, internalId)
+    sdilConnector.balanceHistory(request.subscription.sdilRef, withAssessment = true, internalId)
     .map(items =>
       items.distinct.collect {
         case a: Interest => a.amount
@@ -157,8 +157,8 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
   }
 
   private def convertBalanceHistoryToTransactionHistory(balanceHistory: List[FinancialLineItem]): Map[Int, List[TransactionHistoryItem]] = {
-    val transactionHistoryItem = balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]){(transactionHistory, finicialListItem) =>
-      List(new TransactionHistoryItem(finicialListItem, transactionHistory)) ++ transactionHistory
+    val transactionHistoryItem = balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]){(transactionHistory, financialListItem) =>
+      List(new TransactionHistoryItem(financialListItem, transactionHistory)) ++ transactionHistory
     }
 
     transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]){

@@ -21,9 +21,10 @@ import com.google.inject.Inject
 import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
 import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
-import models.{FinancialLineItem, TransactionHistoryItem}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import service.AccountResult
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import java.time.LocalDate
@@ -40,11 +41,10 @@ class PaymentsController @Inject()(
 
   def setup(): Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
     val sdilRef = request.subscription.sdilRef
-    val transactions: service.AccountResult[List[FinancialLineItem]] = sdilConnector.balanceHistory(sdilRef, true, request.internalId)
-    val dueDate: Option[LocalDate] = lastReturnDueDate(sdilRef, transactions)
     val res = for {
-      balance <- sdilConnector.balance(sdilRef, true, request.internalId)
-      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, dueDate).map(_.nextUrl)
+      balance <- sdilConnector.balance(sdilRef, withAssessment = true, request.internalId)
+      optLastDueDate <- getOptLastReturnDueDate(sdilRef, request.internalId, balance)
+      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, optLastDueDate).map(_.nextUrl)
     } yield nextUrl
 
     res.value.map{
@@ -53,21 +53,37 @@ class PaymentsController @Inject()(
     }
   }
 
-  private def lastReturnDueDate(sdilRef: String, transactions: service.AccountResult[List[FinancialLineItem]]): Option[LocalDate] = {
-    val currentDate: LocalDate = new LocalDate.now()
-    val existingBalance: BigDecimal = transactions.head.balance
-    val returnChargeTransaction: FinancialLineItem = transactions.filter(_.financialLineItem.messageKey == "returnCharge").head
-    val returnChargeTotal: BigDecimal = returnChargeTransaction.amount
+  private def getOptLastReturnDueDate(sdilRef: String, internalId: String, balance: BigDecimal)
+                                     (implicit headerCarrier: HeaderCarrier): AccountResult[Option[LocalDate]] =  {
+    val lastReturnDueDate = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
+      .map(items =>
+        items.filter(_.messageKey == "returnCharge").head.date
+      )
 
-    if (returnChargeTransaction.financialLineItem.date.after(currentDate) && isCurrentBasedOnAmount(existingBalance, returnChargeTotal)) {
-      returnChargeTransaction.financialLineItem.date
+    val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
+        .map(items =>
+          items.filter(_.messageKey == "returnCharge").head.amount
+        )
+
+    if (lastReturnDueDate.isAfter(LocalDate.now())) {
+      lastReturnDueDate.map(date => Some(date))
     } else {
-      None
+      lastReturnAmount.map(amount => if (balance - amount <= 0) Some(LocalDate.now()) else None)
     }
+    val returnDueDateIsAfterCurrentDate = for {
+      lastReturnDueDate <- lastReturnDueDate
+      } yield lastReturnDueDate.isAfter(LocalDate.now())
+      val balanceLessReturnAmountIsLessThanOrEqualToZero = for {
+        lastReturnAmount <- lastReturnAmount
+      } yield balance - lastReturnAmount <= 0
+      for {
+        notOverdueByDate <- returnDueDateIsAfterCurrentDate
+        notOverdueByAmount <- balanceLessReturnAmountIsLessThanOrEqualToZero
+      } yield (notOverdueByDate, notOverdueByAmount) match {
+        case (true, true) => lastReturnDueDate
+        case _ => LocalDate.now()
+      }
+      lastReturnDueDate.map(date => Some(date))
   }
-
-  private def isCurrentBasedOnAmount(originalBalance: BigDecimal, returnTotal: BigDecimal): Boolean =
-    if (originalBalance - returnTotal <= 0) true else false
-
 
 }

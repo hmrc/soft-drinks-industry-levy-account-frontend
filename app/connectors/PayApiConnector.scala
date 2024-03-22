@@ -37,6 +37,9 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
 
   def initJourney(sdilRef: String, balance: BigDecimal, dueDate: Option[LocalDate])(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
+    println(Console.GREEN + "balance and due date are .............: " + Console.RESET)
+    println(Console.BLUE + "Here they are...Balance " + balance + Console.RESET)
+    println(Console.MAGENTA + "Here they are...due date " + dueDate + Console.RESET)
     http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, dueDate))
       .map(Right(_))
       .recover{
