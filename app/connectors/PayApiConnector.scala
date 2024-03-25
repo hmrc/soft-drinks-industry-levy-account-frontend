@@ -20,7 +20,7 @@ import cats.data.EitherT
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import errors.UnexpectedResponseFromPayAPI
-import models.{NextUrl, SetupPayApiRequest}
+import models.{NextUrl, ReturnPeriod, SdilReturn, SetupPayApiRequest}
 import service.AccountResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utilities.GenericLogger
@@ -36,13 +36,12 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
 
 
-  def initJourney(sdilRef: String, balance: BigDecimal, dueDate: LocalDate, amount: BigDecimal)
+  def initJourney(sdilRef: String, balance: BigDecimal, optLastReturn: Option[SdilReturn], amount: BigDecimal)
                  (implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    println(Console.GREEN + "balance and due date are .............: " + Console.RESET)
     println(Console.BLUE + "Here they are...Balance " + balance + Console.RESET)
-    println(Console.MAGENTA + "Here they are...due date " + dueDate + Console.RESET)
+    println(Console.MAGENTA + "Here is the last return " + optLastReturn + Console.RESET)
     println(Console.YELLOW + "Here they are...amount " + amount + Console.RESET)
-    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, dueDate, amount))
+    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, optLastReturn, amount))
       .map(Right(_))
       .recover{
         case _ =>
@@ -51,14 +50,12 @@ class PayApiConnector @Inject()(val http: HttpClient,
       }
   }
 
-  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, dueDate: LocalDate, amount: BigDecimal): SetupPayApiRequest = {
+  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, optLastReturn: Option[SdilReturn],
+                                       priorReturnAmount: BigDecimal): SetupPayApiRequest = {
     val balanceInPence = balance * 100
     val amountOwed = balanceInPence * -1
     val exactAmountOwed = amountOwed.toLongExact
-    val dueDateToSendToApi = generateDueDate(dueDate, amount, balance)
-    println(Console.GREEN + "theDueDate is  .............: " + dueDateToSendToApi + Console.RESET)
-
-
+    val dueDateToSendToApi = generateDueDate(optLastReturn, priorReturnAmount, balance)
 
     SetupPayApiRequest(
       sdilRef,
@@ -69,19 +66,28 @@ class PayApiConnector @Inject()(val http: HttpClient,
     )
   }
 
-  private def generateDueDate(dueDate: LocalDate, amount: BigDecimal, balance: BigDecimal): Option[LocalDate] = {
-
-    if (dueDate.isAfter(LocalDate.now().minusYears(6))) {
-      if (balance - amount >= 0) {
-        println(Console.GREEN + "balance and amount  .............: " + balance + amount + " the balance is " + theBalanceIs + Console.RESET)
-        Some(dueDate)
-      } else {
-        None
-      }
+  private def generateDueDate(optLastReturn: Option[SdilReturn], priorReturnAmount: BigDecimal, balance: BigDecimal): Option[LocalDate] = {
+    val lastReturnPeriod = ReturnPeriod(LocalDate.now()).previous
+    val dueDate = if (optLastReturn.nonEmpty) {
+      genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - optLastReturn is not empty, due date generated on return period end")
+      Some(lastReturnPeriod.deadline)
     } else {
+      genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - no LastReturn found based on the previous return period, presumed overdue")
       None
     }
-  }
 
+    dueDate match {
+      case Some(dueDate) => if (dueDate.isAfter(LocalDate.now()) && balance - priorReturnAmount >= 0) {
+        genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - due date is after today and balance is less than the prior return amount, " +
+          s"presumed not overdue and future payment date can be offered")
+        Some(dueDate)
+      } else {
+        genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - No due date passed to API, may be due to overdue returns or " +
+          s"balance is greater than the prior return amount")
+        None
+      }
+      case None => None
+    }
+  }
 
 }
