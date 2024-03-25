@@ -38,9 +38,6 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
   def initJourney(sdilRef: String, balance: BigDecimal, optLastReturn: Option[SdilReturn], amount: BigDecimal)
                  (implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    println(Console.BLUE + "Here they are...Balance " + balance + Console.RESET)
-    println(Console.MAGENTA + "Here is the last return " + optLastReturn + Console.RESET)
-    println(Console.YELLOW + "Here they are...amount " + amount + Console.RESET)
     http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, optLastReturn, amount))
       .map(Right(_))
       .recover{
