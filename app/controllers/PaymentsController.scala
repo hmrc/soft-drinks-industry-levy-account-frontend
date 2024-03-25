@@ -21,6 +21,7 @@ import com.google.inject.Inject
 import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
 import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
+import models.ReturnCharge
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.AccountResult
@@ -43,47 +44,65 @@ class PaymentsController @Inject()(
     val sdilRef = request.subscription.sdilRef
     val res = for {
       balance <- sdilConnector.balance(sdilRef, withAssessment = true, request.internalId)
-      optLastDueDate <- getOptLastReturnDueDate(sdilRef, request.internalId, balance)
-      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, optLastDueDate).map(_.nextUrl)
+      optLastDueDate <- getOptLastReturnDueDate(sdilRef, request.internalId)
+      optReturnAmount <- getOptLastReturnAmount(sdilRef, request.internalId)
+      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, optLastDueDate, optReturnAmount).map(_.nextUrl)
     } yield nextUrl
 
     res.value.map{
       case Right(nextUrl) => Redirect(nextUrl)
-      case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
+      case Left(value) => {
+        println(Console.RED + "Error in setup method - errors are " + value + Console.RESET)
+        InternalServerError(errorHandler.internalServerErrorTemplate)
+      }
     }
   }
 
-  private def getOptLastReturnDueDate(sdilRef: String, internalId: String, balance: BigDecimal)
-                                     (implicit headerCarrier: HeaderCarrier): AccountResult[Option[LocalDate]] =  {
+  private def getOptLastReturnDueDate(sdilRef: String, internalId: String)
+                                     (implicit headerCarrier: HeaderCarrier) = {
     val lastReturnDueDate = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
       .map(items =>
-        items.filter(_.messageKey == "returnCharge").head.date
-      )
-
-    val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
-        .map(items =>
-          items.filter(_.messageKey == "returnCharge").head.amount
-        )
-
-    if (lastReturnDueDate.isAfter(LocalDate.now())) {
-      lastReturnDueDate.map(date => Some(date))
-    } else {
-      lastReturnAmount.map(amount => if (balance - amount <= 0) Some(LocalDate.now()) else None)
-    }
-    val returnDueDateIsAfterCurrentDate = for {
-      lastReturnDueDate <- lastReturnDueDate
-      } yield lastReturnDueDate.isAfter(LocalDate.now())
-      val balanceLessReturnAmountIsLessThanOrEqualToZero = for {
-        lastReturnAmount <- lastReturnAmount
-      } yield balance - lastReturnAmount <= 0
-      for {
-        notOverdueByDate <- returnDueDateIsAfterCurrentDate
-        notOverdueByAmount <- balanceLessReturnAmountIsLessThanOrEqualToZero
-      } yield (notOverdueByDate, notOverdueByAmount) match {
-        case (true, true) => lastReturnDueDate
+        items.find(_.messageKey == "returnCharge")
+      ).map {
+        case Some(fli: ReturnCharge) => fli.period.deadline
         case _ => LocalDate.now()
       }
-      lastReturnDueDate.map(date => Some(date))
+
+    lastReturnDueDate
   }
+
+    private def getOptLastReturnAmount(sdilRef: String, internalId: String)
+                                       (implicit headerCarrier: HeaderCarrier) = {
+
+      val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
+        .map(items =>
+          items.find(_.messageKey == "returnCharge").head.amount
+        ).map {
+          case amount => amount
+          case _ => BigDecimal(0)
+        }
+      lastReturnAmount
+    }
+
+//    if (lastReturnDueDate.isAfter(LocalDate.now())) {
+//      lastReturnDueDate.map(date => Some(date))
+//    } else {
+//      lastReturnAmount.map(amount => if (balance - amount <= 0) Some(LocalDate.now()) else None)
+//    }
+//    val returnDueDateIsAfterCurrentDate = for {
+//      lastReturnDueDate <- lastReturnDueDate
+//      } yield lastReturnDueDate.isAfter(LocalDate.now())
+//      val balanceLessReturnAmountIsLessThanOrEqualToZero = for {
+//        lastReturnAmount <- lastReturnAmount
+//      } yield balance - lastReturnAmount <= 0
+//      for {
+//        notOverdueByDate <- returnDueDateIsAfterCurrentDate
+//        notOverdueByAmount <- balanceLessReturnAmountIsLessThanOrEqualToZero
+//      } yield (notOverdueByDate, notOverdueByAmount) match {
+//        case (true, true) => lastReturnDueDate
+//        case _ => LocalDate.now()
+//      }
+
+
 
 }

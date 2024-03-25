@@ -36,10 +36,12 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
 
 
-  def initJourney(sdilRef: String, balance: BigDecimal, dueDate: Option[LocalDate])(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
+  def initJourney(sdilRef: String, balance: BigDecimal, dueDate: LocalDate, amount: BigDecimal)
+                 (implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
     println(Console.GREEN + "balance and due date are .............: " + Console.RESET)
     println(Console.BLUE + "Here they are...Balance " + balance + Console.RESET)
     println(Console.MAGENTA + "Here they are...due date " + dueDate + Console.RESET)
+    println(Console.YELLOW + "Here they are...amount " + amount + Console.RESET)
     http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, dueDate))
       .map(Right(_))
       .recover{
@@ -49,15 +51,18 @@ class PayApiConnector @Inject()(val http: HttpClient,
       }
   }
 
-  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, dueDate: Option[LocalDate]): SetupPayApiRequest = {
+  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, dueDate: LocalDate): SetupPayApiRequest = {
     val balanceInPence = balance * 100
     val amountOwed = balanceInPence * -1
     val exactAmountOwed = amountOwed.toLongExact
+    println(Console.MAGENTA + "getting into geenrate requeest for pay api before attempting due date: " + Console.RESET)
+    val theDueDate = dueDate
+    println(Console.MAGENTA + "in generate requeest for pay api after attempting due date: " + Console.RESET)
 
     SetupPayApiRequest(
       sdilRef,
       exactAmountOwed,
-      dueDate,
+      Some(theDueDate),
       config.homePage,
       config.homePage
     )

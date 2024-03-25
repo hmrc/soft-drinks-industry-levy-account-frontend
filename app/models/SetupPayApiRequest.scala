@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 case class SetupPayApiRequest(reference: String,
                               amountInPence: Long,
-                              dueDate: Option[LocalDate],
+                              dueDate: Option[LocalDate] = None,
                               returnUrl: String,
                               backUrl: String)
 
