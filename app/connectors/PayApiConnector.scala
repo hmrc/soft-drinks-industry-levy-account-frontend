@@ -42,7 +42,7 @@ class PayApiConnector @Inject()(val http: HttpClient,
     println(Console.BLUE + "Here they are...Balance " + balance + Console.RESET)
     println(Console.MAGENTA + "Here they are...due date " + dueDate + Console.RESET)
     println(Console.YELLOW + "Here they are...amount " + amount + Console.RESET)
-    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, dueDate))
+    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, dueDate, amount))
       .map(Right(_))
       .recover{
         case _ =>
@@ -51,21 +51,36 @@ class PayApiConnector @Inject()(val http: HttpClient,
       }
   }
 
-  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, dueDate: LocalDate): SetupPayApiRequest = {
+  private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, dueDate: LocalDate, amount: BigDecimal): SetupPayApiRequest = {
     val balanceInPence = balance * 100
     val amountOwed = balanceInPence * -1
     val exactAmountOwed = amountOwed.toLongExact
-    println(Console.MAGENTA + "getting into geenrate requeest for pay api before attempting due date: " + Console.RESET)
-    val theDueDate = dueDate
-    println(Console.MAGENTA + "in generate requeest for pay api after attempting due date: " + Console.RESET)
+    val dueDateToSendToApi = generateDueDate(dueDate, amount, balance)
+    println(Console.GREEN + "theDueDate is  .............: " + dueDateToSendToApi + Console.RESET)
+
+
 
     SetupPayApiRequest(
       sdilRef,
       exactAmountOwed,
-      Some(theDueDate),
+      dueDateToSendToApi,
       config.homePage,
       config.homePage
     )
+  }
+
+  private def generateDueDate(dueDate: LocalDate, amount: BigDecimal, balance: BigDecimal): Option[LocalDate] = {
+
+    if (dueDate.isAfter(LocalDate.now().minusYears(6))) {
+      if (balance - amount >= 0) {
+        println(Console.GREEN + "balance and amount  .............: " + balance + amount + " the balance is " + theBalanceIs + Console.RESET)
+        Some(dueDate)
+      } else {
+        None
+      }
+    } else {
+      None
+    }
   }
 
 
