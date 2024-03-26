@@ -177,10 +177,10 @@ trait ServicePageITHelper extends ControllerITTestHelper {
     val buttons = page.getElementsByClass("govuk-button govuk-button--secondary")
     if(balance == 0) {
       page.getElementById("balanceZero").text() mustBe "Your balance is £0."
-      buttons.eachText() mustNot contain("Pay now")
+      buttons.eachText() mustNot contain("Make a payment")
     } else if(balance > 0) {
       page.getElementById("balanceCredit").text() mustBe s"You are ${formattedBalance} in credit."
-      buttons.eachText() mustNot contain("Pay now")
+      buttons.eachText() mustNot contain("Make a payment")
     } else {
       if(interest < 0){
         page.getElementById("balanceNeedToPayWithInterest").text() mustBe s"Your balance is ${formattedBalance} including ${formattedInterest} of interest."
@@ -192,7 +192,7 @@ trait ServicePageITHelper extends ControllerITTestHelper {
       }
       page.getElementById("otherPaymentOptions").text() mustBe "If you choose to make payments outside of this online account, you will need to take note of your Soft Drinks Levy reference XKSDIL000000022. Find out other ways to pay the levy (opens in a new tab)."
       page.getElementById("delayInAccountUpdate").text() mustBe "Your account balance may not reflect payments made in the last 3 days."
-      buttons.eachText() must contain("Pay now")
+      buttons.eachText() must contain("Make a payment")
     }
 
     if(hasDirectDebit) {

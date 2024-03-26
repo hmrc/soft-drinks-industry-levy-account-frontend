@@ -232,7 +232,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
 
         "that includes a secondary button that links to payments" in {
           val button = document.getElementsByClass("govuk-button govuk-button--secondary").get(0)
-          button.text() mustBe "Pay now"
+          button.text() mustBe "Make a payment"
           button.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/pay-now"
         }
 
@@ -278,7 +278,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
 
         "that includes a secondary button that links to payments" in {
           val button = document.getElementsByClass("govuk-button govuk-button--secondary").get(0)
-          button.text() mustBe "Pay now"
+          button.text() mustBe "Make a payment"
           button.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/pay-now"
         }
 
@@ -323,7 +323,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
 
         "that includes a secondary button that links to payments" in {
           val button = document.getElementsByClass("govuk-button govuk-button--secondary").get(0)
-          button.text() mustBe "Pay now"
+          button.text() mustBe "Make a payment"
           button.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/pay-now"
         }
 
@@ -367,7 +367,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         }
 
         "that does not include a secondary button that links to payments" in {
-          document.getElementsByClass("govuk-button govuk-button--secondary").eachText() mustNot contain("Pay now")
+          document.getElementsByClass("govuk-button govuk-button--secondary").eachText() mustNot contain("Make a payment")
         }
 
         "that includes a link to transaction history" in {
@@ -410,7 +410,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         }
 
         "that does not include a secondary button that links to payments" in {
-          document.getElementsByClass("govuk-button govuk-button--secondary").eachText() mustNot contain("Pay now")
+          document.getElementsByClass("govuk-button govuk-button--secondary").eachText() mustNot contain("Make a payment")
         }
 
         "that includes a link to transaction history" in {
