@@ -67,9 +67,13 @@ class PaymentsController @Inject()(
 
       val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
         .map(items =>
-          items.find(_.messageKey == "returnCharge").head.amount
+          if (items.isEmpty) {
+            BigDecimal(0)
+          } else {
+            items.find(_.messageKey == "returnCharge").head.amount}
         )
         .recover(_ => BigDecimal(0))
+
       lastReturnAmount
     }
 
