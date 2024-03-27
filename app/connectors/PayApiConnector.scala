@@ -36,9 +36,9 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
 
 
-  def initJourney(sdilRef: String, balance: BigDecimal, optLastReturn: Option[SdilReturn], amount: BigDecimal)
+  def initJourney(sdilRef: String, balance: BigDecimal, optLastReturn: Option[SdilReturn], amount: BigDecimal, todaysDate: LocalDate = LocalDate.now())
                  (implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, optLastReturn, amount))
+    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, optLastReturn, amount, todaysDate: LocalDate))
       .map(Right(_))
       .recover{
         case _ =>
@@ -48,11 +48,11 @@ class PayApiConnector @Inject()(val http: HttpClient,
   }
 
   private def generateRequestForPayApi(balance: BigDecimal, sdilRef: String, optLastReturn: Option[SdilReturn],
-                                       priorReturnAmount: BigDecimal): SetupPayApiRequest = {
+                                       priorReturnAmount: BigDecimal, todaysDate: LocalDate): SetupPayApiRequest = {
     val balanceInPence = balance * 100
     val amountOwed = balanceInPence * -1
     val exactAmountOwed = amountOwed.toLongExact
-    val dueDateToSendToApi = generateDueDate(optLastReturn, priorReturnAmount, balance)
+    val dueDateToSendToApi = generateDueDate(optLastReturn, priorReturnAmount, balance, todaysDate)
 
     SetupPayApiRequest(
       sdilRef,
@@ -63,10 +63,11 @@ class PayApiConnector @Inject()(val http: HttpClient,
     )
   }
 
-  private def generateDueDate(optLastReturn: Option[SdilReturn], priorReturnAmount: BigDecimal, balance: BigDecimal): Option[LocalDate] = {
-    val lastReturnPeriod = ReturnPeriod(LocalDate.now()).previous
+  private[connectors] def generateDueDate(optLastReturn: Option[SdilReturn], priorReturnAmount: BigDecimal, balance: BigDecimal,
+                                          todaysDate: LocalDate): Option[LocalDate] = {
+    val lastReturnPeriod = ReturnPeriod(todaysDate).previous
     val dueDate = if (optLastReturn.nonEmpty) {
-      genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - optLastReturn is not empty, due date generated on return period end")
+      genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - optLastReturn is not empty, due date of ${lastReturnPeriod.deadline} generated on return period end")
       Some(lastReturnPeriod.deadline)
     } else {
       genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - no LastReturn found based on the previous return period, presumed overdue")
@@ -74,7 +75,7 @@ class PayApiConnector @Inject()(val http: HttpClient,
     }
 
     dueDate match {
-      case Some(dueDate) => if (dueDate.isAfter(LocalDate.now()) && balance - priorReturnAmount >= 0) {
+      case Some(dueDate) => if (dueDate.isAfter(todaysDate) && balance - priorReturnAmount >= 0) {
         genericLogger.logger.info(s"[PayApiConnector][generateDueDate] - due date is after today and balance is less than the prior return amount, " +
           s"presumed not overdue and future payment date can be offered")
         Some(dueDate)

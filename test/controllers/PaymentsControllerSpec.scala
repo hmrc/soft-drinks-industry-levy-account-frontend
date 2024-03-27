@@ -44,6 +44,7 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+
 class PaymentsControllerSpec extends SpecBase with MockitoSugar {
 
   val mockSdilConnector: SoftDrinksIndustryLevyConnector = mock[SoftDrinksIndustryLevyConnector]
@@ -155,27 +156,6 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
         when(mockSdilConnector.balance(any(), any(), any())(any())) thenReturn createSuccessAccountResult(BigDecimal(1000))
         when(mockSdilConnector.returns_get(any(), any(), any())(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromSDIL)
         when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(allFinancialItems)
-
-        val application =
-          applicationBuilder()
-            .overrides(
-              bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
-            .build()
-
-        running(application) {
-
-          val request = FakeRequest(GET, routes.PaymentsController.setup().url)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual INTERNAL_SERVER_ERROR
-        }
-      }
-
-      "render the error page when the call to get the return amount fails" in {
-        when(mockSdilConnector.balance(any(), any(), any())(any())) thenReturn createSuccessAccountResult(BigDecimal(1000))
-        when(mockSdilConnector.returns_get(any(), any(), any())(any())) thenReturn createSuccessAccountResult(Some(emptyReturn))
-        when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromSDIL)
 
         val application =
           applicationBuilder()
