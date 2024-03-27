@@ -57,7 +57,7 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
       when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(allFinancialItems)
 
       val mockPayApiConnector = mock[PayApiConnector]
-      when(mockPayApiConnector.initJourney(any(), any(), any(), any())(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
+      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
 
       val application =
         applicationBuilder()
@@ -84,7 +84,7 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
       when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(financialItemsWithNoReturn)
 
       val mockPayApiConnector = mock[PayApiConnector]
-      when(mockPayApiConnector.initJourney(any(), any(), any(), any())(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
+      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
 
       val application =
         applicationBuilder()
@@ -111,7 +111,7 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
         when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(allFinancialItems)
 
         val mockPayApiConnector = mock[PayApiConnector]
-        when(mockPayApiConnector.initJourney(any(), any(), any(), any())(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromPayAPI)
+        when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromPayAPI)
 
         val application =
           applicationBuilder()
