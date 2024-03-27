@@ -26,7 +26,6 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utilities.GenericLogger
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
@@ -37,7 +36,6 @@ class PaymentsController @Inject()(
                                     registered: RegisteredAction,
                                     sdilConnector: SoftDrinksIndustryLevyConnector,
                                     paymentsConnector: PayApiConnector,
-                                    genericLogger: GenericLogger,
                                     errorHandler: ErrorHandler)
                                   (implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
@@ -65,15 +63,13 @@ class PaymentsController @Inject()(
   }
 
     private def getOptLastReturnAmount(sdilRef: String, internalId: String)
-                                       (implicit headerCarrier: HeaderCarrier) = {
+                                       (implicit headerCarrier: HeaderCarrier): service.AccountResult[BigDecimal] = {
 
       val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
         .map(items =>
-          items.filter(_.messageKey == "returnCharge").head.amount
-        ).map {
-          case amount => amount
-          case _ => BigDecimal(0)
-        }
+          items.find(_.messageKey == "returnCharge").head.amount
+        )
+        .recover(_ => BigDecimal(0))
       lastReturnAmount
     }
 
