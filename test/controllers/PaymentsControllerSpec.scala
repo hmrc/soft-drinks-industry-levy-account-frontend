@@ -33,7 +33,7 @@ package controllers
  */
 
 import base.SpecBase
-import base.TestData.{emptyReturn, financialItemWithNoReturn}
+import base.TestData._
 import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
 import errors.{UnexpectedResponseFromPayAPI, UnexpectedResponseFromSDIL}
 import models.NextUrl
@@ -43,7 +43,6 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testSupport.ITCoreTestData.allFinancialItems
 
 class PaymentsControllerSpec extends SpecBase with MockitoSugar {
 

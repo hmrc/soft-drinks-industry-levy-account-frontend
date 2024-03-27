@@ -18,9 +18,9 @@ package repositories
 
 import base.SpecBase
 import models.ModelEncryption
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 
-import java.time.{Instant, LocalDate}
+import java.time.Instant
 
 class ModelEncryptionSpec extends SpecBase {
 
