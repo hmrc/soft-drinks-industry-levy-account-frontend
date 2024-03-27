@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class RetrievedActivity(
                               smallProducer: Boolean,
@@ -33,5 +33,5 @@ case class RetrievedActivity(
     smallProducer && (contractPacker || importer)
 }
 object RetrievedActivity {
-  implicit val format = Json.format[RetrievedActivity]
+  implicit val format: OFormat[RetrievedActivity] = Json.format[RetrievedActivity]
 }

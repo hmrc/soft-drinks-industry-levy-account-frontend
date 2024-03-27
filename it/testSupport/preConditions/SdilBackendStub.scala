@@ -162,12 +162,12 @@ case class SdilBackendStub()
     builder
   }
 
-  def balanceHistory(sdilRef: String, withAssessment: Boolean, finincialItems: List[FinancialLineItem]) = {
+  def balanceHistory(sdilRef: String, withAssessment: Boolean, financialItems: List[FinancialLineItem]) = {
     stubFor(
       get(
         urlPathMatching(s"/balance/$sdilRef/history/all/$withAssessment"))
         .willReturn(
-          ok(Json.toJson(finincialItems).toString())))
+          ok(Json.toJson(financialItems).toString())))
     builder
   }
 

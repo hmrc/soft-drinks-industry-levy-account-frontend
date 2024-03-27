@@ -427,28 +427,28 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
     }
   }
 
-  "balanceHistory" - {
-    "when assessment is true" - {
-      "and there is no balanceHistory in the cache" - {
-        "should call the backend" - {
-          "and return the balanceHistory when sucessful" in {
+  "balanceHistory " - {
+    "when assessment is true " - {
+      "and there is no balanceHistory in the cache " - {
+        "should call the backend " - {
+          "and return the balanceHistory when successful" in {
             given
               .sdilBackend
-              .balanceHistory(aSubscription.sdilRef, true, allFinicialItems)
+              .balanceHistory(aSubscription.sdilRef, withAssessment = true, allFinancialItems)
 
-            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, true, identifier)
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = true, identifier)
 
             whenReady(res.value) { result =>
-              result mustBe Right(allFinicialItems)
+              result mustBe Right(allFinancialItems)
             }
           }
 
           "and return UnexpectedResponseFromSDIL when call fails" in {
             given
               .sdilBackend
-              .balanceHistoryfailure(aSubscription.sdilRef, true)
+              .balanceHistoryfailure(aSubscription.sdilRef, withAssessment = true)
 
-            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, true, identifier)
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = true, identifier)
 
             whenReady(res.value) { result =>
               result mustBe Left(UnexpectedResponseFromSDIL)
@@ -460,25 +460,25 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
       "and the balanceHistory is in the cache" - {
         "should return the balanceHistory" in {
           val res = for {
-            _ <- EitherT.right[AccountErrors](sessionCache.save[List[FinancialLineItem]](identifier, SessionKeys.balanceHistory(true), allFinicialItems))
-            result <- sdilConnector.balanceHistory(aSubscription.sdilRef, true, identifier)
+            _ <- EitherT.right[AccountErrors](sessionCache.save[List[FinancialLineItem]](identifier, SessionKeys.balanceHistory(true), allFinancialItems))
+            result <- sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = true, identifier)
           } yield result
 
           whenReady(res.value) { result =>
-            result mustBe Right(allFinicialItems)
+            result mustBe Right(allFinancialItems)
           }
         }
       }
     }
-    "when assessment is false" - {
-      "and there is no balanceHistory in the cache" - {
-        "should call the backend" - {
-          "and return an empty list when no history and when sucessful" in {
+    "when assessment is false " - {
+      "and there is no balanceHistory in the cache " - {
+        "should call the backend " - {
+          "and return an empty list when no history and when successful " in {
             given
               .sdilBackend
               .balanceHistory(aSubscription.sdilRef, false, List.empty)
 
-            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, false, identifier)
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = false, identifier)
 
             whenReady(res.value) { result =>
               result mustBe Right(List.empty)
@@ -488,9 +488,9 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
           "and return UnexpectedResponseFromSDIL when call fails" in {
             given
               .sdilBackend
-              .balanceHistoryfailure(aSubscription.sdilRef, false)
+              .balanceHistoryfailure(aSubscription.sdilRef, withAssessment = false)
 
-            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, false, identifier)
+            val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = false, identifier)
 
             whenReady(res.value) { result =>
               result mustBe Left(UnexpectedResponseFromSDIL)
@@ -502,25 +502,25 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
       "and the balanceHistory is in the cache" - {
         "should return the balanceHistory from the cache" in {
           val res = for {
-            _ <- EitherT.right[AccountErrors](sessionCache.save[List[FinancialLineItem]](identifier, SessionKeys.balanceHistory(false), allFinicialItems))
+            _ <- EitherT.right[AccountErrors](sessionCache.save[List[FinancialLineItem]](identifier, SessionKeys.balanceHistory(false), allFinancialItems))
             result <- sdilConnector.balanceHistory(aSubscription.sdilRef, false, identifier)
           } yield result
 
           whenReady(res.value) { result =>
-            result mustBe Right(allFinicialItems)
+            result mustBe Right(allFinancialItems)
           }
         }
       }
     }
   }
 
-  "checkDirectDebitStatus" - {
-    "when the user has a direct debit setup" - {
-      "should call the backend" - {
+  "checkDirectDebitStatus " - {
+    "when the user has a direct debit setup " - {
+      "should call the backend " - {
         "and return true" in {
           given
             .sdilBackend
-            .checkDirectDebitStatus(SDIL_REF, true)
+            .checkDirectDebitStatus(SDIL_REF, hasDD = true)
 
           val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)
 
@@ -529,12 +529,12 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
           }
         }
       }
-      "when the user has no direct debit setup" - {
-        "should call the backend" - {
+      "when the user has no direct debit setup " - {
+        "should call the backend " - {
           "and return false" in {
             given
               .sdilBackend
-              .checkDirectDebitStatus(SDIL_REF, false)
+              .checkDirectDebitStatus(SDIL_REF, hasDD = false)
 
             val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)
 

@@ -49,7 +49,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         "containing the pending returns, balance, no interest, direct debit status and subscription" - {
           "when the user has pending returns, no lastReturn, a positive balance, and no interest to pay and has a direct debit setup" in {
             val balance = BigDecimal(123.45)
-            val balanceHistory = List(finincialItemReturnCharge)
+            val balanceHistory = List(financialItemReturnCharge)
             val interest = BigDecimal(0)
             val ddStatus = true
             val expectedResult = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, Some(ddStatus))
@@ -115,7 +115,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         "containing pending returns sorted, no last return sent, a balance and interest to be payed and direct debit disabled" - {
           "when the user has pending returns in the wrong order and not submitted a return for the current return period" in {
             val balance = BigDecimal(123.45)
-            val balanceHistory = allFinicialItems
+            val balanceHistory = allFinancialItems
             val interest = BigDecimal(20.45)
             val expectedResult = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, None)
 
@@ -136,7 +136,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         "when the finicial item list has no distinct values" - {
           "should filter out repeated items and calculate the interest based off that" in {
             val balance = BigDecimal(123.45)
-            val balanceHistory = allFinicialItems ++ allFinicialItems
+            val balanceHistory = allFinancialItems ++ allFinancialItems
             val interest = BigDecimal(20.45)
             val expectedResult = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, None)
 
@@ -206,7 +206,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         "when the call to get direct debit fails" in {
           val balance = BigDecimal(123.45)
-          val balanceHistory = allFinicialItems ++ allFinicialItems
+          val balanceHistory = allFinancialItems ++ allFinancialItems
           when(mockSDILConnector.returns_pending("id", UTR)(hc)).thenReturn(createSuccessAccountResult(List.empty))
           when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(hc)).thenReturn(createSuccessAccountResult(None))
           when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(hc)).thenReturn(createSuccessAccountResult(balance))

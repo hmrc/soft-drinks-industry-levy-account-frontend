@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
@@ -57,7 +57,7 @@ case class ReturnPeriod(year: Int, quarter: Int) {
 
 object ReturnPeriod {
 
-  implicit val format = Json.format[ReturnPeriod]
+  implicit val format: OFormat[ReturnPeriod] = Json.format[ReturnPeriod]
   def apply(date: LocalDate): ReturnPeriod = ReturnPeriod(date.getYear, quarter(date))
 
   def quarter(date: LocalDate): Int = {
