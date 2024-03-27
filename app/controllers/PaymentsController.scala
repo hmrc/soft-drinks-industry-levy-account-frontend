@@ -70,7 +70,10 @@ class PaymentsController @Inject()(
           if (items.isEmpty) {
             BigDecimal(0)
           } else {
-            items.find(_.messageKey == "returnCharge").head.amount}
+            try { items.find(_.messageKey == "returnCharge").head.amount
+          } catch {
+              case _: NoSuchElementException => BigDecimal(0)
+            }}
         )
         .recover(_ => BigDecimal(0))
 
