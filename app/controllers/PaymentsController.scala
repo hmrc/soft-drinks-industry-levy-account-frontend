@@ -22,7 +22,6 @@ import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
 import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
 import models.{ReturnPeriod, SdilReturn}
-import org.apache.pekko.stream.impl.Stages.DefaultAttributes.recover
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,8 +29,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utilities.GenericLogger
 
 import java.time.LocalDate
-import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.runtime.universe.Try
+import scala.concurrent.ExecutionContext
 
 class PaymentsController @Inject()(
                                     val controllerComponents: MessagesControllerComponents,
