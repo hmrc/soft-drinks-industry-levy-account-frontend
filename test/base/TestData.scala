@@ -139,7 +139,7 @@ object TestData {
   val allFinancialItems: List[FinancialLineItem] = List(financialItemReturnCharge, financialItemReturnChargeInterest, financialItemCentralAssessment,
     financialItemCentralAssInterest, financialItemOfficerAssessment, financialItemOfficerAssInterest, financialItemPaymentOnAccount, financialItemUnknown)
 
-  val financialItemWithNoReturn: List[FinancialLineItem] = List(financialItemReturnChargeInterest, financialItemCentralAssessment,
+  val financialItemsWithNoReturn: List[FinancialLineItem] = List(financialItemReturnChargeInterest, financialItemCentralAssessment,
     financialItemCentralAssInterest, financialItemOfficerAssessment, financialItemOfficerAssInterest, financialItemPaymentOnAccount, financialItemUnknown)
 
 }
