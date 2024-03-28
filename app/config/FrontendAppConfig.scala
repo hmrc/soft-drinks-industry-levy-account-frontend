@@ -48,19 +48,19 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(accountBaseUrl + request.uri).encodedUrl}"
 
-  val basGatewayBaseUrl: String = configuration.baseUrl("bas-gateway")
+  private val basGatewayBaseUrl: String = configuration.baseUrl("bas-gateway")
   val sdilBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy")
-  val directDebitIsTest: Boolean = configuration.getBoolean("direct-debit.isTest")
-  val payApiIsTest: Boolean = configuration.getBoolean("pay-api.isTest")
-  val directDebitBaseUrl: String = configuration.baseUrl("direct-debit-backend")
-  val payApiBaseUrl: String = configuration.baseUrl("pay-api")
+  private val directDebitIsTest: Boolean = configuration.getBoolean("direct-debit.isTest")
+  private val payApiIsTest: Boolean = configuration.getBoolean("pay-api.isTest")
+  private val directDebitBaseUrl: String = configuration.baseUrl("direct-debit-backend")
+  private val payApiBaseUrl: String = configuration.baseUrl("pay-api")
   val directDebitUrl: String = if (directDebitIsTest) {
     directDebitBaseUrl + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
   } else {
     directDebitBaseUrl + "/direct-debit-backend/sdil-frontend/zsdl/journey/start"
   }
 
-  val directDebitEnabled = configuration.getBoolean("direct-debit.isEnabled")
+  val directDebitEnabled: Boolean = configuration.getBoolean("direct-debit.isEnabled")
 
   val payApiUrl: String = if (payApiIsTest) {
     s"$payApiBaseUrl${controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url}"
@@ -81,12 +81,12 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
   val cacheTtl: Int = configuration.getInt("mongodb.timeToLiveInSeconds")
 
-  val sdilGuidance = configuration.getString("sdilGuidance")
-  val sdilRegulations = configuration.getString("sdilRegulations")
-  val sdilContact = configuration.getString("sdilContact")
-  val creditForExportGuidance = configuration.getString("creditForExportGuidance")
-  val howToPayGuidance = configuration.getString("howToPayGuidance")
-  val sdilContactNumber = configuration.getString("sdilContactNumber")
+  val sdilGuidance: String = configuration.getString("sdilGuidance")
+  val sdilRegulations: String = configuration.getString("sdilRegulations")
+  val sdilContact: String = configuration.getString("sdilContact")
+  val creditForExportGuidance: String = configuration.getString("creditForExportGuidance")
+  val howToPayGuidance: String = configuration.getString("howToPayGuidance")
+  val sdilContactNumber: String = configuration.getString("sdilContactNumber")
 
 }
 

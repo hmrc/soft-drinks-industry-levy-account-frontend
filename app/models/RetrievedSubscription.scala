@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
@@ -33,5 +33,5 @@ case class RetrievedSubscription(
                                   deregDate: Option[LocalDate] = None)
 
 object RetrievedSubscription {
-  implicit val format = Json.format[RetrievedSubscription]
+  implicit val format: OFormat[RetrievedSubscription] = Json.format[RetrievedSubscription]
 }

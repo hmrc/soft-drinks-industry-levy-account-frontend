@@ -10,12 +10,14 @@ class PaymentsControllerISpec extends ControllerITTestHelper {
 
   val path = "/pay-now"
 
-  s"GET $path" - {
-    "should redirect to the url provided by pay-api" - {
+  s"GET $path " - {
+    "should redirect to the url provided by pay-api " - {
       "when the call to pay-api succeeds" in {
         given
           .commonPrecondition
-          .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, true)
+          .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
+          .sdilBackend.retrieveReturn(aSubscriptionWithDeRegDate.utr, pendingReturn1, resp = Some(emptyReturn))
+          .sdilBackend.balanceHistory(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true, financialItems = allFinancialItems)
           .payApiStub.successCall()
 
         WsTestClient.withClient { client =>
@@ -29,11 +31,13 @@ class PaymentsControllerISpec extends ControllerITTestHelper {
       }
     }
 
-    "should render the error page" - {
+    "should render the error page " - {
       "when the call to pay-api fails" in {
         given
           .commonPrecondition
-          .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, true)
+          .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
+          .sdilBackend.retrieveReturn(aSubscriptionWithDeRegDate.utr, pendingReturn1, resp = Some(emptyReturn))
+          .sdilBackend.balanceHistory(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true, allFinancialItems)
           .ddStub.failureCall
 
         WsTestClient.withClient { client =>
@@ -49,11 +53,11 @@ class PaymentsControllerISpec extends ControllerITTestHelper {
     }
 
 
-    "should render the error page" - {
+    "should render the error page " - {
       "when the call to sdil backend fails" in {
         given
           .commonPrecondition
-          .sdilBackend.balancefailure(aSubscriptionWithDeRegDate.sdilRef, true)
+          .sdilBackend.balancefailure(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
 
         WsTestClient.withClient { client =>
           val result1 = createClientRequestGet(client, baseUrl + path)

@@ -21,10 +21,14 @@ import com.google.inject.Inject
 import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
 import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
+import models.{ReturnPeriod, SdilReturn}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import service.AccountResult
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
 class PaymentsController @Inject()(
@@ -38,9 +42,12 @@ class PaymentsController @Inject()(
 
   def setup(): Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
     val sdilRef = request.subscription.sdilRef
+    val utr = request.subscription.utr
     val res = for {
-      balance <- sdilConnector.balance(sdilRef, true, request.internalId)
-      nextUrl <- paymentsConnector.initJourney(sdilRef, balance).map(_.nextUrl)
+      balance <- sdilConnector.balance(sdilRef, withAssessment = true, request.internalId)
+      optLastReturn <- getOptLastReturn(utr, request.internalId)
+      optReturnAmount <- getOptLastReturnAmount(sdilRef, request.internalId)
+      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, optLastReturn, optReturnAmount).map(_.nextUrl)
     } yield nextUrl
 
     res.value.map{
@@ -49,5 +56,22 @@ class PaymentsController @Inject()(
     }
   }
 
+  private def getOptLastReturn(utr: String, internalId: String)
+                              (implicit headerCarrier: HeaderCarrier): AccountResult[Option[SdilReturn]] = {
+    val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
+    val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
+    getOptLastReturn
+  }
+
+    private def getOptLastReturnAmount(sdilRef: String, internalId: String)
+                                       (implicit headerCarrier: HeaderCarrier): AccountResult[BigDecimal] = {
+
+      val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
+        .map(items =>
+          items.collectFirst{case item if item.messageKey == "returnCharge" => item.amount
+          }.getOrElse(BigDecimal(0))
+        )
+      lastReturnAmount
+    }
 
 }

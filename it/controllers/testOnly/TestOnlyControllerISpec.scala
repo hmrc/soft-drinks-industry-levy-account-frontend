@@ -61,7 +61,7 @@ class TestOnlyControllerISpec extends ControllerITTestHelper {
           .withFollowRedirects(false)
           .addCookies(DefaultWSCookie("mdtp", authAndSessionCookie))
           .addHttpHeaders((CONTENT_TYPE, JSON))
-          .post(Json.toJson(SetupPayApiRequest(SDIL_REF, 1000L, homeUrl, homeUrl)))
+          .post(Json.toJson(SetupPayApiRequest(SDIL_REF, 1000L, None, homeUrl, homeUrl)))
 
         whenReady(result1) { res =>
           res.status mustBe 200

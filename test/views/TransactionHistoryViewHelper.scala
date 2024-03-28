@@ -88,11 +88,11 @@ trait TransactionHistoryViewHelper extends ViewSpecHelper {
   }
 
   def expectedDateField(transactionHistoryItem: TransactionHistoryItem): String = {
-    transactionHistoryItem.finincialLineItem.date.format(dateFormatter)
+    transactionHistoryItem.financialLineItem.date.format(dateFormatter)
   }
 
   def expectedTransactionField(transactionHistoryItem: TransactionHistoryItem): String = {
-    transactionHistoryItem.finincialLineItem match {
+    transactionHistoryItem.financialLineItem match {
       case fli: Unknown => fli.title
       case fli: ReturnCharge =>
         val fromMonth = fli.period.start.format(monthFormatter)
@@ -110,16 +110,16 @@ trait TransactionHistoryViewHelper extends ViewSpecHelper {
   }
 
   def expectedCredit(transactionHistoryItem: TransactionHistoryItem): String = {
-    if (transactionHistoryItem.finincialLineItem.amount > 0) {
-      formatPounds(transactionHistoryItem.finincialLineItem.amount)
+    if (transactionHistoryItem.financialLineItem.amount > 0) {
+      formatPounds(transactionHistoryItem.financialLineItem.amount)
     } else {
       "£0.00"
     }
   }
 
   def expectedDebit(transactionHistoryItem: TransactionHistoryItem): String = {
-    if (transactionHistoryItem.finincialLineItem.amount < 0) {
-      s"${formatPounds(transactionHistoryItem.finincialLineItem.amount)}"
+    if (transactionHistoryItem.financialLineItem.amount < 0) {
+      s"${formatPounds(transactionHistoryItem.financialLineItem.amount)}"
     } else {
       "£0.00"
     }

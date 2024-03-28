@@ -16,10 +16,10 @@
 
 package models
 
-case class TransactionHistoryItem(finincialLineItem: FinancialLineItem, balance: BigDecimal) {
+case class TransactionHistoryItem(financialLineItem: FinancialLineItem, balance: BigDecimal) {
   def this(financialLineItem: FinancialLineItem,
            currentTransactionHistory: List[TransactionHistoryItem]) = this(
-    finincialLineItem = financialLineItem,
+    financialLineItem = financialLineItem,
     balance = currentTransactionHistory.headOption.fold(financialLineItem.amount)(_.balance + financialLineItem.amount)
   )
 }

@@ -27,7 +27,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
                 .sdilBackend.balance(SDIL_REF, true, -1000)
-                .sdilBackend.balanceHistory(SDIL_REF, true, List(finincialItemReturnCharge))
+                .sdilBackend.balanceHistory(SDIL_REF, true, List(financialItemReturnCharge))
                 .sdilBackend.checkDirectDebitStatus(SDIL_REF, true)
 
               WsTestClient.withClient { client =>
@@ -46,7 +46,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns3)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
                 .sdilBackend.balance(SDIL_REF, true, -1000)
-                .sdilBackend.balanceHistory(SDIL_REF, true, allFinicialItems)
+                .sdilBackend.balanceHistory(SDIL_REF, true, allFinancialItems)
                 .sdilBackend.checkDirectDebitStatus(SDIL_REF, false)
 
               WsTestClient.withClient { client =>
@@ -109,7 +109,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
               .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
               .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
               .sdilBackend.balance(SDIL_REF, true, -1000)
-              .sdilBackend.balanceHistory(SDIL_REF, true, allFinicialItems ++ allFinicialItems)
+              .sdilBackend.balanceHistory(SDIL_REF, true, allFinancialItems ++ allFinancialItems)
               .sdilBackend.checkDirectDebitStatus(SDIL_REF, true)
 
             WsTestClient.withClient { client =>
@@ -130,7 +130,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
               .sdilBackend.retrievePendingReturns(UTR, List.empty)
               .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
               .sdilBackend.balance(SDIL_REF, true, -1000)
-              .sdilBackend.balanceHistory(SDIL_REF, true, allFinicialItems ++ allFinicialItems)
+              .sdilBackend.balanceHistory(SDIL_REF, true, allFinancialItems ++ allFinancialItems)
               .sdilBackend.checkDirectDebitStatus(SDIL_REF, true)
 
             WsTestClient.withClient { client =>

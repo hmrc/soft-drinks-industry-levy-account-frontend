@@ -149,14 +149,14 @@ object ITCoreTestData extends TryValues {
     )
   )
 
-  val finincialItemReturnCharge = ReturnCharge(currentReturnPeriod, BigDecimal(123.45))
-  val finincialItemReturnChargeInterest = ReturnChargeInterest(localDate, BigDecimal(-12.45))
-  val finincialItemCentralAssessment = CentralAssessment(localDate, BigDecimal(1))
-  val finincialItemCentralAssInterest = CentralAsstInterest(localDate, BigDecimal(-5))
-  val finincialItemOfficerAssessment = OfficerAssessment(localDate, BigDecimal(2))
-  val finincialItemOfficerAssInterest = OfficerAsstInterest(localDate, BigDecimal(-3))
-  val finincialItemPaymentOnAccount = PaymentOnAccount(localDate, "test", BigDecimal(300))
-  val finincialItemUnknown = Unknown(localDate, "test", BigDecimal(300))
-  val allFinicialItems = List(finincialItemReturnCharge, finincialItemReturnChargeInterest, finincialItemCentralAssessment,
-    finincialItemCentralAssInterest, finincialItemOfficerAssessment, finincialItemOfficerAssInterest, finincialItemPaymentOnAccount, finincialItemUnknown)
+  val financialItemReturnCharge: ReturnCharge = ReturnCharge(currentReturnPeriod, BigDecimal(123.45))
+  val financialItemReturnChargeInterest: ReturnChargeInterest = ReturnChargeInterest(localDate, BigDecimal(-12.45))
+  val financialItemCentralAssessment: CentralAssessment = CentralAssessment(localDate, BigDecimal(1))
+  val financialItemCentralAssInterest: CentralAsstInterest = CentralAsstInterest(localDate, BigDecimal(-5))
+  val financialItemOfficerAssessment: OfficerAssessment = OfficerAssessment(localDate, BigDecimal(2))
+  val financialItemOfficerAssInterest: OfficerAsstInterest = OfficerAsstInterest(localDate, BigDecimal(-3))
+  val financialItemPaymentOnAccount: PaymentOnAccount = PaymentOnAccount(localDate, "test", BigDecimal(300))
+  val financialItemUnknown: Unknown = Unknown(localDate, "test", BigDecimal(300))
+  val allFinancialItems: List[FinancialLineItem] = List(financialItemReturnCharge, financialItemReturnChargeInterest, financialItemCentralAssessment,
+    financialItemCentralAssInterest, financialItemOfficerAssessment, financialItemOfficerAssInterest, financialItemPaymentOnAccount, financialItemUnknown)
 }
