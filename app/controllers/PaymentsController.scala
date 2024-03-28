@@ -26,6 +26,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import service.AccountResult
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
@@ -46,7 +47,7 @@ class PaymentsController @Inject()(
       balance <- sdilConnector.balance(sdilRef, withAssessment = true, request.internalId)
       optLastReturn <- getOptLastReturn(utr, request.internalId)
       optReturnAmount <- getOptLastReturnAmount(sdilRef, request.internalId)
-      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, optLastReturn: Option[SdilReturn], optReturnAmount).map(_.nextUrl)
+      nextUrl <- paymentsConnector.initJourney(sdilRef, balance, optLastReturn, optReturnAmount).map(_.nextUrl)
     } yield nextUrl
 
     res.value.map{
@@ -56,14 +57,14 @@ class PaymentsController @Inject()(
   }
 
   private def getOptLastReturn(utr: String, internalId: String)
-                              (implicit headerCarrier: HeaderCarrier): service.AccountResult[Option[SdilReturn]] = {
+                              (implicit headerCarrier: HeaderCarrier): AccountResult[Option[SdilReturn]] = {
     val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
     val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
     getOptLastReturn
   }
 
     private def getOptLastReturnAmount(sdilRef: String, internalId: String)
-                                       (implicit headerCarrier: HeaderCarrier): service.AccountResult[BigDecimal] = {
+                                       (implicit headerCarrier: HeaderCarrier): AccountResult[BigDecimal] = {
 
       val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
         .map(items =>
