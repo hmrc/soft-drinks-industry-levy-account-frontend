@@ -130,27 +130,6 @@ class PayApiConnectorISpec extends Specifications with TestConfiguration with Lo
 
   }
 
-
-//
-//  def generateDueDate(optLastReturn: Option[SdilReturn], priorReturnAmount: BigDecimal, balance: BigDecimal, mockToday: LocalDate): Option[LocalDate] = {
-//    val lastReturnPeriod = ReturnPeriod(mockToday).previous
-//    val dueDate = if (optLastReturn.nonEmpty) {
-//      Some(lastReturnPeriod.deadline)
-//    } else {
-//      None
-//    }
-//
-//    dueDate match {
-//      case Some(dueDate) =>
-//        if (dueDate.isAfter(mockToday) && (balance - priorReturnAmount >= 0)) {
-//          Some(dueDate)
-//        } else {
-//          None
-//        }
-//      case None => None
-//    }
-//  }
-
   "generateDue date " - {
     "when the optLastReturn is not None " - {
       val optLastReturn = Some(emptyReturn)

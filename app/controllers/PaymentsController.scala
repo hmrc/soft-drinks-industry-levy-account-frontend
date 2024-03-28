@@ -56,7 +56,7 @@ class PaymentsController @Inject()(
   }
 
   private def getOptLastReturn(utr: String, internalId: String)
-                                     (implicit headerCarrier: HeaderCarrier) = {
+                              (implicit headerCarrier: HeaderCarrier): service.AccountResult[Option[SdilReturn]] = {
     val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
     val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
     getOptLastReturn
@@ -67,16 +67,9 @@ class PaymentsController @Inject()(
 
       val lastReturnAmount = sdilConnector.balanceHistory(sdilRef, withAssessment = true, internalId)
         .map(items =>
-          if (items.isEmpty) {
-            BigDecimal(0)
-          } else {
-            try { items.find(_.messageKey == "returnCharge").head.amount
-          } catch {
-              case _: NoSuchElementException => BigDecimal(0)
-            }}
+          items.collectFirst{case item if item.messageKey == "returnCharge" => item.amount
+          }.getOrElse(BigDecimal(0))
         )
-        .recover(_ => BigDecimal(0))
-
       lastReturnAmount
     }
 
