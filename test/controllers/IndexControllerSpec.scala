@@ -19,13 +19,12 @@ package controllers
 import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.IndexView
 
 class IndexControllerSpec extends SpecBase {
 
   "Index Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    "must redirect to Service Page Controller for a GET" in {
 
       val application = applicationBuilder().build()
 
@@ -34,11 +33,8 @@ class IndexControllerSpec extends SpecBase {
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[IndexView]
-
-        status(result) mustEqual OK
-
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe routes.ServicePageController.onPageLoad.url
       }
     }
   }
