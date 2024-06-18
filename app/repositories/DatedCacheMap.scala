@@ -36,14 +36,14 @@ object DatedCacheMap {
     def reads(implicit encryption: Encryption): Reads[DatedCacheMap] = {
       (
         (__ \ "id").read[String] and
-          (__ \ "data").read[Map[String, EncryptedValue]] and
+          (__ \ "data").read[Map[String, JsValue]] and
           (__ \ "lastUpdated").read[Instant]
         )(ModelEncryption.decryptDatedCacheMap _)
     }
 
     def writes(implicit encryption: Encryption): OWrites[DatedCacheMap] = new OWrites[DatedCacheMap] {
       override def writes(datedCacheMap: DatedCacheMap): JsObject = {
-        val encryptedValue: (String, Map[String, EncryptedValue], Instant) = {
+        val encryptedValue: (String, Map[String, JsValue], Instant) = {
           ModelEncryption.encryptDatedCacheMap(datedCacheMap)
         }
         Json.obj(

@@ -23,19 +23,21 @@ import uk.gov.hmrc.crypto.EncryptedValue
 import java.time.Instant
 
 object ModelEncryption {
-  def encryptDatedCacheMap(datedCacheMap: DatedCacheMap)(implicit encryption: Encryption): (String, Map[String, EncryptedValue], Instant) = {
+  def encryptDatedCacheMap(datedCacheMap: DatedCacheMap)(implicit encryption: Encryption): (String, Map[String, JsValue], Instant) = {
     (
       datedCacheMap._id,
-      datedCacheMap.data.map(item => item._1 -> encryption.crypto.encrypt(item._2.toString(), datedCacheMap._id)),
+//      datedCacheMap.data.map(item => item._1 -> encryption.crypto.encrypt(item._2.toString(), datedCacheMap._id)),
+      datedCacheMap.data,
       datedCacheMap.lastUpdated
     )
   }
   def decryptDatedCacheMap(id: String,
-                           data: Map[String, EncryptedValue],
+                           data: Map[String, JsValue],
                            lastUpdated: Instant)(implicit encryption: Encryption): DatedCacheMap = {
     DatedCacheMap(
       _id = id,
-      data = data.map(item => item._1 -> Json.parse(encryption.crypto.decrypt(item._2, id))),
+//      data = data.map(item => item._1 -> Json.parse(encryption.crypto.decrypt(item._2, id))),
+      data,
       lastUpdated = lastUpdated
     )
   }
