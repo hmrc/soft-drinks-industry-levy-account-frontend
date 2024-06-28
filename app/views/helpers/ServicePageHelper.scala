@@ -122,8 +122,8 @@ object ServicePageHelper {
                              (implicit messages: Messages) = {
 
     val deregReturnPeriod = ReturnPeriod(deRegDate)
-    val deregPeriodStart = deregReturnPeriod.previous.start.format(monthYearFormatter)
-    val deregPeriodEnd = deregReturnPeriod.previous.end.format(monthYearFormatter)
+    val deregPeriodStart = deregReturnPeriod.start.format(monthYearFormatter)
+    val deregPeriodEnd = deregReturnPeriod.end.format(monthYearFormatter)
     messages("finalReturnRequired.dereg.paragraph", deregPeriodStart, deregPeriodEnd)
   }
 

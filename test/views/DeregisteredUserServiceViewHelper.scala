@@ -77,8 +77,8 @@ trait DeregisteredUserServiceViewHelper extends ServiceViewHelper {
       "that has the expected content" in {
         val content = document.getElementById("sendFinalReturnParagraph")
         val deregReturnPeriod = ReturnPeriod(deregDate)
-        val deregPeriodStart = deregReturnPeriod.previous.start.format(monthYearFormatter)
-        val deregPeriodEnd = deregReturnPeriod.previous.end.format(monthYearFormatter)
+        val deregPeriodStart = deregReturnPeriod.start.format(monthYearFormatter)
+        val deregPeriodEnd = deregReturnPeriod.end.format(monthYearFormatter)
         content.text() mustBe s"You must send a return for $deregPeriodStart to $deregPeriodEnd before we can cancel your registration."
       }
       "that includes a details section" - {

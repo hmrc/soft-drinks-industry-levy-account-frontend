@@ -150,8 +150,8 @@ trait ServicePageITHelper extends ControllerITTestHelper {
 
   def validateSendFinalReturnWhenOverdue(page: Document) = {
     val deregReturnPeriod = ReturnPeriod(deregDate)
-    val deregPeriodStart = deregReturnPeriod.previous.start.format(monthYearFormatter)
-    val deregPeriodEnd = deregReturnPeriod.previous.end.format(monthYearFormatter)
+    val deregPeriodStart = deregReturnPeriod.start.format(monthYearFormatter)
+    val deregPeriodEnd = deregReturnPeriod.end.format(monthYearFormatter)
     page.getElementById("sendFinalReturn").text() mustBe "Send final return"
     page.getElementById("sendFinalReturnParagraph").text() mustBe s"You must send a return for $deregPeriodStart to $deregPeriodEnd before we can cancel your registration."
     page.getElementsByClass("govuk-button").get(0).text() mustBe "Send a final return"
