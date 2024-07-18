@@ -147,7 +147,7 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
         "that includes a link to sdil home" in {
           val homeLink = document.getElementById("returnToServicePage")
           homeLink.text() mustBe "You can go to your Soft Drinks Industry Levy account"
-          homeLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/home"
+          homeLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend"
         }
 
         testBackLink(document)
