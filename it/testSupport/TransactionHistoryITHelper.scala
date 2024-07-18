@@ -141,7 +141,7 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
 
     val homeLink = page.getElementById("returnToServicePage")
     homeLink.text() mustBe "You can go to your Soft Drinks Industry Levy account"
-    homeLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend"
+    homeLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/home"
   }
 
   private def expectedDateField(transactionHistoryItem: TransactionHistoryItem): String = {
