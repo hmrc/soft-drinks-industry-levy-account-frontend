@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.oldRoute
 
 import controllers.actions.AuthenticatedAction
-import javax.inject.Inject
+import controllers.routes
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-class IndexController @Inject()(
+import javax.inject.Inject
+
+class RedirectToNewServiceController @Inject()(
                                  val controllerComponents: MessagesControllerComponents,
                                  identify: AuthenticatedAction
                                ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = identify {
+  def home: Action[AnyContent] = identify {
     Redirect(routes.ServicePageController.onPageLoad)
+  }
+
+  def register: Action[AnyContent] = identify {
+    Redirect(routes.RegisterController.start)
   }
 }

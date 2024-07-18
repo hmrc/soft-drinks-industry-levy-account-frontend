@@ -1,0 +1,7 @@
+# microservice specific routes
+
+GET         /                                            controllers.oldRoute.RedirectToNewServiceController.home
+
+GET         /home                                        controllers.oldRoute.RedirectToNewServiceController.home
+
+GET         /register/start                          controllers.oldRoute.RedirectToNewServiceController.register

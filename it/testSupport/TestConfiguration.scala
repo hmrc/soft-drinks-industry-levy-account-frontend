@@ -39,6 +39,8 @@ trait TestConfiguration
 
 
   val baseUrl = s"http://localhost:$port/soft-drinks-industry-levy-account-frontend"
+  val oldBaseUrl = s"http://localhost:$port/soft-drinks-industry-levy"
+
   val testOnlyBaseUrl = s"http://localhost:$port/soft-drinks-industry-levy-account-frontend/test-only"
 
   val sessionId = "sessionId-eb3158c2-0aff-4ce8-8d1b-f2208ace52fe"
