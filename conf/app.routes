@@ -2,6 +2,8 @@
 
 ->          /hmrc-frontend                               hmrcfrontend.Routes
 
+GET         /                    controllers.ServicePageController.onPageLoad
+
 GET         /home                controllers.ServicePageController.onPageLoad
 
 GET         /register/start                          controllers.RegisterController.start
