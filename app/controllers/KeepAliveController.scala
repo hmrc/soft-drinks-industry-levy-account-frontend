@@ -20,10 +20,9 @@ import controllers.actions.AuthenticatedAction
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionCache
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
-
+import controllers.oldRoute.routes
 class KeepAliveController @Inject()(
                                      val controllerComponents: MessagesControllerComponents,
                                      identify: AuthenticatedAction,
@@ -33,7 +32,7 @@ class KeepAliveController @Inject()(
   def keepAlive: Action[AnyContent] = (identify).async {
     implicit request =>
       sessionCache.extendSession(request.internalId).map(_ =>
-        Redirect(routes.IndexController.onPageLoad)
+        Redirect(routes.RedirectToNewServiceController.home)
       )
   }
 }

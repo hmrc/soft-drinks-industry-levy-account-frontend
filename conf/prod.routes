@@ -1,3 +1,4 @@
 # Add all the application routes to the app.routes file
 ->         /soft-drinks-industry-levy-account-frontend                    app.Routes
+->         /soft-drinks-industry-levy                                     old.Routes
 ->         /                          health.Routes

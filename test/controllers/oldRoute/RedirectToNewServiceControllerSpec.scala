@@ -14,27 +14,45 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.oldRoute
 
 import base.SpecBase
+import controllers.oldRoute.routes
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-class IndexControllerSpec extends SpecBase {
+class RedirectToNewServiceControllerSpec extends SpecBase {
 
-  "Index Controller" - {
+  "home" - {
 
-    "must redirect to Service Page Controller for a GET" in {
+    "when called must redirect to accountHome" in {
 
       val application = applicationBuilder().build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.IndexController.onPageLoad.url)
+        val request = FakeRequest(GET, routes.RedirectToNewServiceController.home.url)
 
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe routes.ServicePageController.onPageLoad.url
+        redirectLocation(result).value mustBe controllers.routes.ServicePageController.onPageLoad.url
+      }
+    }
+  }
+
+  "register" - {
+
+    "when called must redirect to register controller" in {
+
+      val application = applicationBuilder().build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.RedirectToNewServiceController.register.url)
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe controllers.routes.RegisterController.start.url
       }
     }
   }
