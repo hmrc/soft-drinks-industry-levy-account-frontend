@@ -27,9 +27,9 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utilities.GenericLogger
-import views.html.{ServiceView, DeregisteredUserServiceView}
+import views.html.{DeregisteredUserServiceView, ServiceView}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ServicePageController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
@@ -44,28 +44,28 @@ class ServicePageController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
 
-    registeredOrchestrator.handleServicePageRequest.value.map{
+    registeredOrchestrator.handleServicePageRequest.value.flatMap {
       case Right(viewModel: RegisteredUserServicePageViewModel) =>
-        Ok(serviceView(
+        Future.successful(Ok(serviceView(
           viewModel)
-        (implicitly, implicitly, implicitly))
+        (implicitly, implicitly, implicitly)))
       case Right(viewModel: DeregisteredUserServicePageViewModel) =>
-        Ok(deregServiceView(
+        Future.successful(Ok(deregServiceView(
           viewModel)
-        (implicitly, implicitly, implicitly))
-      case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
+        (implicitly, implicitly, implicitly)))
+      case Left(_) => errorHandler.internalServerErrorTemplate.map(errorView => InternalServerError(errorView))
     }
   }
 
   def startAReturn(isNilReturn: Boolean) = (authenticated andThen registered).async {implicit request =>
-    registeredOrchestrator.handleStartAReturn.value.map{
+    registeredOrchestrator.handleStartAReturn.value.flatMap {
       case Right(returnPeriod) =>
         val url = config.startReturnUrl(returnPeriod.year, returnPeriod.quarter, isNilReturn)
-        Redirect(url)
+        Future.successful(Redirect(url))
       case Left(NoPendingReturns) =>
         genericLogger.logger.warn("Unable to start return - no returns pending")
-        Redirect(routes.ServicePageController.onPageLoad)
-      case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
+        Future.successful(Redirect(routes.ServicePageController.onPageLoad))
+      case Left(_) => errorHandler.internalServerErrorTemplate.map(errorView => InternalServerError(errorView))
     }
   }
 

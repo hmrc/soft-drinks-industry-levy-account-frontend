@@ -40,7 +40,7 @@ class DirectDebitControllerISpec extends ControllerITTestHelper {
           whenReady(result1) { res =>
             res.status mustBe 500
             val page = Jsoup.parse(res.body)
-            page.title() mustBe "Sorry, we are experiencing technical difficulties - 500 - Soft Drinks Industry Levy - GOV.UK"
+            page.title() mustBe "Sorry, there is a problem with the service - 500 - Soft Drinks Industry Levy - GOV.UK"
           }
         }
       }

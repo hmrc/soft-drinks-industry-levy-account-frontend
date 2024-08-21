@@ -29,7 +29,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import service.AccountResult
 
 import java.time.LocalDate
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentsController @Inject()(
                                     val controllerComponents: MessagesControllerComponents,
@@ -50,9 +50,9 @@ class PaymentsController @Inject()(
       nextUrl <- paymentsConnector.initJourney(sdilRef, balance, optLastReturn, optReturnAmount).map(_.nextUrl)
     } yield nextUrl
 
-    res.value.map{
-      case Right(nextUrl) => Redirect(nextUrl)
-      case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
+    res.value.flatMap {
+      case Right(nextUrl) => Future.successful(Redirect(nextUrl))
+      case Left(_) => errorHandler.internalServerErrorTemplate.map(errorView => InternalServerError(errorView))
     }
   }
 
