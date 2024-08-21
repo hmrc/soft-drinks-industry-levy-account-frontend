@@ -5,7 +5,7 @@ object AppDependencies {
   private val playSuffix = s"-play-30"
   private val bootstrapVersion = "8.6.0"
   private val hmrcMongoVersion = "2.2.0"
-  private val playFrontendHMRCVersion = "10.9.0"
+  private val playFrontendHMRCVersion = "8.5.0"
 
   // Test dependencies
   private val scalaTestPlusPlayVersion = "7.0.1"
@@ -32,5 +32,5 @@ object AppDependencies {
     "io.github.wolfendale"    %% "scalacheck-gen-regexp"        % "1.1.0"
   ).map(_ % "test, it")
 
-  def all(): Seq[ModuleID] = compile ++ test
+  val all: Seq[ModuleID] = compile ++ test
 }
