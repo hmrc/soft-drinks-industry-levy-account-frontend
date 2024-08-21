@@ -14,11 +14,11 @@ addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0" exclude("org.
 
 addSbtPlugin("io.github.irundaia" % "sbt-sassify" % "1.5.2")
 
-addSbtPlugin("net.ground5hark.sbt" % "sbt-concat" % "0.2.0")
+addSbtPlugin("com.github.sbt" % "sbt-concat" % "1.0.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-uglify" % "2.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.4")
+addSbtPlugin("com.github.sbt" % "sbt-digest" % "2.0.0")
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
-addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.0.9")
+addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.1.0")
