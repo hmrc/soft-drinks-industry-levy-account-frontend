@@ -26,7 +26,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.TransactionHistoryView
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionHistoryController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
@@ -38,11 +38,11 @@ class TransactionHistoryController @Inject()(
                                     )(implicit config: FrontendAppConfig, ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
-    registeredOrchestrator.getTransactionHistoryForAllYears.value.map {
+    registeredOrchestrator.getTransactionHistoryForAllYears.value.flatMap {
       case Right(transactionHistoryForYears) =>
-        Ok(transactionHistoryView(request.subscription.orgName,
-          transactionHistoryForYears)(implicitly, implicitly, implicitly))
-      case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
+        Future.successful(Ok(transactionHistoryView(request.subscription.orgName,
+          transactionHistoryForYears)(implicitly, implicitly, implicitly)))
+      case Left(_) => errorHandler.internalServerErrorTemplate.map(errorView => InternalServerError(errorView))
     }
   }
 }

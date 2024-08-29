@@ -52,24 +52,27 @@ class AuthenticatedAuthenticatedAction @Inject()(override val authConnector: Aut
     authorised(AuthProviders(GovernmentGateway)).retrieve(retrieval) {
       case enrolments ~ role ~ id ~ affinity =>
         id.fold[Future[Either[Result, AuthenticatedRequest[A]]]](
-          Future.successful(
-            Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
-          )) { internalId =>
+          errorHandler.internalServerErrorTemplate(request).map(errorView => Left(InternalServerError(errorView)))
+          ) { internalId =>
           val maybeUtr = getUtr(enrolments)
           val maybeSdil = getSdilEnrolment(enrolments)
           (maybeUtr, maybeSdil) match {
             case (Some(utr), _) => sdilConnector.retrieveSubscription(utr, "utr", internalId).value
-              .map {
+              .flatMap {
                 case Right(optSubscription) =>
-                  Right(AuthenticatedRequest(request, internalId, enrolments, optSubscription, maybeUtr, maybeSdil.map(_.value)))
-                case Left(_) => Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
+                  Future.successful(
+                    Right(AuthenticatedRequest(request, internalId, enrolments, optSubscription, maybeUtr, maybeSdil.map(_.value)))
+                  )
+                case Left(_) => errorHandler.internalServerErrorTemplate(request).map(errorView => Left(InternalServerError(errorView)))
               }
             case (_, Some(sdilEnrolment)) =>
               sdilConnector.retrieveSubscription(sdilEnrolment.value, "sdil", internalId).value
-              .map {
+              .flatMap {
                 case Right(optSubscription) =>
-                Right(AuthenticatedRequest(request, internalId, enrolments, optSubscription, maybeUtr, maybeSdil.map(_.value)))
-                case Left(_) => Left(InternalServerError(errorHandler.internalServerErrorTemplate(request)))
+                Future.successful(
+                  Right(AuthenticatedRequest(request, internalId, enrolments, optSubscription, maybeUtr, maybeSdil.map(_.value)))
+                )
+                case Left(_) => errorHandler.internalServerErrorTemplate(request).map(errorView => Left(InternalServerError(errorView)))
               }
             case _ => invalidRole(role).orElse(invalidAffinityGroup(affinity)) match {
               case Some(error) => Future.successful(Left(error))

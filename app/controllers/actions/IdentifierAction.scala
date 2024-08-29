@@ -36,7 +36,7 @@ class IdentificationActionImp @Inject()(errorHandler: ErrorHandler)
           Future.successful(Left(Redirect(routes.ServicePageController.onPageLoad)))
         case (Some(_), optSub) => Future.successful(Right(IdentificationRequest(request, request.internalId, optSub, request.optUtr)))
         case (None, Some(sub)) if sub.deregDate.nonEmpty => Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
-        case _ if request.optSdilRef.isDefined => Future.successful(Left(NotFound(errorHandler.notFoundTemplate(request))))
+        case _ if request.optSdilRef.isDefined => errorHandler.notFoundTemplate(request).map(errorView => Left(NotFound(errorView)))
         case _ => Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
       }
     }

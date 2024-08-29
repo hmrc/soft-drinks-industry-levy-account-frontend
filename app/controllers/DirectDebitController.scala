@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utilities.GenericLogger
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class DirectDebitController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
@@ -37,10 +37,12 @@ class DirectDebitController @Inject()(
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def setup(): Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
-    directDebitConnector.initJourney().value.map{
+    directDebitConnector.initJourney().value.flatMap {
       case Right(resp) =>
-        Redirect(resp.nextUrl)
-      case Left(_) => InternalServerError(errorHandler.internalServerErrorTemplate)
+        Future.successful(Redirect(resp.nextUrl))
+      case Left(_) => errorHandler.internalServerErrorTemplate.map{
+        InternalServerError(_)
+      }
     }
   }
 }

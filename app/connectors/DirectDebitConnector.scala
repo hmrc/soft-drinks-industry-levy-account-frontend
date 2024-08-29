@@ -21,14 +21,16 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import errors.UnexpectedResponseFromDirectDebit
 import models.{NextUrl, SetupDirectDebitRequest}
+import play.api.libs.json.Json
 import service.AccountResult
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import utilities.GenericLogger
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import utilities.GenericLogger
 
 import scala.concurrent.ExecutionContext
 
-class DirectDebitConnector @Inject()(val http: HttpClient,
+class DirectDebitConnector @Inject()(val http: HttpClientV2,
                                      config: FrontendAppConfig,
                                      genericLogger: GenericLogger
                                    )(implicit ec: ExecutionContext) {
@@ -36,7 +38,10 @@ class DirectDebitConnector @Inject()(val http: HttpClient,
 
 
   def initJourney()(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    http.POST[SetupDirectDebitRequest, NextUrl](config.directDebitUrl, new SetupDirectDebitRequest(config))
+    val ddRequest = new SetupDirectDebitRequest(config)
+    http.post(url"${config.directDebitUrl}")
+      .withBody(Json.toJson(ddRequest))
+      .execute[NextUrl]
       .map(Right(_))
       .recover{
         case _ =>

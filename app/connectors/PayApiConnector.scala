@@ -21,15 +21,17 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import errors.UnexpectedResponseFromPayAPI
 import models.{NextUrl, ReturnPeriod, SdilReturn, SetupPayApiRequest}
+import play.api.libs.json.Json
 import service.AccountResult
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import utilities.GenericLogger
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import utilities.GenericLogger
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
-class PayApiConnector @Inject()(val http: HttpClient,
+class PayApiConnector @Inject()(val http: HttpClientV2,
                                 config: FrontendAppConfig,
                                 genericLogger: GenericLogger
                                    )(implicit ec: ExecutionContext) {
@@ -38,11 +40,14 @@ class PayApiConnector @Inject()(val http: HttpClient,
 
   def initJourney(sdilRef: String, balance: BigDecimal, optLastReturn: Option[SdilReturn], amount: BigDecimal, todaysDate: LocalDate = LocalDate.now())
                  (implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
-    http.POST[SetupPayApiRequest, NextUrl](config.payApiUrl, generateRequestForPayApi(balance, sdilRef, optLastReturn, amount, todaysDate: LocalDate))
+    val payApiRequest = generateRequestForPayApi(balance, sdilRef, optLastReturn, amount, todaysDate: LocalDate)
+    http.post(url"${config.payApiUrl}")
+      .withBody(Json.toJson(payApiRequest))
+      .execute[NextUrl]
       .map(Right(_))
-      .recover{
+      .recover {
         case _ =>
-          genericLogger.logger.error(s"[PayApiConnector][initJourney] - unexpected response")
+          genericLogger.logger.error(s"[DirectDebitConnector][initJourney] - unexpected response")
           Left(UnexpectedResponseFromPayAPI)
       }
   }

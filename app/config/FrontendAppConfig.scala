@@ -17,8 +17,6 @@
 package config
 
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.RequestHeader
-import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
@@ -28,8 +26,6 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val appName: String = configuration.getString("appName")
   lazy val homePage: String = configuration.getString("microservice.services.home-page-url")
 
-  private val contactHost = configuration.getString("contact-frontend.host")
-  private val contactFormServiceIdentifier = "soft-drinks-industry-levy-account-frontend"
   val returnsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-returns-frontend")
   val registrationBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-registration-frontend")
   val variationsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-variations-frontend")
@@ -45,8 +41,6 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val startRegistrationUrl: String = {
     s"$registrationBaseUrl/soft-drinks-industry-levy-registration/start"
   }
-  def feedbackUrl(implicit request: RequestHeader): String =
-    s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(accountBaseUrl + request.uri).encodedUrl}"
 
   private val basGatewayBaseUrl: String = configuration.baseUrl("bas-gateway")
   val sdilBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy")
