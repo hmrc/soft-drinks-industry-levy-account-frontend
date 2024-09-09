@@ -31,11 +31,18 @@ trait ServiceViewHelper extends ViewSpecHelper {
   lazy val timeFormatter = DateTimeFormatter.ofPattern("h:mma")
 
   def noReturnsPendingMessage(lastReturn: SdilReturn): String = {
-    val submittedOn = lastReturn.submittedOn.getOrElse(Instant.now).atZone(ZoneId.of("Europe/London"))
     val lastPeriodStart = pendingReturn1.start.format(monthFormatter)
     val lastPeriodEnd = pendingReturn1.end.format(monthYearFormatter)
-    val submittedTime = submittedOn.format(timeFormatter).toLowerCase
-    val submittedDate = submittedOn.format(dateFormatter)
+    val submittedTime = lastReturn.submittedOn
+      .map(_.atZone(ZoneId.of("Europe/London")))
+      .getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
+      .format(timeFormatter).toLowerCase
+
+    val submittedDate = lastReturn.submittedOn
+      .map(_.atZone(ZoneId.of("Europe/London")))
+      .getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
+      .format(dateFormatter)
+
     val currentPeriodStart = currentReturnPeriod.start.format(monthFormatter)
     val currentPeriodEnd = currentReturnPeriod.end.format(monthYearFormatter)
     val nextReturnDueDate = currentReturnPeriod.deadline.format(dateFormatter)
@@ -93,7 +100,6 @@ trait ServiceViewHelper extends ViewSpecHelper {
       }
     }
   }
-
 
 
 }
