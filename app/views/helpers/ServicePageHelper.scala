@@ -77,18 +77,9 @@ object ServicePageHelper {
     val currentReturnPeriod = ReturnPeriod(LocalDate.now)
     val lastPeriodStart = currentReturnPeriod.previous.start.format(monthFormatter)
     val lastPeriodEnd = currentReturnPeriod.previous.end.format(monthYearFormatter)
-
-    val submittedTime = lastReturn.submittedOn
-      .map(_.atZone(ZoneId.of("Europe/London")))
-      .getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
-      .format(timeFormatter).toLowerCase
-
-    val submittedDate = lastReturn.submittedOn
-      .map(_.atZone(ZoneId.of("Europe/London")))
-      .getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
-      .format(dateFormatter)
-
-
+    val submittedOn = lastReturn.submittedOn.map(_.atZone(ZoneId.of("Europe/London"))).getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
+    val submittedTime = submittedOn.format(timeFormatter).toLowerCase
+    val submittedDate = submittedOn.format(dateFormatter)
     val currentPeriodStart = currentReturnPeriod.start.format(monthFormatter)
     val currentPeriodEnd = currentReturnPeriod.end.format(monthYearFormatter)
     val nextReturnDueDate = currentReturnPeriod.deadline.format(dateFormatter)
