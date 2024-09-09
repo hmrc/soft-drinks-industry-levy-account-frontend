@@ -69,7 +69,7 @@ object TestData {
 
   val submittedDateTime = LocalDateTime.of(2023, 1, 1, 11, 0)
 
-  val emptyReturn = SdilReturn((0, 0), (0, 0), List.empty, (0, 0), (0, 0), (0, 0), (0, 0), submittedOn = Some(submittedDateTime.toInstant(ZoneOffset.UTC)))
+  val emptyReturn = SdilReturn((0, 0), (0, 0), List.empty, (0, 0), (0, 0), (0, 0), (0, 0), submittedOn = Some(submittedDateTime)))
 
   def registeredUserServicePageViewModel(pendingReturns: List[ReturnPeriod],
                                          optLastReturn: Option[SdilReturn],
