@@ -289,7 +289,7 @@ def validateAccountBalance(page: Document,
     s"$startMonth to $endDate"
   }
   def noReturnsPendingMessage(lastReturn: SdilReturn): String = {
-    val submittedOn = lastReturn.submittedOn.getOrElse(Instant.now).atZone(ZoneId.of("Europe/London"))
+    val submittedOn = lastReturn.submittedOn.map(_.atZone(ZoneId.of("Europe/London"))).getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
     val lastPeriodStart = pendingReturn1.start.format(monthFormatter)
     val lastPeriodEnd = pendingReturn1.end.format(monthYearFormatter)
     val submittedTime = submittedOn.format(timeFormatter).toLowerCase
