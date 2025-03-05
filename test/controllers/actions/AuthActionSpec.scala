@@ -22,7 +22,7 @@ import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
 import handlers.ErrorHandler
-import play.api.mvc.{BodyParsers, Results}
+import play.api.mvc.{AnyContent, BodyParsers, Request, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
@@ -30,13 +30,12 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
 
-
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends SpecBase {
 
   class Harness(authAction: AuthenticatedAction) {
-    def onPageLoad() = authAction { _ => Results.Ok }
+    def onPageLoad() = authAction { implicit request: Request[AnyContent] => Results.Ok }
   }
 
   "Auth Action" - {

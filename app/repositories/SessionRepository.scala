@@ -29,6 +29,8 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
+
 @Singleton
 class SessionRepository @Inject()(
                                    mongoComponent: MongoComponent,
@@ -43,7 +45,7 @@ class SessionRepository @Inject()(
         Indexes.ascending("lastUpdated"),
         IndexOptions()
           .name("session-cache-expiry")
-          .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+          .expireAfter(appConfig.cacheTtl.toLong, TimeUnit.SECONDS)
       )
     ),
     replaceIndexes = false
@@ -69,7 +71,7 @@ class SessionRepository @Inject()(
 
   def get(id: String): Future[Option[CacheMap]] = {
     collection.find(equal("_id", id)).headOption().map { datedCacheMap =>
-      datedCacheMap.map { value: DatedCacheMap =>
+      datedCacheMap.map { value =>
         CacheMap(value._id, value.data)
       }
     }

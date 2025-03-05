@@ -1,16 +1,21 @@
 package controllers
 
+import testSupport.preConditions.PreconditionHelpers._
 import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
+import org.scalatest.matchers.must.Matchers.include
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.EitherValues._
 import play.api.http.HeaderNames
 import play.api.libs.json.JsValue
 import play.api.libs.ws.{DefaultWSCookie, WSClient, WSResponse}
 import play.api.test.WsTestClient
 import testSupport.{Specifications, TestConfiguration}
+import play.api.libs.ws.writeableOf_JsValue
+
 
 import scala.concurrent.Future
 
-trait ControllerITTestHelper extends Specifications with TestConfiguration {
+trait ControllerITTestHelper extends Specifications with TestConfiguration with PreconditionHelpers {
 
   def createClientRequestGet(client: WSClient, url: String): Future[WSResponse] = {
     client.url(url)
@@ -31,8 +36,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration {
   def testUnauthorisedUser(url: String, optJson: Option[JsValue] = None, requiresSubscription: Boolean = true): Unit = {
     "the user is unauthenticated" - {
       "redirect to gg-signin" in {
-        given.unauthorisedPrecondition
-
+         unauthorisedPrecondition
         WsTestClient.withClient { client =>
           val result1 = optJson match {
             case Some(json) => createClientRequestPOST(client, url, json)
@@ -49,8 +53,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration {
 
     "the user is authorised but has an invalid role" - {
       "redirect to sdil home" in {
-        given.authorisedWithInvalidRolePrecondition
-
+         authorisedWithInvalidRolePrecondition
         WsTestClient.withClient { client =>
           val result1 = optJson match {
             case Some(json) => createClientRequestPOST(client, url, json)
@@ -67,7 +70,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration {
 
     "the user is authorised but has an invalid affinity group" - {
       "redirect to sdil home" in {
-        given.authorisedWithInvalidAffinityPrecondition
+         authorisedWithInvalidAffinityPrecondition
 
         WsTestClient.withClient { client =>
           val result1 = optJson match {
@@ -85,7 +88,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration {
     if (requiresSubscription) {
       "redirect to the index page" - {
         "the user is authorised but has no sdilSubscription" in {
-          given.authorisedWithNoSubscriptionPrecondition
+          authorisedWithNoSubscriptionPrecondition
           WsTestClient.withClient { client =>
             val result1 = optJson match {
               case Some(json) => createClientRequestPOST(client, url, json)
@@ -100,7 +103,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration {
         }
 
         "the user is authorised but has no enrolent" in {
-          given.authorisedButNoEnrolmentsPrecondition
+           authorisedButNoEnrolmentsPrecondition
           WsTestClient.withClient { client =>
             val result1 = optJson match {
               case Some(json) => createClientRequestPOST(client, url, json)
@@ -118,7 +121,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration {
 
     "the user is authorised but has no identifer" - {
       "render the error page" in {
-        given.authorisedButInternalIdPrecondition
+         authorisedButInternalIdPrecondition
 
         WsTestClient.withClient { client =>
           val result1 = optJson match {

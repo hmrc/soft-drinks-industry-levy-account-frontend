@@ -21,27 +21,29 @@ import config.FrontendAppConfig
 import models.NextUrl
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+
+import scala.concurrent.Future
 
 class TestOnlyController @Inject()(val controllerComponents: MessagesControllerComponents,
                                    config: FrontendAppConfig)
   extends FrontendBaseController with I18nSupport {
 
-  def stubDirectDebitJourney() = Action { _ =>
-    Redirect(config.homePage)
+  def stubDirectDebitJourney() = Action.async {  request =>
+    Future.successful(Redirect(config.homePage))
   }
 
-  def stubDirectDebitInitialise() = Action { _ =>
-    Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubDirectDebitJourney().url)))
+  def stubDirectDebitInitialise() = Action.async {  request =>
+    Future.successful(Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubDirectDebitJourney().url))))
   }
 
-  def stubPayApiJourney() = Action { _ =>
-    Redirect(config.homePage)
+  def stubPayApiJourney() = Action.async {  request =>
+    Future.successful(Redirect(config.homePage))
   }
 
-  def stubPayApiInitialise() = Action { _ =>
-    Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubPayApiJourney().url)))
+  def stubPayApiInitialise() = Action.async {  request =>
+    Future.successful(Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubPayApiJourney().url))))
   }
 
 }

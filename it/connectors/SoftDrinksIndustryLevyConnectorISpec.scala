@@ -3,17 +3,22 @@ package connectors
 import cats.data.EitherT
 import errors.{AccountErrors, UnexpectedResponseFromSDIL}
 import models.{FinancialLineItem, OptPreviousSubmittedReturn, OptRetrievedSubscription, ReturnPeriod}
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import repositories.SessionKeys
 import testSupport.ITCoreTestData._
 import testSupport.{Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
 import models.FinancialLineItem.formatter
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.EitherValues._
+import testSupport.preConditions.{PreconditionHelpers, PreconditionBuilder }
 
-class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfiguration {
 
-  val sdilConnector = app.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-  implicit val hc = new HeaderCarrier()
+class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfiguration with PreconditionHelpers {
+
+  val sdilConnector: SoftDrinksIndustryLevyConnector = app.injector.instanceOf[SoftDrinksIndustryLevyConnector]
+  implicit val hc: HeaderCarrier = new HeaderCarrier()
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
+
 
   "retrieveSubscription" - {
     "when the cache is empty" - {
@@ -21,7 +26,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "should return None" - {
           "when searching by utr" in {
             given
-              .sdilBackend
+              sdilBackend
               .retrieveSubscriptionNone("utr", UTR)
 
             val res = sdilConnector.retrieveSubscription(UTR, "utr", identifier)
@@ -33,7 +38,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "when searching by sdilRef" in {
             given
-              .sdilBackend
+              sdilBackend
               .retrieveSubscriptionNone("sdil", SDIL_REF)
 
             val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
@@ -49,7 +54,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "should return the subscription" - {
           "when searching by utr" in {
             given
-              .sdilBackend
+              sdilBackend
               .retrieveSubscription("utr", UTR)
 
             val res = sdilConnector.retrieveSubscription(UTR, "utr", identifier)
@@ -61,7 +66,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "when searching by sdilRef" in {
             given
-              .sdilBackend
+              sdilBackend
               .retrieveSubscription("sdil", SDIL_REF)
 
             val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
@@ -76,7 +81,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
       "when the backend returns an internal error" - {
         "should return an UnexpectedResponseFromSDIL error" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrieveSubscriptionError("sdil", SDIL_REF)
 
           val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
@@ -146,7 +151,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
       "should call the backend" - {
         "and return None when no pending returns" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrievePendingReturns(UTR, List.empty)
 
           val res = sdilConnector.returns_pending(identifier, UTR)
@@ -157,7 +162,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         }
         "and return the list of pending return when exist" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrievePendingReturns(UTR, pendingReturns3)
 
           val res = sdilConnector.returns_pending(identifier, UTR)
@@ -169,7 +174,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
         "and return UnexpectedResponseFromSDIL when the backend returns an unexpectedResponse code" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrievePendingReturnsError(UTR)
 
           val res = sdilConnector.returns_pending(identifier, UTR)
@@ -212,7 +217,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
       "should call the backend" - {
         "and return None when no variable returns" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrieveVariableReturns(UTR, List.empty)
 
           val res = sdilConnector.returns_variable(identifier, UTR)
@@ -223,7 +228,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         }
         "and return the list of variable return when exist" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrieveVariableReturns(UTR, pendingReturns3)
 
           val res = sdilConnector.returns_variable(identifier, UTR)
@@ -235,7 +240,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
         "and return UnexpectedResponseFromSDIL when the backend returns an unexpectedResponse code" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrieveVariableReturnsError(UTR)
 
           val res = sdilConnector.returns_variable(identifier, UTR)
@@ -279,7 +284,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
       "should call the backend" - {
         "and return None when no previous return submitted" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrieveReturn(UTR, currentReturnPeriod.previous, None)
 
           val res = sdilConnector.returns_get(UTR, currentReturnPeriod.previous, identifier)
@@ -290,7 +295,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         }
         "and return the sdil return when exists" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
 
           val res = sdilConnector.returns_get(UTR, currentReturnPeriod.previous, identifier)
@@ -302,7 +307,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
         "and return UnexpectedResponseFromSDIL when the backend returns an unexpectedResponse code" in {
           given
-            .sdilBackend
+            sdilBackend
             .retrieveReturnError(UTR, currentReturnPeriod.previous)
 
           val res = sdilConnector.returns_get(UTR, currentReturnPeriod.previous, identifier)
@@ -346,7 +351,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "should call the backend" - {
           "and return the balance when sucessful" in {
             given
-              .sdilBackend
+              sdilBackend
               .balance(aSubscription.sdilRef, true)
 
             val res = sdilConnector.balance(aSubscription.sdilRef, true, identifier)
@@ -358,7 +363,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "and return UnexpectedResponseFromSDIL when call fails" in {
             given
-              .sdilBackend
+              sdilBackend
               .balancefailure(aSubscription.sdilRef, true)
 
             val res = sdilConnector.balance(aSubscription.sdilRef, true, identifier)
@@ -388,7 +393,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "should call the backend" - {
           "and return the balance when sucessful" in {
             given
-              .sdilBackend
+              sdilBackend
               .balance(aSubscription.sdilRef, false)
 
             val res = sdilConnector.balance(aSubscription.sdilRef, false, identifier)
@@ -400,7 +405,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "and return UnexpectedResponseFromSDIL when call fails" in {
             given
-              .sdilBackend
+              sdilBackend
               .balancefailure(aSubscription.sdilRef, false)
 
             val res = sdilConnector.balance(aSubscription.sdilRef, false, identifier)
@@ -433,7 +438,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "should call the backend " - {
           "and return the balanceHistory when successful" in {
             given
-              .sdilBackend
+              sdilBackend
               .balanceHistory(aSubscription.sdilRef, withAssessment = true, allFinancialItems)
 
             val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = true, identifier)
@@ -445,7 +450,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "and return UnexpectedResponseFromSDIL when call fails" in {
             given
-              .sdilBackend
+              sdilBackend
               .balanceHistoryfailure(aSubscription.sdilRef, withAssessment = true)
 
             val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = true, identifier)
@@ -475,7 +480,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "should call the backend " - {
           "and return an empty list when no history and when successful " in {
             given
-              .sdilBackend
+              sdilBackend
               .balanceHistory(aSubscription.sdilRef, false, List.empty)
 
             val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = false, identifier)
@@ -487,7 +492,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "and return UnexpectedResponseFromSDIL when call fails" in {
             given
-              .sdilBackend
+              sdilBackend
               .balanceHistoryfailure(aSubscription.sdilRef, withAssessment = false)
 
             val res = sdilConnector.balanceHistory(aSubscription.sdilRef, withAssessment = false, identifier)
@@ -519,7 +524,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
       "should call the backend " - {
         "and return true" in {
           given
-            .sdilBackend
+            sdilBackend
             .checkDirectDebitStatus(SDIL_REF, hasDD = true)
 
           val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)
@@ -533,7 +538,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "should call the backend " - {
           "and return false" in {
             given
-              .sdilBackend
+              sdilBackend
               .checkDirectDebitStatus(SDIL_REF, hasDD = false)
 
             val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)
@@ -545,7 +550,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         }
         "should return UnexpectedResponseFromSDIL when the backend returns an unexpectedResponse code" in {
           given
-            .sdilBackend
+            sdilBackend
             .checkDirectDebitStatusfailure(SDIL_REF)
 
           val res = sdilConnector.checkDirectDebitStatus(SDIL_REF)

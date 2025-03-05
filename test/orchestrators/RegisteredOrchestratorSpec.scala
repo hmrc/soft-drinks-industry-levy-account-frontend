@@ -23,7 +23,7 @@ import connectors.SoftDrinksIndustryLevyConnector
 import errors.{NoPendingReturns, UnexpectedResponseFromSDIL}
 import models.{CentralAssessment, CentralAsstInterest, FinancialLineItem, OfficerAssessment, OfficerAsstInterest, PaymentOnAccount, ReturnCharge, ReturnChargeInterest, ReturnPeriod, SdilReturn, TransactionHistoryItem, Unknown}
 import models.requests.RegisteredRequest
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest

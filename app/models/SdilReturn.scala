@@ -38,7 +38,7 @@ object SdilReturn {
   implicit val longTupleFormatter: Format[(Long, Long)] = (
     (JsPath \ "lower").format[Long] and
       (JsPath \ "higher").format[Long]
-    )((a: Long, b: Long) => (a, b), unlift({ x: (Long, Long) =>
+    )((a: Long, b: Long) => (a, b), unlift({ (x: (Long, Long)) =>
     Tuple2.unapply(x)
   }))
 
