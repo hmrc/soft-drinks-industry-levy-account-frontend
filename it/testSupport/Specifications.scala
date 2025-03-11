@@ -8,7 +8,7 @@ import testSupport.preConditions.PreconditionBuilder
 trait Specifications extends AnyFreeSpec with ScalaFutures {
   this: TestConfiguration =>
 
-  implicit val `given` = new PreconditionBuilder
+  val build = new PreconditionBuilder
   lazy val user = new ActionsBuilder(baseUrl)
 
 }

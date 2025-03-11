@@ -7,8 +7,10 @@ import testSupport.ITCoreTestData.*
 import org.scalatest.matchers.must.Matchers.*
 import org.scalatest.EitherValues.*
 import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
 
-class PaymentsControllerISpec extends ControllerITTestHelper with PreconditionHelpers {
+class PaymentsControllerISpec extends ControllerITTestHelper with PreconditionHelpers with Specifications {
 
   val path = "/pay-now"
 
@@ -17,8 +19,8 @@ class PaymentsControllerISpec extends ControllerITTestHelper with PreconditionHe
   s"GET $path " - {
     "should redirect to the url provided by pay-api " - {
       "when the call to pay-api succeeds" in {
-        given
-          commonPrecondition
+        build
+          .commonPrecondition
           .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
           .sdilBackend.retrieveReturn(aSubscriptionWithDeRegDate.utr, pendingReturn1, resp = Some(emptyReturn))
           .sdilBackend.balanceHistory(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true, financialItems = allFinancialItems)
@@ -37,8 +39,8 @@ class PaymentsControllerISpec extends ControllerITTestHelper with PreconditionHe
 
     "should render the error page " - {
       "when the call to pay-api fails" in {
-        given
-          commonPrecondition
+        build
+          .commonPrecondition
           .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
           .sdilBackend.retrieveReturn(aSubscriptionWithDeRegDate.utr, pendingReturn1, resp = Some(emptyReturn))
           .sdilBackend.balanceHistory(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true, allFinancialItems)
@@ -59,8 +61,8 @@ class PaymentsControllerISpec extends ControllerITTestHelper with PreconditionHe
 
     "should render the error page " - {
       "when the call to sdil backend fails" in {
-        given
-          commonPrecondition
+        build
+          .commonPrecondition
           .sdilBackend.balancefailure(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
 
         WsTestClient.withClient { client =>

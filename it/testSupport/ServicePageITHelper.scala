@@ -21,11 +21,12 @@ import testSupport.ITCoreTestData._
 import models.{ReturnPeriod, SdilReturn}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.matchers.must.Matchers.{contain, convertToAnyMustWrapper, include}
+import org.scalatest.matchers.must.Matchers._
 import play.api.i18n.Messages
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneId}
+import play.api.i18n.Messages.implicitMessagesProviderToMessages
 
 trait ServicePageITHelper extends ControllerITTestHelper {
 

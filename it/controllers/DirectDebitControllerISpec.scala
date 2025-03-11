@@ -7,9 +7,12 @@ import testSupport.ITCoreTestData._
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.EitherValues._
 import testSupport.preConditions.PreconditionHelpers
-import testSupport.preConditions.PreconditionBuilder // Import PreconditionBuilder
+import testSupport.preConditions.PreconditionBuilder
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
 
-class DirectDebitControllerISpec extends ControllerITTestHelper with PreconditionHelpers {
+
+class DirectDebitControllerISpec extends ControllerITTestHelper with PreconditionHelpers with Specifications {
 
   // Provide an implicit PreconditionBuilder as required by PreconditionHelpers
   implicit val builder: PreconditionBuilder = new PreconditionBuilder()
@@ -19,8 +22,8 @@ class DirectDebitControllerISpec extends ControllerITTestHelper with Preconditio
   s"GET $path" - {
     "should redirect to the url provided by direct-debit" - {
       "when the call to direct-debit succeeds" in {
-        given
-          commonPrecondition 
+        build
+          .commonPrecondition
           .ddStub.successCall()
 
         WsTestClient.withClient { client =>
@@ -36,9 +39,9 @@ class DirectDebitControllerISpec extends ControllerITTestHelper with Preconditio
 
     "should render the error page" - {
       "when the call to direct-debit fails" in {
-        given
-          commonPrecondition
-          .ddStub.failureCall()
+        build
+          .commonPrecondition
+          .ddStub.failureCall
 
         WsTestClient.withClient { client =>
           val result1 = createClientRequestGet(client, baseUrl + path)

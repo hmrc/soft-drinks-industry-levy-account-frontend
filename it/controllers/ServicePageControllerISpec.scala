@@ -2,13 +2,15 @@ package controllers
 
 import models.ReturnPeriod
 import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
+import org.scalatest.matchers.must.Matchers._
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
 import testSupport.ServicePageITHelper
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
 
-class ServicePageControllerISpec extends ServicePageITHelper {
+class ServicePageControllerISpec extends ServicePageITHelper with Specifications {
 
   val servicePagePath = "/home"
   val startAReturnPath = "/start-a-return/nilReturn/false"
@@ -22,7 +24,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
         "that includes a returns section and account balance section" - {
           "with a list of pending returns, and an amount to pay message" - {
             "when the user has 1 return pending, currently owes money with no interest and has a direct debit setup" in {
-              given
+              build
                 .commonPrecondition
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -41,7 +43,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
             }
 
             "when the user has more than 1 return pending, currently owes money with interest and has no direct debit setup" in {
-              given
+              build
                 .commonPrecondition
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns3)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -60,7 +62,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
             }
 
             "when the user has 1 return pending, a lastReturn, a balance of zero and no ddSetup" in {
-              given
+              build
                 .commonPreconditionSdilRef
                 .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
@@ -82,7 +84,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
           "with no warning message but inset text containing details of last sent return" - {
 
             "when there is no returns pending, a return for the previous period submitted, and an balance in credit" in {
-              given
+              build
                 .commonPrecondition
                 .sdilBackend.retrievePendingReturns(UTR, List.empty)
                 .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
@@ -104,7 +106,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
 
         "that has 5 sections which includes a message about small producers not submitting returns instead of a returns, account with correct balance and interest, manage your account, business details and need help" - {
           "when there are no pending returns or lastReturn and balance history returns duplicate items" in {
-            given
+            build
               .authorisedSmallProducer
               .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
               .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
@@ -125,7 +127,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
 
         "that does not include a returns section but has an account section with correct balance and interest" - {
           "when there are no pending returns or lastReturn and balance history returns duplicate items" in {
-            given
+            build
               .commonPreconditionBoth
               .sdilBackend.retrievePendingReturns(UTR, List.empty)
               .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -152,7 +154,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
           "no returns section, a register again section," - {
             "a correct error in previous return section, and a manage account section that has nothing owed" - {
               "when the user has submitted their final return, has no last return, has variable returns and a balance of 0" in {
-                given
+                build
                   .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                   .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
                   .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -171,7 +173,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
             }
             "no correct error in previous return section, and a manage account section that has shows account in credit" - {
               "when the user has submitted their final return, has no last return, has no variable returns and a balance of 100" in {
-                given
+                build
                   .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                   .sdilBackend.retrieveVariableReturns(UTR, List())
                   .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -193,7 +195,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
           "has message about the last return sent, a register again section," - {
             "a correct error in previous return section, and a manage account section that states they owe money" - {
               "when the user has submitted their final return, has last return, has variable returns and a balance of -100" in {
-                given
+                build
                   .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                   .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
                   .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
@@ -212,7 +214,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
             }
             "no correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
               "when the user has submitted their final return, has last return, has no variable returns and a balance of 0" in {
-                given
+                build
                   .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                   .sdilBackend.retrieveVariableReturns(UTR, List())
                   .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
@@ -235,7 +237,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
             "has message about the last return sent with the deadline for the final return, a register again section," - {
               "a correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
                 "when the user has not submitted their final return, has last return, has variable returns and a balance of 0" in {
-                  given
+                  build
                     .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                     .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
                     .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
@@ -254,7 +256,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
               }
               "no correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
                 "when the user has not submitted their final return, has last return, has no variable returns and a balance of 0" in {
-                  given
+                  build
                     .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                     .sdilBackend.retrieveVariableReturns(UTR, List())
                     .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
@@ -276,7 +278,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
             "has a section to send final return, no register again section," - {
               "a correct error in previous return section, and a manage account section that has shows account with nothing owed" - {
                 "when the user has not submitted their final return, has no last return, has variable returns and a balance of 0" in {
-                  given
+                  build
                     .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                     .sdilBackend.retrieveVariableReturns(UTR, pendingReturns1)
                     .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -295,7 +297,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
               }
               "no correct error in previous return section, and a manage account section that has shows account in credit" - {
                 "when the user has not submitted their final return, has no last return, has no variable returns and a balance of 100" in {
-                  given
+                  build
                     .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
                     .sdilBackend.retrieveVariableReturns(UTR, List())
                     .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -322,7 +324,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
     "render the error page" - {
       "for a deregistered user" - {
         "when the backend call to get variable enrolments fails" in {
-          given
+          build
             .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
             .sdilBackend.retrieveVariableReturnsError(UTR)
             .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -341,7 +343,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
         }
 
         "when the backend call to get last return fails" in {
-          given
+          build
             .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
             .sdilBackend.retrieveVariableReturns(UTR, List())
             .sdilBackend.retrieveReturnError(UTR, currentReturnPeriod.previous)
@@ -359,7 +361,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
           }
         }
         "when the backend call to get final return fails" in {
-          given
+          build
             .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
             .sdilBackend.retrieveVariableReturns(UTR, List())
             .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -378,7 +380,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
         }
 
         "when the backend call to get balance fails" in {
-          given
+          build
             .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
             .sdilBackend.retrieveVariableReturns(UTR, List())
             .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -396,7 +398,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
           }
         }
         "when all the backend calls fail" in {
-          given
+          build
             .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
             .sdilBackend.retrieveVariableReturnsError(UTR)
             .sdilBackend.retrieveReturnError(UTR, currentReturnPeriod.previous)
@@ -415,7 +417,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
         }
       }
       "when the backend call to get pending enrolments fails" in {
-        given
+        build
           .commonPrecondition
           .sdilBackend.retrievePendingReturnsError(UTR)
           .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -432,7 +434,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with UTR" in {
-        given
+        build
           .user.isAuthorisedAndEnrolled
           .sdilBackend.retrieveSubscriptionError("utr", UTR)
 
@@ -448,7 +450,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with SDIL_REF" in {
-        given
+        build
           .user.isAuthorisedAndEnrolledSDILRef
           .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
 
@@ -470,7 +472,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       "should redirect to sdilReturns" - {
         "with the year and quarter from the earliest pending return" - {
           "when there is 1 pending return" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
 
@@ -488,7 +490,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
           }
 
           "when there is more than 1 pending return" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.retrievePendingReturns(UTR, pendingReturns3)
 
@@ -511,7 +513,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
 
     "render the error page" - {
       "when the backend call to get pending enrolments fails" in {
-        given
+        build
           .commonPrecondition
           .sdilBackend.retrievePendingReturnsError(UTR)
           .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -528,7 +530,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with UTR" in {
-        given
+        build
           .user.isAuthorisedAndEnrolled
           .sdilBackend.retrieveSubscriptionError("utr", UTR)
 
@@ -544,7 +546,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with SDIL_REF" in {
-        given
+        build
           .user.isAuthorisedAndEnrolledSDILRef
           .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
 
@@ -566,7 +568,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       "should redirect to sdilReturns" - {
         "with the year and quarter from the earliest pending return" - {
           "when there is 1 pending return" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.retrievePendingReturns(UTR, pendingReturns1)
 
@@ -584,7 +586,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
           }
 
           "when there is more than 1 pending return" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.retrievePendingReturns(UTR, pendingReturns3)
 
@@ -607,7 +609,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
 
     "render the error page" - {
       "when the backend call to get pending enrolments fails" in {
-        given
+        build
           .commonPrecondition
           .sdilBackend.retrievePendingReturnsError(UTR)
           .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, None)
@@ -624,7 +626,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with UTR" in {
-        given
+        build
           .user.isAuthorisedAndEnrolled
           .sdilBackend.retrieveSubscriptionError("utr", UTR)
 
@@ -640,7 +642,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with SDIL_REF" in {
-        given
+        build
           .user.isAuthorisedAndEnrolledSDILRef
           .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
 
@@ -660,7 +662,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
   s"GET $makeAChangePath" - {
     "when the user is authenticated and has a subscription" - {
       "should redirect to sdilVariations" in {
-        given
+        build
           .commonPrecondition
 
         WsTestClient.withClient { client =>
@@ -676,7 +678,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
     }
     "render the error page" - {
       "when the backend call to get sdilSubscription fails with UTR" in {
-        given
+        build
           .user.isAuthorisedAndEnrolled
           .sdilBackend.retrieveSubscriptionError("utr", UTR)
 
@@ -692,7 +694,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with SDIL_REF" in {
-        given
+        build
           .user.isAuthorisedAndEnrolledSDILRef
           .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
 
@@ -712,7 +714,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
   s"GET $correctAReturnPath" - {
     "when the user is authenticated and has a subscription" - {
       "should redirect to sdilVariations" in {
-        given
+        build
           .authorisedWithSdilSubscriptionIncDeRegDatePrecondition
 
         WsTestClient.withClient { client =>
@@ -728,7 +730,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
     }
     "render the error page" - {
       "when the backend call to get sdilSubscription fails with UTR" in {
-        given
+        build
           .user.isAuthorisedAndEnrolled
           .sdilBackend.retrieveSubscriptionError("utr", UTR)
 
@@ -744,7 +746,7 @@ class ServicePageControllerISpec extends ServicePageITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with SDIL_REF" in {
-        given
+        build
           .user.isAuthorisedAndEnrolledSDILRef
           .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
 

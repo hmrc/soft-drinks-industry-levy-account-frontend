@@ -1,7 +1,10 @@
 package testSupport.actions
 
 import play.api.libs.ws.{WSClient, WSResponse}
-
+import play.api.libs.ws.writeableOf_JsValue
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
+import play.api.libs.ws.WSBodyWritables.writeableOf_String
+import play.api.libs.ws.writeableOf_String
 import scala.concurrent.Future
 
 class PostCalls(baseUrl: String) {

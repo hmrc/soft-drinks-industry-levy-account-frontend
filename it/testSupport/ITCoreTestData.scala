@@ -1,10 +1,10 @@
 package testSupport
 
-import models._
+import models.*
 import org.scalatest.TryValues
 
 import java.time.{LocalDate, LocalDateTime, ZoneOffset}
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object ITCoreTestData extends TryValues {
   val localDate = LocalDate.now()
@@ -70,7 +70,7 @@ object ITCoreTestData extends TryValues {
 
   def identifier = "some-id"
 
-  implicit val duration = 5.seconds
+  implicit val duration: FiniteDuration = 5.seconds
 
   def packagingSite1 = Site(
     UkAddress(List("33 Rhes Priordy", "East London"), "E73 2RP"),

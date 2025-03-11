@@ -12,9 +12,13 @@ import play.api.libs.json.{Format, JsObject, Json}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.crypto.EncryptedValue
 import uk.gov.hmrc.crypto.json.CryptoFormats
-
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 import java.time.{LocalDateTime, ZoneOffset}
 import java.util.concurrent.TimeUnit
+import org.mongodb.scala.SingleObservableFuture
+import org.mongodb.scala.gridfs.SingleObservableFuture
+import org.mongodb.scala.ObservableFuture
+import org.mongodb.scala.gridfs.ObservableFuture
 
 class SessionRepositorySpec
   extends AnyFreeSpec

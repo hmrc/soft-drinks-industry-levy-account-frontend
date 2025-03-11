@@ -1,6 +1,6 @@
 package controllers
 
-import testSupport.preConditions.PreconditionHelpers._
+import testSupport.preConditions.PreconditionHelpers
 import org.jsoup.Jsoup
 import org.scalatest.matchers.must.Matchers.include
 import org.scalatest.matchers.must.Matchers._

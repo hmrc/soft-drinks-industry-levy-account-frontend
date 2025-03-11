@@ -2,12 +2,17 @@ package controllers.testOnly
 
 import controllers.ControllerITTestHelper
 import models.SetupPayApiRequest
-import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.Matcher._
 import play.api.libs.json.{JsString, Json}
 import play.api.libs.ws.DefaultWSCookie
 import play.api.test.Helpers.{CONTENT_TYPE, JSON, LOCATION}
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
+import play.api.libs.ws.writeableOf_JsValue
+import play.api.libs.ws.WSBodyReadables.readableAsJson
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
+
 
 class TestOnlyControllerISpec extends ControllerITTestHelper {
 
@@ -31,7 +36,7 @@ class TestOnlyControllerISpec extends ControllerITTestHelper {
 
         whenReady(result1) { res =>
           res.status mustBe 200
-          res.body must include(journeyDDPath)
+          res.body eq include(journeyDDPath).asInstanceOf[play.api.libs.json.JsValue]
         }
       }
     }
@@ -65,7 +70,7 @@ class TestOnlyControllerISpec extends ControllerITTestHelper {
 
         whenReady(result1) { res =>
           res.status mustBe 200
-          res.body must include(journeyPayPath)
+          res.body eq include(journeyPayPath).asInstanceOf[play.api.libs.json.JsValue]
         }
       }
     }

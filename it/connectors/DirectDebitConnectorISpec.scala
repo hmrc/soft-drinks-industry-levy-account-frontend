@@ -7,17 +7,21 @@ import uk.gov.hmrc.http.HeaderCarrier
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.EitherValues._
 import testSupport.preConditions.PreconditionHelpers
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
 
 
-class DirectDebitConnectorISpec extends Specifications with PreconditionHelpers  {
+class DirectDebitConnectorISpec extends Specifications with PreconditionHelpers with TestConfiguration  {
 
-  val ddConnector = app.injector.instanceOf[DirectDebitConnector]
+  val ddConnector: DirectDebitConnector = app.injector.instanceOf[DirectDebitConnector]
+
   implicit val hc: HeaderCarrier = new HeaderCarrier()
 
   "initJourney" - {
     "should return a link to redirect the user to" - {
       "when the call to direct-debit succeeds" in {
-        given ddStub.successCall()
+        build
+         .ddStub.successCall()
 
         val res = ddConnector.initJourney()
 
@@ -29,7 +33,8 @@ class DirectDebitConnectorISpec extends Specifications with PreconditionHelpers 
 
     "should return an UnexpectedResponseFromDirectDebit error" - {
       "when the call to direct-debit fails" in {
-        given ddStub.failureCall()
+        build
+          .ddStub.failureCall
 
         val res = ddConnector.initJourney()
 
