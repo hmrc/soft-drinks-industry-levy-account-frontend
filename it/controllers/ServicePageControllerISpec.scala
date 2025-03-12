@@ -2,16 +2,18 @@ package controllers
 
 import models.ReturnPeriod
 import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.must.Matchers.*
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
 import testSupport.ServicePageITHelper
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
+import testSupport.preConditions.PreconditionBuilder
 
 class ServicePageControllerISpec extends ServicePageITHelper with Specifications {
 
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
   val servicePagePath = "/home"
   val startAReturnPath = "/start-a-return/nilReturn/false"
   val startANilReturnPath = "/start-a-return/nilReturn/true"

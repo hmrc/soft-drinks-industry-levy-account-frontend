@@ -1,13 +1,16 @@
 package controllers.oldRoute
 
 import controllers.ControllerITTestHelper
-import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.must.Matchers.*
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
+import testSupport.preConditions.PreconditionBuilder
 
 class RedirectToNewServiceControllerISpec extends ControllerITTestHelper with Specifications {
+
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
 
   val path = "/"
   val homePath = "/home"

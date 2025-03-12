@@ -1,6 +1,7 @@
 package connectors
 
 import errors.UnexpectedResponseFromPayAPI
+import testSupport.preConditions.PreconditionBuilder
 //import org.scalatest.matchers.must.Matchers._
 import org.scalatest.EitherValues._
 import play.api.inject.NewInstanceInjector.instanceOf
@@ -14,6 +15,8 @@ import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.matchers.must.Matchers.mustEqual
 
 class PayApiConnectorISpec extends Specifications with TestConfiguration with LoggerHelper with PreconditionHelpers  {
+
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
 
   val currentYear = LocalDate.now().getYear
   val mockQuarter2 = LocalDate.of(currentYear, 4, 1)

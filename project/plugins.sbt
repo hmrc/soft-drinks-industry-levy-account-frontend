@@ -21,4 +21,4 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-uglify" % "2.0.0")
 addSbtPlugin("com.github.sbt" % "sbt-digest" % "2.0.0")
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
-addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.1.0")
+addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.3.0")

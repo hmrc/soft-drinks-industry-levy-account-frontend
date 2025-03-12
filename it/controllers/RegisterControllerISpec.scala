@@ -1,16 +1,19 @@
 package controllers
 
 import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.must.Matchers.*
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
 import testSupport.ServicePageITHelper
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
+import testSupport.preConditions.PreconditionBuilder
 
 
 class RegisterControllerISpec extends ServicePageITHelper with Specifications {
+
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
 
   val startPath = "/register/start"
 

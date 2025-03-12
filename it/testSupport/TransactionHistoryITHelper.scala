@@ -20,8 +20,6 @@ import controllers.ControllerITTestHelper
 import models._
 import org.jsoup.Jsoup
 import org.scalatest.matchers.must.Matchers._
-import play.api.i18n.Messages
-
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -101,7 +99,7 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
 
   def validatePage(body: String, expectedTransactionHistory: Map[Int, List[TransactionHistoryItem]]) = {
     val page = Jsoup.parse(body)
-    page.title must include(Messages("Transaction history"))
+    page.title must include("Transaction history")
     page.getElementsByTag("h1").text() mustBe "Transaction history"
     page.getElementsByClass("govuk-body").first().text() mustBe "Super Lemonade Plc"
     val tabs = page.getElementsByClass("govuk-tabs").first()

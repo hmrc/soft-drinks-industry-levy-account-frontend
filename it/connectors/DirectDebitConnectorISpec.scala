@@ -1,19 +1,22 @@
 package connectors
 
 import errors.UnexpectedResponseFromDirectDebit
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
 import testSupport.{Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.matchers.must.Matchers._
-import org.scalatest.EitherValues._
-import testSupport.preConditions.PreconditionHelpers
+import org.scalatest.matchers.must.Matchers.*
+import org.scalatest.EitherValues.*
+import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
 
 
-class DirectDebitConnectorISpec extends Specifications with PreconditionHelpers with TestConfiguration  {
+class DirectDebitConnectorISpec extends Specifications with TestConfiguration  {
 
   val ddConnector: DirectDebitConnector = app.injector.instanceOf[DirectDebitConnector]
+
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
+
 
   implicit val hc: HeaderCarrier = new HeaderCarrier()
 

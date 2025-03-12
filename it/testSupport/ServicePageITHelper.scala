@@ -17,12 +17,12 @@
 package testSupport
 
 import controllers.ControllerITTestHelper
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
 import models.{ReturnPeriod, SdilReturn}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.matchers.must.Matchers._
-import play.api.i18n.Messages
+import org.scalatest.matchers.must.Matchers.*
+import play.api.i18n.{DefaultMessagesApiProvider, Messages}
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneId}
@@ -42,7 +42,7 @@ trait ServicePageITHelper extends ControllerITTestHelper {
                    hasDirectDebit: Boolean,
                    isSmallProducer: Boolean = false) = {
     val page = Jsoup.parse(body)
-    page.title must include(Messages("Your Soft Drinks Industry Levy account"))
+    page.title must include("Your Soft Drinks Industry Levy account")
     page.getElementById("caption").text() mustBe "Company is Super Lemonade Plc"
     page.getElementsByTag("h1").text() mustBe "Your Soft Drinks Industry Levy account"
     if(isSmallProducer) {
@@ -61,7 +61,7 @@ trait ServicePageITHelper extends ControllerITTestHelper {
                                optLastReturn: Option[SdilReturn],
                                 balance: BigDecimal) = {
     val page = Jsoup.parse(body)
-    page.title must include(Messages("Your Soft Drinks Industry Levy account"))
+    page.title must include("Your Soft Drinks Industry Levy account")
     page.getElementsByTag("h1").text() mustBe "Super Lemonade Plc Your Soft Drinks Industry Levy account"
     validateNotificationBanner(page, sentFinalReturn)
     optLastReturn match{

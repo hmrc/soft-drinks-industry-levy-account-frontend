@@ -17,7 +17,7 @@
 package orchestrators
 
 import base.SpecBase
-import base.TestData._
+import base.TestData.*
 import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import errors.{NoPendingReturns, UnexpectedResponseFromSDIL}
@@ -32,6 +32,7 @@ import uk.gov.hmrc.auth.core.Enrolments
 
 import java.time.LocalDate
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
@@ -40,6 +41,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
   val mockSessionCache = mock[SessionCache]
   val mockConfig = mock[FrontendAppConfig]
 
+  implicit def intToBigDecimal(i: Int): BigDecimal = BigDecimal(i)
 
   val orchestrator = new RegisteredOrchestrator(mockSDILConnector, mockSessionCache, mockConfig)
 
@@ -242,7 +244,9 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         val hasVariableReturnsOptions = List(true, false)
         val hasSentLastReturnOptions = List(true, false)
         val sentFinalReturnOptions = List(true, false)
-        val balanceOptions = List(100, 0, -100)
+        val balanceOptions: List[BigDecimal] = List(100, 0, -100)
+        
+
         def hasOrHasNot(isTrue: Boolean): String = if(isTrue) {"has"} else {"has not"}
 
         hasVariableReturnsOptions.foreach { hasVariableReturns =>
