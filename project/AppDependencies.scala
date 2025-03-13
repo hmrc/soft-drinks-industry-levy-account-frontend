@@ -3,10 +3,10 @@ import sbt._
 object AppDependencies {
 
   private val playSuffix = s"-play-30"
-  private val bootstrapVersion = "9.6.0"
+  private val bootstrapVersion = "9.9.0"
 
-  private val hmrcMongoVersion = "2.4.0"
-  private val playFrontendHMRCVersion = "11.10.0"
+  private val hmrcMongoVersion = "2.5.0"
+  private val playFrontendHMRCVersion = "11.11.0"
 
   // Test dependencies
   private val scalaTestPlusPlayVersion = "7.0.1"
@@ -20,7 +20,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% s"play-conditional-form-mapping$playSuffix" % "3.2.0",
     "org.typelevel"     %% "cats-core"                     % "2.12.0",
     "uk.gov.hmrc.mongo" %% s"hmrc-mongo$playSuffix"         % hmrcMongoVersion,
-    "uk.gov.hmrc"       %% s"crypto-json$playSuffix"        % "8.1.0"
+    "uk.gov.hmrc"       %% s"crypto-json$playSuffix"        % "8.2.0"
   )
 
   val test: Seq[ModuleID] = Seq(

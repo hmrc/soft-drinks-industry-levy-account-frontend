@@ -8,7 +8,7 @@ lazy val appName: String = "soft-drinks-industry-levy-account-frontend"
 lazy val scoverageSettings = {
   Seq(
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-      ".*Routes.*;.*viewmodels.*;.*views.*;.*CascadeUpsert*.*GuiceInjector;$anon;.*javascript;testOnlyDoNotUseInAppConf.*",
+      ".*Routes.*;.*viewmodels.*;.*views.*;.*CascadeUpsert*.*GuiceInjector;.*$anon.*;.*javascript;testOnlyDoNotUseInAppConf.*",
     ScoverageKeys.coverageMinimumStmtTotal := 99,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
@@ -23,7 +23,7 @@ lazy val root = (project in file("."))
   .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(majorVersion := 0, libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always) // libraryDependencySchemes added to get around the scoverage compile errors for scala 2.13.10
   .settings(ThisBuild / useSuperShell := false)
-  .settings(scoverageSettings*)
+  .settings(scoverageSettings: _*)
   .settings(
     scalaVersion := "3.3.4",
     name := appName,
