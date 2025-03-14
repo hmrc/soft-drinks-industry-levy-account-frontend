@@ -8,7 +8,7 @@ lazy val appName: String = "soft-drinks-industry-levy-account-frontend"
 lazy val scoverageSettings = {
   Seq(
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-      ".*Routes.*;.*viewmodels.*;.*views.*;.*CascadeUpsert*.*GuiceInjector;.*\\$anon.*;.*javascript;testOnlyDoNotUseInAppConf.*",
+      ".*Routes.*;.*viewmodels.*;.*views.*;.*CascadeUpsert*.*GuiceInjector;.*anon.*;.*javascript;testOnlyDoNotUseInAppConf.*",
     ScoverageKeys.coverageMinimumStmtTotal := 99,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
@@ -43,11 +43,6 @@ lazy val root = (project in file("."))
       "viewmodels.govuk.all._"
     ),
     PlayKeys.playDefaultPort := 8707,
-//    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-//      ".*Routes.*;.*viewmodels.*;.*views.*;.*CascadeUpsert*",
-//    ScoverageKeys.coverageMinimumStmtTotal := 99,
-//    ScoverageKeys.coverageFailOnMinimum := true,
-//    ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
       "-rootdir",
