@@ -16,50 +16,17 @@
 
 package models
 
-
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import java.time.LocalDateTime
-import play.api.libs.json._
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json.{Format, JsPath, Json, OFormat}
+import play.api.libs.json.*
 
 
 class SdilReturnSpec extends AnyWordSpec with Matchers {
 
-  // Define the SmallProducer case class for the test
-  case class SmallProducer(alias: String, sdilRef: String, litreage: (Long, Long))
-
-  object SmallProducer {
-    implicit val format: OFormat[SmallProducer] = Json.format[SmallProducer]
-  }
-
-  // Define the SdilReturn case class for the test
-  case class SdilReturn(
-                         ownBrand: (Long, Long) = (0L, 0L),
-                         packLarge: (Long, Long) = (0L, 0L),
-                         packSmall: List[SmallProducer] = List.empty,
-                         importLarge: (Long, Long) = (0L, 0L),
-                         importSmall: (Long, Long) = (0L, 0L),
-                         `export`: (Long, Long) = (0L, 0L),
-                         wastage: (Long, Long) = (0L, 0L),
-                         submittedOn: Option[LocalDateTime] = None
-                       )
-
-  object SdilReturn {
-    implicit val longTupleFormatter: Format[(Long, Long)] = (
-      (JsPath \ "lower").format[Long] and
-        (JsPath \ "higher").format[Long]
-      )((a: Long, b: Long) => (a, b), unlift { (x: (Long, Long)) =>
-      Tuple2.unapply(x)
-    })
-
-    implicit val returnsFormat: OFormat[SdilReturn] = Json.format[SdilReturn]
-  }
 
   "SdilReturn" should {
     "serialize to JSON correctly" in {
-      // Example instance of SdilReturn
       val sdilReturn = SdilReturn(
         ownBrand = (100L, 200L),
         packLarge = (150L, 250L),
@@ -73,14 +40,13 @@ class SdilReturnSpec extends AnyWordSpec with Matchers {
         submittedOn = Some(LocalDateTime.of(2022, 1, 1, 12, 0, 0, 0))
       )
 
-      // Expected JSON
       val expectedJson = Json.obj(
         "packLarge" -> Json.obj("lower" -> 150L, "higher" -> 250L),
         "export" -> Json.obj("lower" -> 500L, "higher" -> 600L),
         "packSmall" -> Json.arr(Json.obj(
           "alias" -> "Alias1",
           "sdilRef" -> "SD123",
-          "litreage" -> Json.arr(10, 20)
+          "litreage" -> Json.obj("lower" -> 10, "higher" -> 20) // ✅ Corrected
         )),
         "ownBrand" -> Json.obj("lower" -> 100L, "higher" -> 200L),
         "importLarge" -> Json.obj("lower" -> 300L, "higher" -> 400L),
@@ -89,7 +55,7 @@ class SdilReturnSpec extends AnyWordSpec with Matchers {
         "importSmall" -> Json.obj("lower" -> 50L, "higher" -> 60L)
       )
 
-      // Assert that the instance is serialized correctly
+
       Json.toJson(sdilReturn) mustBe expectedJson
     }
 
@@ -100,7 +66,7 @@ class SdilReturnSpec extends AnyWordSpec with Matchers {
         "packSmall" -> Json.arr(Json.obj(
           "alias" -> "Alias1",
           "sdilRef" -> "SD123",
-          "litreage" -> Json.arr(10, 20)
+          "litreage" -> Json.obj("lower" -> 10, "higher" -> 20) // ✅ Corrected
         )),
         "ownBrand" -> Json.obj("lower" -> 100L, "higher" -> 200L),
         "importLarge" -> Json.obj("lower" -> 300L, "higher" -> 400L),
@@ -122,7 +88,6 @@ class SdilReturnSpec extends AnyWordSpec with Matchers {
         submittedOn = Some(LocalDateTime.of(2022, 1, 1, 12, 0, 0, 0))
       )
 
-      // Deserialize and check equality
       json.as[SdilReturn] mustBe expectedReturn
     }
   }

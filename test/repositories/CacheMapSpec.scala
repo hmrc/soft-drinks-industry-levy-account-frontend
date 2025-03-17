@@ -22,12 +22,6 @@ import play.api.libs.json._
 
 class CacheMapSpec extends AnyWordSpec with Matchers {
 
-  case class CacheMap(id: String, data: Map[String, JsValue])
-
-  object CacheMap {
-    implicit val formats: OFormat[CacheMap] = Json.format[CacheMap]
-  }
-
   val greeting: JsValue = Json.toJson("hello")
 
   "CacheMap JSON format" should {
@@ -53,4 +47,3 @@ class CacheMapSpec extends AnyWordSpec with Matchers {
     }
   }
 }
-
