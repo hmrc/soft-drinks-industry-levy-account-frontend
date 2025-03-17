@@ -27,7 +27,6 @@ import play.api.test.Helpers._
 class TestOnlyControllerSpec extends SpecBase with MockitoSugar {
 
   val mockConfig = mock[FrontendAppConfig]
-
   val controller = new TestOnlyController(mcc, mockConfig)
 
   "stubDirectDebitJourney" - {

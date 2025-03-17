@@ -29,7 +29,6 @@ import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import repositories.SessionCache
 import uk.gov.hmrc.auth.core.Enrolments
-
 import java.time.LocalDate
 import scala.concurrent.Future
 import scala.language.implicitConversions

@@ -21,7 +21,6 @@ import org.scalatest.wordspec.AnyWordSpec
 import java.time.LocalDateTime
 import play.api.libs.json.*
 
-
 class SdilReturnSpec extends AnyWordSpec with Matchers {
 
 

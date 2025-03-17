@@ -14,10 +14,7 @@ import org.scalatest.matchers.must.Matchers.mustBe
 class DirectDebitConnectorISpec extends Specifications with TestConfiguration  {
 
   val ddConnector: DirectDebitConnector = app.injector.instanceOf[DirectDebitConnector]
-
   implicit val builder: PreconditionBuilder = new PreconditionBuilder()
-
-
   implicit val hc: HeaderCarrier = new HeaderCarrier()
 
   "initJourney" - {

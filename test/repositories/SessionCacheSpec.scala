@@ -20,7 +20,6 @@ import base.SpecBase
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsBoolean, JsString, Json}
-
 import scala.concurrent.Future
 
 class SessionCacheSpec extends SpecBase with MockitoSugar {

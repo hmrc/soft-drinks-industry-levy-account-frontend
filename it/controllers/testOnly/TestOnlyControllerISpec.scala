@@ -3,17 +3,13 @@ package controllers.testOnly
 import controllers.ControllerITTestHelper
 import models.SetupPayApiRequest
 import org.scalatest.matchers.must.Matchers.*
-import org.scalatest.matchers.Matcher.*
 import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.libs.ws.DefaultWSCookie
 import play.api.test.Helpers.{CONTENT_TYPE, JSON, LOCATION}
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData.*
 import play.api.libs.ws.writeableOf_JsValue
-import play.api.libs.ws.WSBodyReadables.readableAsJson
-import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 import testSupport.preConditions.PreconditionBuilder
-
 
 class TestOnlyControllerISpec extends ControllerITTestHelper {
 

@@ -9,16 +9,13 @@ import testSupport.{Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
 import models.FinancialLineItem.formatter
 import org.scalatest.matchers.must.Matchers._
-import org.scalatest.EitherValues._
 import testSupport.preConditions.{PreconditionHelpers, PreconditionBuilder }
-
 
 class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfiguration with PreconditionHelpers {
 
   val sdilConnector: SoftDrinksIndustryLevyConnector = app.injector.instanceOf[SoftDrinksIndustryLevyConnector]
   implicit val hc: HeaderCarrier = new HeaderCarrier()
   implicit val builder: PreconditionBuilder = new PreconditionBuilder()
-
 
   "retrieveSubscription" - {
     "when the cache is empty" - {

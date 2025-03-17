@@ -2,8 +2,6 @@ package connectors
 
 import errors.UnexpectedResponseFromPayAPI
 import testSupport.preConditions.PreconditionBuilder
-//import org.scalatest.matchers.must.Matchers._
-import org.scalatest.EitherValues._
 import play.api.inject.NewInstanceInjector.instanceOf
 import testSupport.ITCoreTestData._
 import testSupport.{LoggerHelper, Specifications, TestConfiguration}

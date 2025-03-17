@@ -30,7 +30,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, _}
 import utilities.GenericLogger
 import views.html.{DeregisteredUserServiceView, ServiceView}
-
 import scala.concurrent.Future
 
 class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHelper{

@@ -4,8 +4,6 @@ import org.jsoup.Jsoup
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData.*
-import org.scalatest.matchers.must.Matchers.*
-import org.scalatest.EitherValues.*
 import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
@@ -13,7 +11,6 @@ import org.scalatest.matchers.must.Matchers.mustBe
 class PaymentsControllerISpec extends ControllerITTestHelper with PreconditionHelpers with Specifications {
 
   val path = "/pay-now"
-
   implicit val builder: PreconditionBuilder = new PreconditionBuilder()
 
   s"GET $path " - {

@@ -4,13 +4,10 @@ import org.jsoup.Jsoup
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
-import org.scalatest.matchers.must.Matchers._
-import org.scalatest.EitherValues._
 import testSupport.preConditions.PreconditionHelpers
 import testSupport.preConditions.PreconditionBuilder
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
-
 
 class DirectDebitControllerISpec extends ControllerITTestHelper with PreconditionHelpers with Specifications {
 

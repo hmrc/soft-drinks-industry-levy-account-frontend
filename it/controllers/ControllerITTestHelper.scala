@@ -2,17 +2,13 @@ package controllers
 
 import testSupport.preConditions.PreconditionHelpers
 import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers.include
 import org.scalatest.matchers.must.Matchers._
-import org.scalatest.EitherValues._
 import play.api.http.HeaderNames
 import play.api.libs.json.JsValue
 import play.api.libs.ws.{DefaultWSCookie, WSClient, WSResponse}
 import play.api.test.WsTestClient
 import testSupport.{Specifications, TestConfiguration}
 import play.api.libs.ws.writeableOf_JsValue
-
-
 import scala.concurrent.Future
 
 trait ControllerITTestHelper extends Specifications with TestConfiguration with PreconditionHelpers {

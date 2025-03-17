@@ -10,7 +10,6 @@ import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
 import testSupport.preConditions.PreconditionBuilder
 
-
 class RegisterControllerISpec extends ServicePageITHelper with Specifications {
 
   implicit val builder: PreconditionBuilder = new PreconditionBuilder()

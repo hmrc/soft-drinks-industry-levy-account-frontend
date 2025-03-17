@@ -16,7 +16,6 @@
 
 package models
 
-import models.{Warehouse, UkAddress}
 import play.api.libs.json._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must.Matchers
