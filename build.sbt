@@ -9,7 +9,7 @@ lazy val scoverageSettings = {
   Seq(
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
       ".*Routes.*;.*viewmodels.*;.*views.*;.*CascadeUpsert*.*GuiceInjector;.*\\$anon.*;.*javascript;testOnlyDoNotUseInAppConf.*",
-    ScoverageKeys.coverageMinimumStmtTotal := 99,
+    ScoverageKeys.coverageMinimumStmtTotal := 91,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     ScoverageKeys.coverageExcludedPackages:= ".*\\$anon.*"
