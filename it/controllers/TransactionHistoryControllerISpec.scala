@@ -11,7 +11,6 @@ import testSupport.Specifications
 class TransactionHistoryControllerISpec extends TransactionHistoryITHelper with Specifications {
 
   implicit val builder: PreconditionBuilder = new PreconditionBuilder()
-  
   val transactionHistoryPath = "/transaction-history"
 
   s"GET $transactionHistoryPath" - {

@@ -83,7 +83,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration with 
     }
     if (requiresSubscription) {
       "redirect to the index page" - {
-        "the user is authorised but has no sdilSubscription" in {
+       "the user is authorised but has no sdilSubscription" in {
           authorisedWithNoSubscriptionPrecondition
           WsTestClient.withClient { client =>
             val result1 = optJson match {
@@ -99,7 +99,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration with 
         }
 
         "the user is authorised but has no enrolent" in {
-           authorisedButNoEnrolmentsPrecondition
+          authorisedButNoEnrolmentsPrecondition
           WsTestClient.withClient { client =>
             val result1 = optJson match {
               case Some(json) => createClientRequestPOST(client, url, json)
@@ -117,8 +117,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration with 
 
     "the user is authorised but has no identifer" - {
       "render the error page" in {
-         authorisedButInternalIdPrecondition
-
+        authorisedButInternalIdPrecondition
         WsTestClient.withClient { client =>
           val result1 = optJson match {
             case Some(json) => createClientRequestPOST(client, url, json)

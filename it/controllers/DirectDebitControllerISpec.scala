@@ -4,16 +4,13 @@ import org.jsoup.Jsoup
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
-import testSupport.preConditions.PreconditionHelpers
-import testSupport.preConditions.PreconditionBuilder
+import testSupport.preConditions.{PreconditionHelpers, PreconditionBuilder}
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
 
 class DirectDebitControllerISpec extends ControllerITTestHelper with PreconditionHelpers with Specifications {
 
-  // Provide an implicit PreconditionBuilder as required by PreconditionHelpers
   implicit val builder: PreconditionBuilder = new PreconditionBuilder()
-
   val path = "/start-direct-debit-journey"
 
   s"GET $path" - {

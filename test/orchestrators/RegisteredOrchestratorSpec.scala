@@ -244,8 +244,6 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         val hasSentLastReturnOptions = List(true, false)
         val sentFinalReturnOptions = List(true, false)
         val balanceOptions: List[BigDecimal] = List(100, 0, -100)
-        
-
         def hasOrHasNot(isTrue: Boolean): String = if(isTrue) {"has"} else {"has not"}
 
         hasVariableReturnsOptions.foreach { hasVariableReturns =>

@@ -1,16 +1,14 @@
 package connectors
 
 import errors.UnexpectedResponseFromPayAPI
-import testSupport.preConditions.PreconditionBuilder
+import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
 import play.api.inject.NewInstanceInjector.instanceOf
 import testSupport.ITCoreTestData._
 import testSupport.{LoggerHelper, Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
 import utilities.GenericLogger
-import testSupport.preConditions.PreconditionHelpers
 import java.time.LocalDate
-import org.scalatest.matchers.must.Matchers.mustBe
-import org.scalatest.matchers.must.Matchers.mustEqual
+import org.scalatest.matchers.must.Matchers.{mustBe, mustEqual}
 
 class PayApiConnectorISpec extends Specifications with TestConfiguration with LoggerHelper with PreconditionHelpers  {
 
