@@ -4,12 +4,8 @@ object AppDependencies {
 
   private val playSuffix = s"-play-30"
   private val bootstrapVersion = "9.9.0"
-
   private val hmrcMongoVersion = "2.5.0"
   private val playFrontendHMRCVersion = "11.11.0"
-
-  // Test dependencies
-  private val scalatestPlusScalacheckVersion = "3.2.18.0"
 
   val compile: Seq[ModuleID] = Seq(
     play.sbt.PlayImport.ws,
