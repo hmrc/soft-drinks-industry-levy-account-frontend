@@ -9,9 +9,7 @@ object AppDependencies {
   private val playFrontendHMRCVersion = "11.11.0"
 
   // Test dependencies
-  private val scalaTestPlusPlayVersion = "7.0.1"
   private val scalatestPlusScalacheckVersion = "3.2.18.0"
-  private val mockitoScalatestVersion = "1.17.37"
 
   val compile: Seq[ModuleID] = Seq(
     play.sbt.PlayImport.ws,
@@ -24,7 +22,7 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "org.scalatestplus.play"  %% "scalatestplus-play"           % scalaTestPlusPlayVersion,
+    "org.scalatestplus"       %% "scalacheck-1-17"              % scalatestPlusScalacheckVersion,
     "org.jsoup"               %  "jsoup"                        % "1.18.1",
     "uk.gov.hmrc"             %% s"bootstrap-test$playSuffix"    % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% s"hmrc-mongo-test$playSuffix"   % hmrcMongoVersion,
