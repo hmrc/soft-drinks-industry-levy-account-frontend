@@ -12,6 +12,10 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageMinimumStmtTotal := 91,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
+    scalacOptions ++= Seq(
+      "-feature",
+      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
+    ),
     ScoverageKeys.coverageExcludedPackages:= ".*\\$anon.*"
   )
 }
