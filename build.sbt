@@ -44,12 +44,6 @@ lazy val root = (project in file("."))
       "viewmodels.govuk.all._"
     ),
     PlayKeys.playDefaultPort := 8707,
-    scalacOptions ++= Seq(
-      "-feature",
-      "-rootdir",
-      baseDirectory.value.getCanonicalPath,
-      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
-    ),
     libraryDependencies ++= AppDependencies.all,
     retrieveManaged := true,
     resolvers ++= Seq(Resolver.jcenterRepo),
