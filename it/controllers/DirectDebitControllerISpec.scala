@@ -1,19 +1,22 @@
 package controllers
 
 import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
 import testSupport.ITCoreTestData._
+import testSupport.preConditions.{PreconditionHelpers, PreconditionBuilder}
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
 
-class DirectDebitControllerISpec extends ControllerITTestHelper {
+class DirectDebitControllerISpec extends ControllerITTestHelper with PreconditionHelpers with Specifications {
 
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
   val path = "/start-direct-debit-journey"
 
   s"GET $path" - {
     "should redirect to the url provided by direct-debit" - {
       "when the call to direct-debit succeeds" in {
-        given
+        build
           .commonPrecondition
           .ddStub.successCall()
 
@@ -30,7 +33,7 @@ class DirectDebitControllerISpec extends ControllerITTestHelper {
 
     "should render the error page" - {
       "when the call to direct-debit fails" in {
-        given
+        build
           .commonPrecondition
           .ddStub.failureCall
 

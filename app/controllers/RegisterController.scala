@@ -24,6 +24,8 @@ import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utilities.GenericLogger
 
+import scala.concurrent.Future
+
 class RegisterController @Inject()(
                                     val controllerComponents: MessagesControllerComponents,
                                     val genericLogger: GenericLogger,
@@ -31,8 +33,8 @@ class RegisterController @Inject()(
                                     identifierAction: IdentifierAction
                                   )(implicit config: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
 
-  def start = (authenticated andThen identifierAction) { _ =>
-    Redirect(config.startRegistrationUrl)
+  def start = (authenticated andThen identifierAction).async { request =>
+    Future.successful(Redirect(config.startRegistrationUrl))
   }
 
 }

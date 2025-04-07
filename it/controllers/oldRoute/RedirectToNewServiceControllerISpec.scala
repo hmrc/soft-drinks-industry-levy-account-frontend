@@ -1,11 +1,15 @@
 package controllers.oldRoute
 
 import controllers.ControllerITTestHelper
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
+import testSupport.preConditions.PreconditionBuilder
 
-class RedirectToNewServiceControllerISpec extends ControllerITTestHelper {
+class RedirectToNewServiceControllerISpec extends ControllerITTestHelper with Specifications {
+
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
 
   val path = "/"
   val homePath = "/home"
@@ -13,7 +17,7 @@ class RedirectToNewServiceControllerISpec extends ControllerITTestHelper {
 
   s"GET $path" - {
     "should redirect to /soft-drinks-industry-levy-account-frontend/home" in {
-      given
+      build
         .commonPrecondition
 
       WsTestClient.withClient { client =>
@@ -29,7 +33,7 @@ class RedirectToNewServiceControllerISpec extends ControllerITTestHelper {
 
   s"GET $homePath" - {
     "should redirect to /soft-drinks-industry-levy-account-frontend/home" in {
-      given
+      build
         .commonPrecondition
 
       WsTestClient.withClient { client =>
@@ -45,7 +49,7 @@ class RedirectToNewServiceControllerISpec extends ControllerITTestHelper {
 
   s"GET $registerPath" - {
     "should redirect to /soft-drinks-industry-levy-account-frontend/register" in {
-      given
+      build
         .commonPrecondition
 
       WsTestClient.withClient { client =>

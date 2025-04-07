@@ -1,14 +1,16 @@
 package controllers
 
 import org.jsoup.Jsoup
+import org.scalatest.matchers.must.Matchers.mustBe
 import play.api.test.WsTestClient
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
 import testSupport.TransactionHistoryITHelper
-import org.scalatest.matchers.must.Matchers._
+import testSupport.preConditions.PreconditionBuilder
+import testSupport.Specifications
 
+class TransactionHistoryControllerISpec extends TransactionHistoryITHelper with Specifications {
 
-class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
-
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
   val transactionHistoryPath = "/transaction-history"
 
   s"GET $transactionHistoryPath" - {
@@ -16,7 +18,7 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
       "should render the transaction history page" - {
         "with one tab containing the expected item" - {
           "when the user has 1 fininical item in balance history" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistory1Item)
 
@@ -31,7 +33,7 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
           }
 
           "when the user has several fininical item in balance history that are all the same" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryDuplicates)
 
@@ -48,7 +50,7 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
 
         "with one tab containing the expected items" - {
           "when the user has multiple fininical item in balance history for the same year" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryMultiItemsSameYear)
 
@@ -65,7 +67,7 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
 
         "with multiple tabs containing the expected items" - {
           "when the user has multiple fininical item in balance history for different years" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryMultiItemsDiffYears)
 
@@ -80,7 +82,7 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
           }
 
           "when the user has multiple fininical item in balance history for different years that are not ordered" in {
-            given
+            build
               .commonPrecondition
               .sdilBackend.balanceHistory(SDIL_REF, true, balanceHistoryMultiItemsDiffYearsNotOrder)
 
@@ -101,7 +103,7 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
     "render the error page" - {
 
       "when the backend call to get sdilSubscription fails with UTR" in {
-        given
+        build
           .user.isAuthorisedAndEnrolled
           .sdilBackend.retrieveSubscriptionError("utr", UTR)
 
@@ -117,7 +119,7 @@ class TransactionHistoryControllerISpec extends TransactionHistoryITHelper {
       }
 
       "when the backend call to get sdilSubscription fails with SDIL_REF" in {
-        given
+        build
           .user.isAuthorisedAndEnrolledSDILRef
           .sdilBackend.retrieveSubscriptionError("sdil", SDIL_REF)
 

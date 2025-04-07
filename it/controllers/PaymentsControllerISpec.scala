@@ -1,19 +1,22 @@
 package controllers
 
 import org.jsoup.Jsoup
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import play.api.http.HeaderNames
 import play.api.test.WsTestClient
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
+import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
 
-class PaymentsControllerISpec extends ControllerITTestHelper {
+class PaymentsControllerISpec extends ControllerITTestHelper with PreconditionHelpers with Specifications {
 
   val path = "/pay-now"
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
 
   s"GET $path " - {
     "should redirect to the url provided by pay-api " - {
       "when the call to pay-api succeeds" in {
-        given
+        build
           .commonPrecondition
           .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
           .sdilBackend.retrieveReturn(aSubscriptionWithDeRegDate.utr, pendingReturn1, resp = Some(emptyReturn))
@@ -33,7 +36,7 @@ class PaymentsControllerISpec extends ControllerITTestHelper {
 
     "should render the error page " - {
       "when the call to pay-api fails" in {
-        given
+        build
           .commonPrecondition
           .sdilBackend.balance(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
           .sdilBackend.retrieveReturn(aSubscriptionWithDeRegDate.utr, pendingReturn1, resp = Some(emptyReturn))
@@ -55,7 +58,7 @@ class PaymentsControllerISpec extends ControllerITTestHelper {
 
     "should render the error page " - {
       "when the call to sdil backend fails" in {
-        given
+        build
           .commonPrecondition
           .sdilBackend.balancefailure(aSubscriptionWithDeRegDate.sdilRef, withAssessment = true)
 

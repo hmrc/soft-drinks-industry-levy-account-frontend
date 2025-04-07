@@ -24,13 +24,12 @@ import helpers.LoggerHelper
 import models._
 import orchestrators.RegisteredOrchestrator
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.TransactionHistoryView
-
 import java.time.LocalDate
 
 class TransactionHistoryControllerSpec extends SpecBase with MockitoSugar with LoggerHelper{

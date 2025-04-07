@@ -2,18 +2,22 @@ package controllers.testOnly
 
 import controllers.ControllerITTestHelper
 import models.SetupPayApiRequest
-import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, include}
-import play.api.libs.json.{JsString, Json}
+import org.scalatest.matchers.must.Matchers.*
+import org.scalatest.matchers.should.Matchers.should
+import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.libs.ws.DefaultWSCookie
 import play.api.test.Helpers.{CONTENT_TYPE, JSON, LOCATION}
 import play.api.test.WsTestClient
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
+import play.api.libs.ws.writeableOf_JsValue
+import testSupport.preConditions.PreconditionBuilder
+import play.api.libs.ws.DefaultBodyReadables.readableAsString
 
 class TestOnlyControllerISpec extends ControllerITTestHelper {
 
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
   val initialiseDDPath = "/direct-debit-backend"
   val journeyDDPath = "/simulate-direct-debit-journey"
-
   val initialisePayPath = "/bta/sdil/journey/start"
   val journeyPayPath = "/simulate-pay-api-journey"
 

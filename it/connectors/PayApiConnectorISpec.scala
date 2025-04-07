@@ -1,17 +1,18 @@
 package connectors
 
 import errors.UnexpectedResponseFromPayAPI
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
 import play.api.inject.NewInstanceInjector.instanceOf
 import testSupport.ITCoreTestData._
 import testSupport.{LoggerHelper, Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
 import utilities.GenericLogger
-
 import java.time.LocalDate
+import org.scalatest.matchers.must.Matchers.{mustBe, mustEqual}
 
-class PayApiConnectorISpec extends Specifications with TestConfiguration with LoggerHelper {
+class PayApiConnectorISpec extends Specifications with TestConfiguration with LoggerHelper with PreconditionHelpers  {
+
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
 
   val currentYear = LocalDate.now().getYear
   val mockQuarter2 = LocalDate.of(currentYear, 4, 1)
@@ -29,7 +30,7 @@ class PayApiConnectorISpec extends Specifications with TestConfiguration with Lo
   "initJourney " - {
     "should return a link to redirect the user to " - {
       "when the call to direct-debit succeeds" in {
-        given
+        build
           .payApiStub.successCall()
 
         val res = payApiConnector.initJourney(aSubscriptionWithDeRegDate.sdilRef, 1000L, None, 50000.0)
@@ -42,7 +43,7 @@ class PayApiConnectorISpec extends Specifications with TestConfiguration with Lo
 
     "should return an UnexpectedResponseFromPayAPI error " - {
       "when the call to direct-debit fails" in {
-        given
+        build
           .ddStub.failureCall
 
         val res = payApiConnector.initJourney(aSubscriptionWithDeRegDate.sdilRef, 1000L, None, 0.0)
@@ -54,7 +55,7 @@ class PayApiConnectorISpec extends Specifications with TestConfiguration with Lo
     }
 
     "should log a message when no due date is passed to the API because of an overdue payment" in {
-      given
+      build
         .payApiStub.successCall()
 
       withCaptureOfLoggingFrom(instanceOf[GenericLogger].logger) { events =>
@@ -73,7 +74,7 @@ class PayApiConnectorISpec extends Specifications with TestConfiguration with Lo
     }
 
     "should log a message when no due date is passed to the API because of an return amount due is less than the balance due " in {
-      given
+      build
         .payApiStub.successCall()
 
       withCaptureOfLoggingFrom(instanceOf[GenericLogger].logger) { events =>
@@ -92,7 +93,7 @@ class PayApiConnectorISpec extends Specifications with TestConfiguration with Lo
     }
 
     "should log a message when no due date is passed to the API due to no return being sent" in {
-      given
+      build
         .payApiStub.successCall()
 
       withCaptureOfLoggingFrom(instanceOf[GenericLogger].logger) { events =>
@@ -109,7 +110,7 @@ class PayApiConnectorISpec extends Specifications with TestConfiguration with Lo
     }
 
     "should log a message when a due date is passed to the API" in {
-      given
+      build
         .payApiStub.successCall()
 
       withCaptureOfLoggingFrom(instanceOf[GenericLogger].logger) { events =>

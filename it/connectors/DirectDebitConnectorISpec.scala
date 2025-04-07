@@ -1,21 +1,27 @@
 package connectors
 
 import errors.UnexpectedResponseFromDirectDebit
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
-import testSupport.ITCoreTestData._
+import testSupport.ITCoreTestData.*
 import testSupport.{Specifications, TestConfiguration}
 import uk.gov.hmrc.http.HeaderCarrier
+import org.scalatest.matchers.must.Matchers.*
+import org.scalatest.EitherValues.*
+import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
+import testSupport.Specifications
+import org.scalatest.matchers.must.Matchers.mustBe
 
-class DirectDebitConnectorISpec extends Specifications with TestConfiguration {
 
-  val ddConnector = app.injector.instanceOf[DirectDebitConnector]
-  implicit val hc = new HeaderCarrier()
+class DirectDebitConnectorISpec extends Specifications with TestConfiguration  {
+
+  val ddConnector: DirectDebitConnector = app.injector.instanceOf[DirectDebitConnector]
+  implicit val builder: PreconditionBuilder = new PreconditionBuilder()
+  implicit val hc: HeaderCarrier = new HeaderCarrier()
 
   "initJourney" - {
     "should return a link to redirect the user to" - {
       "when the call to direct-debit succeeds" in {
-        given
-          .ddStub.successCall()
+        build
+         .ddStub.successCall()
 
         val res = ddConnector.initJourney()
 
@@ -27,7 +33,7 @@ class DirectDebitConnectorISpec extends Specifications with TestConfiguration {
 
     "should return an UnexpectedResponseFromDirectDebit error" - {
       "when the call to direct-debit fails" in {
-        given
+        build
           .ddStub.failureCall
 
         val res = ddConnector.initJourney()

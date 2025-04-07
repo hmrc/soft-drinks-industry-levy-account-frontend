@@ -19,6 +19,7 @@ import uk.gov.hmrc.crypto.PlainText
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
 import uk.gov.hmrc.play.health.HealthController
 import utilities.GenericLogger
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 
 import java.time.{Clock, ZoneOffset}
 import scala.concurrent.ExecutionContext
@@ -144,8 +145,8 @@ trait TestConfiguration
       .map(_.getRequest).foreach(r => s"${r.getLoggedDate.toInstant.toEpochMilli}\t${r.getMethod}\t${r.getUrl}")
   }
 
-  implicit lazy val messagesAPI = app.injector.instanceOf[MessagesApi]
-  implicit lazy val messagesProvider = MessagesImpl(Lang("en"), messagesAPI)
+  lazy val messagesAPI: MessagesApi = app.injector.instanceOf[MessagesApi]
+  lazy val messagesProvider: MessagesImpl = MessagesImpl(Lang("en"), messagesAPI)
   val genericLogger = app.injector.instanceOf[GenericLogger]
   lazy val mcc = app.injector.instanceOf[MessagesControllerComponents]
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
