@@ -211,26 +211,26 @@ trait ServicePageITHelper extends ControllerITTestHelper {
 
   }
 
-def validateAccountBalance(page: Document,
+  def validateAccountBalance(page: Document,
                            balance: BigDecimal,
                            sentFinalReturn: Boolean) = {
-  page.getElementsByClass("govuk-heading-m").eachText() must contain("Account balance")
-  val expectedContent = if (balance < 0) {
-    "Your balance is £100.00."
-  } else if (balance > 0 && sentFinalReturn) {
-    "Your balance is £100.00 in credit. Call the Soft Drinks Industry Levy helpline to arrange repayment."
-  } else if (balance > 0) {
-    "You are £100.00 in credit. This account is closed."
-  } else {
-    "Your balance is £0. This account is closed."
+    page.getElementsByClass("govuk-heading-m").eachText() must contain("Account balance")
+    val expectedContent = if (balance < 0) {
+      "Your balance is £100.00."
+    } else if (balance > 0 && sentFinalReturn) {
+      "Your balance is £100.00 in credit. Call the Soft Drinks Industry Levy helpline to arrange repayment."
+    } else if (balance > 0) {
+      "You are £100.00 in credit. This account is closed."
+    } else {
+      "Your balance is £0. This account is closed."
+    }
+    page.getElementsByClass("govuk-body").text() must include(expectedContent)
+
+    val transHistoryLink = page.getElementById("viewTransactionHistory")
+    transHistoryLink.text() mustBe "View your transaction history"
+    transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
+
   }
-  page.getElementsByClass("govuk-body").text() must include(expectedContent)
-
-  val transHistoryLink = page.getElementById("viewTransactionHistory")
-  transHistoryLink.text() mustBe "View your transaction history"
-  transHistoryLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/transaction-history"
-
-}
 
   def validateManageAccount(page: Document, isDeregistered: Boolean = false) = {
     page.getElementsByClass("govuk-heading-m").eachText() must contain("Manage your account")

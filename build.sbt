@@ -14,7 +14,7 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
-      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
+      "-Wconf:cat=deprecation:s"
     ),
     ScoverageKeys.coverageExcludedPackages:= ".*\\$anon.*"
   )
@@ -57,8 +57,9 @@ lazy val root = (project in file("."))
           "javascripts/app.js"
         ))
     ),
-     scalacOptions += "-deprecation",
-    scalacOptions ++= Seq("-Ypatmat-exhaust-depth", "off"),
+    scalacOptions ++= Seq(
+      "-Wconf:cat=unused-imports:s,src=.*[/\\\\]target[/\\\\].*:s"
+    ),
     // prevent removal of unused code which generates warning errors due to use of third-party libs
     uglifyCompressOptions := Seq("unused=false", "dead_code=false"),
     pipelineStages := Seq(digest),

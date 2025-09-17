@@ -2,11 +2,9 @@ package connectors
 
 import errors.UnexpectedResponseFromDirectDebit
 import testSupport.ITCoreTestData.*
-import testSupport.{Specifications, TestConfiguration}
+import testSupport.TestConfiguration
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.matchers.must.Matchers.*
-import org.scalatest.EitherValues.*
-import testSupport.preConditions.{PreconditionBuilder, PreconditionHelpers}
+import testSupport.preConditions.PreconditionBuilder
 import testSupport.Specifications
 import org.scalatest.matchers.must.Matchers.mustBe
 

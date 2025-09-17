@@ -33,11 +33,11 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration with 
     "the user is unauthenticated" - {
       "redirect to gg-signin" in {
          unauthorisedPrecondition
-        WsTestClient.withClient { client =>
-          val result1 = optJson match {
-            case Some(json) => createClientRequestPOST(client, url, json)
-            case _ => createClientRequestGet(client, url)
-          }
+          WsTestClient.withClient { client =>
+            val result1 = optJson match {
+              case Some(json) => createClientRequestPOST(client, url, json)
+              case _ => createClientRequestGet(client, url)
+            }
 
           whenReady(result1) { res =>
             res.status mustBe 303
@@ -50,11 +50,11 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration with 
     "the user is authorised but has an invalid role" - {
       "redirect to sdil home" in {
          authorisedWithInvalidRolePrecondition
-        WsTestClient.withClient { client =>
-          val result1 = optJson match {
-            case Some(json) => createClientRequestPOST(client, url, json)
-            case _ => createClientRequestGet(client, url)
-          }
+          WsTestClient.withClient { client =>
+            val result1 = optJson match {
+              case Some(json) => createClientRequestPOST(client, url, json)
+              case _ => createClientRequestGet(client, url)
+            }
 
           whenReady(result1) { res =>
             res.status mustBe 303
@@ -68,10 +68,10 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration with 
       "redirect to sdil home" in {
          authorisedWithInvalidAffinityPrecondition
 
-        WsTestClient.withClient { client =>
-          val result1 = optJson match {
-            case Some(json) => createClientRequestPOST(client, url, json)
-            case _ => createClientRequestGet(client, url)
+          WsTestClient.withClient { client =>
+            val result1 = optJson match {
+              case Some(json) => createClientRequestPOST(client, url, json)
+              case _ => createClientRequestGet(client, url)
           }
 
           whenReady(result1) { res =>
@@ -127,7 +127,7 @@ trait ControllerITTestHelper extends Specifications with TestConfiguration with 
           whenReady(result1) { res =>
             res.status mustBe 500
             val page = Jsoup.parse(res.body)
-            page.title() mustBe "Sorry, there is a problem with the service - 500 - Soft Drinks Industry Levy - GOV.UK"
+            page.title() mustBe "Sorry, there is a problem with the service - Soft Drinks Industry Levy - GOV.UK"
           }
         }
       }
