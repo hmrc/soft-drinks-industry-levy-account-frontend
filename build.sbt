@@ -3,6 +3,8 @@ import sbt.Def
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
+import scala.collection.Seq
+
 lazy val appName: String = "soft-drinks-industry-levy-account-frontend"
 
 lazy val scoverageSettings = {
@@ -58,7 +60,8 @@ lazy val root = (project in file("."))
         ))
     ),
     scalacOptions ++= Seq(
-      "-Wconf:cat=unused-imports:s,src=.*[/\\\\]target[/\\\\].*:s"
+      "-feature",
+      "-Wconf:cat=feature:s,src=target/.*:s,msg=Flag.*repeatedly:s,msg=unused explicit parameter*:s"
     ),
     // prevent removal of unused code which generates warning errors due to use of third-party libs
     uglifyCompressOptions := Seq("unused=false", "dead_code=false"),
