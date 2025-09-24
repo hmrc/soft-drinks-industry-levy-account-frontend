@@ -29,7 +29,6 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 
 @Singleton
 class SessionRepository @Inject()(

@@ -3,6 +3,8 @@ import sbt.Def
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
+import scala.collection.Seq
+
 lazy val appName: String = "soft-drinks-industry-levy-account-frontend"
 
 lazy val scoverageSettings = {
@@ -14,7 +16,7 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
-      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
+      "-Wconf:cat=deprecation:s"
     ),
     ScoverageKeys.coverageExcludedPackages:= ".*\\$anon.*"
   )
@@ -57,8 +59,10 @@ lazy val root = (project in file("."))
           "javascripts/app.js"
         ))
     ),
-     scalacOptions += "-deprecation",
-    scalacOptions ++= Seq("-Ypatmat-exhaust-depth", "off"),
+    scalacOptions ++= Seq(
+      "-feature",
+      "-Wconf:cat=feature:s,src=target/.*:s,msg=Flag.*repeatedly:s,msg=unused explicit parameter*:s"
+    ),
     // prevent removal of unused code which generates warning errors due to use of third-party libs
     uglifyCompressOptions := Seq("unused=false", "dead_code=false"),
     pipelineStages := Seq(digest),

@@ -89,7 +89,7 @@ class RegisterControllerISpec extends ServicePageITHelper with Specifications {
         whenReady(result1) { res =>
           res.status mustBe 404
           val page = Jsoup.parse(res.body)
-          page.title() mustBe "Page not found - 404 - Soft Drinks Industry Levy - GOV.UK"
+          page.title() mustBe "Page not found - Soft Drinks Industry Levy - GOV.UK"
         }
       }
     }
@@ -105,7 +105,7 @@ class RegisterControllerISpec extends ServicePageITHelper with Specifications {
         whenReady(result1) { res =>
           res.status mustBe 500
           val page = Jsoup.parse(res.body)
-          page.title() mustBe "Sorry, there is a problem with the service - 500 - Soft Drinks Industry Levy - GOV.UK"
+          page.title() mustBe "Sorry, there is a problem with the service - Soft Drinks Industry Levy - GOV.UK"
         }
       }
     }
@@ -121,7 +121,7 @@ class RegisterControllerISpec extends ServicePageITHelper with Specifications {
         whenReady(result1) { res =>
           res.status mustBe 500
           val page = Jsoup.parse(res.body)
-          page.title() mustBe "Sorry, there is a problem with the service - 500 - Soft Drinks Industry Levy - GOV.UK"
+          page.title() mustBe "Sorry, there is a problem with the service - Soft Drinks Industry Levy - GOV.UK"
         }
       }
     }

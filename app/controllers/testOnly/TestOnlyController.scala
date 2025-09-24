@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import models.NextUrl
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.Future
