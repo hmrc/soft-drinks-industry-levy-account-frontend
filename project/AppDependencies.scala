@@ -3,9 +3,9 @@ import sbt._
 object AppDependencies {
 
   private val playVersion = s"-play-30"
-  private val bootstrapVersion = "10.1.0"
-  private val hmrcMongoVersion = "2.7.0"
-  private val playFrontendHMRCVersion = "12.13.0"
+  private val bootstrapVersion = "10.4.0"
+  private val hmrcMongoVersion = "2.10.0"
+  private val playFrontendHMRCVersion = "12.20.0"
 
   val compile: Seq[ModuleID] = Seq(
     play.sbt.PlayImport.ws,
@@ -14,7 +14,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% s"play-conditional-form-mapping$playVersion" % "3.3.0",
     "org.typelevel"     %% "cats-core"                     % "2.13.0",
     "uk.gov.hmrc.mongo" %% s"hmrc-mongo$playVersion"         % hmrcMongoVersion,
-    "uk.gov.hmrc"       %% s"crypto-json$playVersion"        % "8.3.0"
+    "uk.gov.hmrc"       %% s"crypto-json$playVersion"        % "8.4.0"
   )
 
   val test: Seq[ModuleID] = Seq(
