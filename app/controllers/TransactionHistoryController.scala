@@ -18,30 +18,30 @@ package controllers
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import controllers.actions.{AuthenticatedAction, RegisteredAction}
+import controllers.actions.{ AuthenticatedAction, RegisteredAction }
 import handlers.ErrorHandler
 import orchestrators.RegisteredOrchestrator
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.TransactionHistoryView
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-class TransactionHistoryController @Inject()(
-                                       val controllerComponents: MessagesControllerComponents,
-                                       authenticated: AuthenticatedAction,
-                                       registered: RegisteredAction,
-                                       registeredOrchestrator: RegisteredOrchestrator,
-                                       transactionHistoryView: TransactionHistoryView,
-                                       errorHandler: ErrorHandler
-                                    )(implicit config: FrontendAppConfig, ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class TransactionHistoryController @Inject() (
+  val controllerComponents: MessagesControllerComponents,
+  authenticated: AuthenticatedAction,
+  registered: RegisteredAction,
+  registeredOrchestrator: RegisteredOrchestrator,
+  transactionHistoryView: TransactionHistoryView,
+  errorHandler: ErrorHandler
+)(implicit config: FrontendAppConfig, ec: ExecutionContext)
+    extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
     registeredOrchestrator.getTransactionHistoryForAllYears.value.flatMap {
       case Right(transactionHistoryForYears) =>
-        Future.successful(Ok(transactionHistoryView(request.subscription.orgName,
-          transactionHistoryForYears)(implicitly, implicitly, implicitly)))
+        Future.successful(Ok(transactionHistoryView(request.subscription.orgName, transactionHistoryForYears)))
       case Left(_) => errorHandler.internalServerErrorTemplate.map(errorView => InternalServerError(errorView))
     }
   }

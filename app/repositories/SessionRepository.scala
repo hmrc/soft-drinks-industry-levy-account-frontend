@@ -27,31 +27,29 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class SessionRepository @Inject()(
-                                   mongoComponent: MongoComponent,
-                                   appConfig: FrontendAppConfig)
-                                 (implicit ec: ExecutionContext, encryption: Encryption)
-  extends PlayMongoRepository[DatedCacheMap](
-    collectionName = "session-cache",
-    mongoComponent = mongoComponent,
-    domainFormat   = DatedCacheMap.MongoFormats.formats,
-    indexes        = Seq(
-      IndexModel(
-        Indexes.ascending("lastUpdated"),
-        IndexOptions()
-          .name("session-cache-expiry")
-          .expireAfter(appConfig.cacheTtl.toLong, TimeUnit.SECONDS)
-      )
-    ),
-    replaceIndexes = false
-  ) {
+class SessionRepository @Inject() (mongoComponent: MongoComponent, appConfig: FrontendAppConfig)(implicit
+  ec: ExecutionContext,
+  encryption: Encryption
+) extends PlayMongoRepository[DatedCacheMap](
+      collectionName = "session-cache",
+      mongoComponent = mongoComponent,
+      domainFormat = DatedCacheMap.MongoFormats.formats,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("lastUpdated"),
+          IndexOptions()
+            .name("session-cache-expiry")
+            .expireAfter(appConfig.cacheTtl.toLong, TimeUnit.SECONDS)
+        )
+      ),
+      replaceIndexes = false
+    ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
-
 
   def upsert(cm: CacheMap): Future[Boolean] = {
     val cmUpdated = DatedCacheMap(cm.id, cm.data)
@@ -64,19 +62,17 @@ class SessionRepository @Inject()(
       }
   }
 
-  def removeRecord(id: String): Future[Boolean] = {
+  def removeRecord(id: String): Future[Boolean] =
     collection.deleteOne(equal("_id", id)).toFuture().map(_.getDeletedCount > 0)
-  }
 
-  def get(id: String): Future[Option[CacheMap]] = {
+  def get(id: String): Future[Option[CacheMap]] =
     collection.find(equal("_id", id)).headOption().map { datedCacheMap =>
       datedCacheMap.map { value =>
         CacheMap(value._id, value.data)
       }
     }
-  }
 
-  def updateLastUpdated(id: String): Future[Boolean] = {
+  def updateLastUpdated(id: String): Future[Boolean] =
     collection
       .updateOne(
         equal("_id", id),
@@ -86,5 +82,4 @@ class SessionRepository @Inject()(
       .map { result =>
         result.wasAcknowledged()
       }
-  }
 }

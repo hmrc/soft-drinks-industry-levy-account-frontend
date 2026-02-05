@@ -18,57 +18,61 @@ package repositories
 
 import play.api.libs.json.Format
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class SessionCache @Inject()(sessionRepository: SessionRepository,
-                             cascadeUpsert: CascadeUpsert)(implicit val ec: ExecutionContext) {
+class SessionCache @Inject() (sessionRepository: SessionRepository, cascadeUpsert: CascadeUpsert)(implicit
+  val ec: ExecutionContext
+) {
 
-  def save[A](_id: String, key: String, value: A)(
-    implicit fmt: Format[A]
-  ): Future[CacheMap] = {
-    sessionRepository.get(_id).flatMap { optionalCacheMap =>
-      val updatedCacheMap = cascadeUpsert(
-        key,
-        value,
-        optionalCacheMap.getOrElse(CacheMap(_id, Map()))
-      )
-      sessionRepository.upsert(updatedCacheMap).map { _ =>
-        updatedCacheMap
+  def save[A](_id: String, key: String, value: A)(implicit
+    fmt: Format[A]
+  ): Future[CacheMap] =
+    sessionRepository
+      .get(_id)
+      .flatMap { optionalCacheMap =>
+        val updatedCacheMap = cascadeUpsert(
+          key,
+          value,
+          optionalCacheMap.getOrElse(CacheMap(_id, Map()))
+        )
+        sessionRepository.upsert(updatedCacheMap).map { _ =>
+          updatedCacheMap
+        }
       }
-    }.recover {
-      case _ => CacheMap(_id, Map.empty)
-    }
-  }
-  def removeRecord(_id: String): Future[Boolean] = {
+      .recover { case _ =>
+        CacheMap(_id, Map.empty)
+      }
+  def removeRecord(_id: String): Future[Boolean] =
     sessionRepository.removeRecord(_id)
-  }.recover {
-    case _ => false
-  }
+      .recover { case _ =>
+        false
+      }
 
   def fetch(_id: String): Future[Option[CacheMap]] =
-    sessionRepository.get(_id)
-      .recover {
-        case _ => None
+    sessionRepository
+      .get(_id)
+      .recover { case _ =>
+        None
       }
 
-  def fetchEntry[T](_id: String, key: String)
-                   (implicit fmt: Format[T]): Future[Option[T]] = {
-    fetch(_id).map(optCacheMap =>
-      optCacheMap.fold[Option[T]](None)(cachedMap =>
-        cachedMap.data.get(key)
-          .map(json =>
-            json.as[T])))
-      .recover {
-        case _ => None
+  def fetchEntry[T](_id: String, key: String)(implicit fmt: Format[T]): Future[Option[T]] =
+    fetch(_id)
+      .map(optCacheMap =>
+        optCacheMap.fold[Option[T]](None)(cachedMap =>
+          cachedMap.data
+            .get(key)
+            .map(json => json.as[T])
+        )
+      )
+      .recover { case _ =>
+        None
       }
-  }
 
-  def extendSession(_id: String): Future[Boolean] = {
-    sessionRepository.updateLastUpdated(_id).recover {
-      case _ => false
+  def extendSession(_id: String): Future[Boolean] =
+    sessionRepository.updateLastUpdated(_id).recover { case _ =>
+      false
     }
-  }
 
 }

@@ -68,14 +68,14 @@ class TransactionHistoryControllerSpec extends SpecBase with MockitoSugar with L
 
         val config = application.injector.instanceOf[FrontendAppConfig]
 
-        when(mockOrchestrator.getTransactionHistoryForAllYears(any(), any(), any())).thenReturn(createSuccessAccountResult(transactionHistoryForYears))
+        when(mockOrchestrator.getTransactionHistoryForAllYears(using any(), any(), any())).thenReturn(createSuccessAccountResult(transactionHistoryForYears))
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[TransactionHistoryView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(aSubscription.orgName, transactionHistoryForYears)(request, messages(application), config).toString
+        contentAsString(result) mustEqual view(aSubscription.orgName, transactionHistoryForYears)(using request, messages(application), config).toString
       }
     }
 
@@ -88,7 +88,7 @@ class TransactionHistoryControllerSpec extends SpecBase with MockitoSugar with L
         running(application) {
           val request = FakeRequest(GET, transactionHistoryRoute.url)
 
-          when(mockOrchestrator.getTransactionHistoryForAllYears(any(), any(), any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockOrchestrator.getTransactionHistoryForAllYears(using any(), any(), any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
           val result = route(application, request).value
 
           status(result) mustEqual INTERNAL_SERVER_ERROR

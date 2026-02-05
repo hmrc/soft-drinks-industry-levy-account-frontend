@@ -16,16 +16,16 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 import java.time.LocalDate
 
 case class Site(
-                 address: UkAddress,
-                 ref: Option[String],
-                 tradingName: Option[String],
-                 closureDate: Option[LocalDate]
-               )
+  address: UkAddress,
+  ref: Option[String],
+  tradingName: Option[String],
+  closureDate: Option[LocalDate]
+)
 
 object Site {
   implicit val format: Format[Site] = Json.format[Site]

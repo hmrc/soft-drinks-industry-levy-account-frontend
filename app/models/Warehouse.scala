@@ -16,10 +16,9 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
-case class Warehouse(tradingName: Option[String],
-                      address: UkAddress)
+case class Warehouse(tradingName: Option[String], address: UkAddress)
 
 object Warehouse {
 

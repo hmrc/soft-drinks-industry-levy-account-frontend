@@ -107,9 +107,9 @@ class ServicePageViewModelSpec extends AnyWordSpec with Matchers {
       model match {
         case _: RegisteredUserServicePageViewModel  => fail("Should not match RegisteredUserServicePageViewModel")
         case _: DeregisteredUserServicePageViewModel => succeed
-        case _ => fail("Should match one of the known models")
       }
     }
   }
 }
+
 

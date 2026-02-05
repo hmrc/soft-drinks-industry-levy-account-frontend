@@ -16,15 +16,17 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 import java.time.LocalDate
 
-case class SetupPayApiRequest(reference: String,
-                              amountInPence: Long,
-                              dueDate: Option[LocalDate] = None,
-                              returnUrl: String,
-                              backUrl: String)
+case class SetupPayApiRequest(
+  reference: String,
+  amountInPence: Long,
+  dueDate: Option[LocalDate] = None,
+  returnUrl: String,
+  backUrl: String
+)
 
 object SetupPayApiRequest {
   implicit val format: Format[SetupPayApiRequest] = Json.format[SetupPayApiRequest]

@@ -56,14 +56,14 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
           val config = application.injector.instanceOf[FrontendAppConfig]
 
-          when(mockOrchestrator.handleServicePageRequest(any(), any(), any())).thenReturn(createSuccessAccountResult(registeredUserServicePageViewModel1PendingReturns))
+          when(mockOrchestrator.handleServicePageRequest(using any(), any(), any())).thenReturn(createSuccessAccountResult(registeredUserServicePageViewModel1PendingReturns))
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[ServiceView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(registeredUserServicePageViewModel1PendingReturns)(request, messages(application), config).toString
+          contentAsString(result) mustEqual view(registeredUserServicePageViewModel1PendingReturns)(using request, messages(application), config).toString
         }
       }
     }
@@ -82,14 +82,14 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
           val config = application.injector.instanceOf[FrontendAppConfig]
           val deregUserSeviceModel = generateDeregUserServicePageModel(true, true, true, 100)
 
-          when(mockOrchestrator.handleServicePageRequest(any(), any(), any())).thenReturn(createSuccessAccountResult(deregUserSeviceModel))
+          when(mockOrchestrator.handleServicePageRequest(using any(), any(), any())).thenReturn(createSuccessAccountResult(deregUserSeviceModel))
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[DeregisteredUserServiceView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(deregUserSeviceModel)(request, messages(application), config).toString
+          contentAsString(result) mustEqual view(deregUserSeviceModel)(using request, messages(application), config).toString
         }
       }
     }
@@ -107,7 +107,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
         running(application) {
           val request = FakeRequest(GET, startAReturnRoute(false).url)
           val config = application.injector.instanceOf[FrontendAppConfig]
-          when(mockOrchestrator.handleStartAReturn(any(), any(), any())).thenReturn(createSuccessAccountResult(pendingReturn1))
+          when(mockOrchestrator.handleStartAReturn(using any(), any(), any())).thenReturn(createSuccessAccountResult(pendingReturn1))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
@@ -126,7 +126,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
           val request = FakeRequest(GET, startAReturnRoute(true).url)
 
-          when(mockOrchestrator.handleStartAReturn(any(), any(), any())).thenReturn(createSuccessAccountResult(pendingReturn1))
+          when(mockOrchestrator.handleStartAReturn(using any(), any(), any())).thenReturn(createSuccessAccountResult(pendingReturn1))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
@@ -144,7 +144,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
         running(application) {
           val request = FakeRequest(GET, startAReturnRoute(false).url)
 
-          when(mockOrchestrator.handleStartAReturn(any(), any(), any())).thenReturn(createFailureAccountResult(NoPendingReturns))
+          when(mockOrchestrator.handleStartAReturn(using any(), any(), any())).thenReturn(createFailureAccountResult(NoPendingReturns))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
@@ -162,7 +162,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
         running(application) {
           val request = FakeRequest(GET, startAReturnRoute(false).url)
 
-          when(mockOrchestrator.handleStartAReturn(any(), any(), any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockOrchestrator.handleStartAReturn(using any(), any(), any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
           val result = route(application, request).value
 
           status(result) mustEqual INTERNAL_SERVER_ERROR
@@ -178,7 +178,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
       running(application) {
         withCaptureOfLoggingFrom(application.injector.instanceOf[GenericLogger].logger) { events =>
           val request = FakeRequest(GET, startAReturnRoute(false).url)
-          when(mockOrchestrator.handleStartAReturn(any(), any(), any())).thenReturn(createFailureAccountResult(NoPendingReturns))
+          when(mockOrchestrator.handleStartAReturn(using any(), any(), any())).thenReturn(createFailureAccountResult(NoPendingReturns))
           await(route(application, request).value)
           events.collectFirst {
             case event =>
@@ -200,7 +200,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
       running(application) {
         val request = FakeRequest(GET, makeAChangeRoute.url)
         val config = application.injector.instanceOf[FrontendAppConfig]
-        when(mockOrchestrator.emptyCache(any())).thenReturn(Future.successful(true))
+        when(mockOrchestrator.emptyCache(using any())).thenReturn(Future.successful(true))
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
@@ -219,7 +219,7 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
       running(application) {
         val request = FakeRequest(GET, correctAReturnRoute.url)
         val config = application.injector.instanceOf[FrontendAppConfig]
-        when(mockOrchestrator.emptyCache(any())).thenReturn(Future.successful(true))
+        when(mockOrchestrator.emptyCache(using any())).thenReturn(Future.successful(true))
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER

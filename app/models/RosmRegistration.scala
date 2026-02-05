@@ -22,28 +22,27 @@ case class RosmRegistration(
   safeId: String,
   organisation: Option[OrganisationDetails],
   individual: Option[IndividualDetails],
-  address: UkAddress) {
+  address: UkAddress
+) {
 
-  lazy val organisationName: String = {
+  lazy val organisationName: String =
     organisation.map(_.organisationName).orElse(individual.map(i => s"${i.firstName} ${i.lastName}")).getOrElse("")
-  }
 }
 
 object RosmRegistration {
   implicit val addressReads: Reads[UkAddress] =
-    (json: JsValue) => {
-    for {
-      jsObject <- json.validate[JsObject]
-      line1 <- (jsObject \ "addressLine1").validate[String]
-      line2 <- (jsObject \ "addressLine2").validateOpt[String]
-      line3 <- (jsObject \ "addressLine3").validateOpt[String]
-      line4 <- (jsObject \ "addressLine4").validateOpt[String]
-      postCode <- (jsObject \ "postalCode").validate[String]
-    } yield {
-      val optlines: List[String] = List(line2, line3, line4).collect{case Some(l) => l}
-      UkAddress(List(line1) ++ optlines, postCode, None)
-    }
-  }
+    (json: JsValue) =>
+      for {
+        jsObject <- json.validate[JsObject]
+        line1    <- (jsObject \ "addressLine1").validate[String]
+        line2    <- (jsObject \ "addressLine2").validateOpt[String]
+        line3    <- (jsObject \ "addressLine3").validateOpt[String]
+        line4    <- (jsObject \ "addressLine4").validateOpt[String]
+        postCode <- (jsObject \ "postalCode").validate[String]
+      } yield {
+        val optlines: List[String] = List(line2, line3, line4).collect { case Some(l) => l }
+        UkAddress(List(line1) ++ optlines, postCode, None)
+      }
 
   implicit val readsROSMReg: Reads[RosmRegistration] = Json.reads[RosmRegistration]
 }

@@ -26,7 +26,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
 
   val application = applicationBuilder().build()
   val view = application.injector.instanceOf[ServiceView]
-  implicit val request: Request[_] = FakeRequest()
+  implicit val request: Request[?] = FakeRequest()
   implicit val config: FrontendAppConfig = application
     .injector.instanceOf[FrontendAppConfig]
 
@@ -38,19 +38,19 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
     val button = "govuk-button"
   }
 
-  val htmlNoReturn = view(registeredUserServicePageViewModelWithNoReturnInfo)(request, messages(application), config)
+  val htmlNoReturn = view(registeredUserServicePageViewModelWithNoReturnInfo)(using request, messages(application), config)
   val documentNoReturn = doc(htmlNoReturn)
 
-  val html1Return = view(registeredUserServicePageViewModel1PendingReturns)(request, messages(application), config)
+  val html1Return = view(registeredUserServicePageViewModel1PendingReturns)(using request, messages(application), config)
   val document1Return = doc(html1Return)
 
-  val html3Return = view(registeredUserServicePageViewModel3PendingReturns)(request, messages(application), config)
+  val html3Return = view(registeredUserServicePageViewModel3PendingReturns)(using request, messages(application), config)
   val document3Return = doc(html3Return)
 
-  val htmlWithLastReturn = view(registeredUserServicePageViewModelWithLastReturn)(request, messages(application), config)
+  val htmlWithLastReturn = view(registeredUserServicePageViewModelWithLastReturn)(using request, messages(application), config)
   val documentLastReturn = doc(htmlWithLastReturn)
 
-  val htmlForVolunaryRegistration = view(registeredUserServicePageViewModelForVoluntaryRegistration)(request, messages(application), config)
+  val htmlForVolunaryRegistration = view(registeredUserServicePageViewModelForVoluntaryRegistration)(using request, messages(application), config)
   val documentForVolunaryRegistration = doc(htmlForVolunaryRegistration)
 
   "View" - {
@@ -198,7 +198,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         val balance = BigDecimal(-123.45)
         val interest = BigDecimal(0)
         val viewModel = registeredUserServicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
-        val html = view(viewModel)(request, messages(application), config)
+        val html = view(viewModel)(using request, messages(application), config)
         val document = doc(html)
 
         "that include the amount owed message not including interest" in {
@@ -247,7 +247,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         val balance = BigDecimal(-123.45)
         val interest = BigDecimal(0)
         val viewModel = registeredUserServicePageViewModel(List.empty, None, balance, interest, Some(false))
-        val html = view(viewModel)(request, messages(application), config)
+        val html = view(viewModel)(using request, messages(application), config)
         val document = doc(html)
         "that include the amount owed message not including interest" in {
           val balanceMessage1 = document.getElementById("balanceNeedToPayNoInterest")
@@ -293,7 +293,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         val balance = BigDecimal(-123.45)
         val interest = BigDecimal(-10)
         val viewModel = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, None)
-        val html = view(viewModel)(request, messages(application), config)
+        val html = view(viewModel)(using request, messages(application), config)
         val document = doc(html)
         "that include the amount owed message in bold not including interest" in {
           val balanceMessage1 = document.getElementById("balanceNeedToPayWithInterest")
@@ -338,7 +338,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         val balance = BigDecimal(123.45)
         val interest = BigDecimal(0)
         val viewModel = registeredUserServicePageViewModel(pendingReturns1, None, balance, interest, Some(true))
-        val html = view(viewModel)(request, messages(application), config)
+        val html = view(viewModel)(using request, messages(application), config)
         val document = doc(html)
         "that include the amount in credit in normal text" in {
           val balanceMessage1 = document.getElementById("balanceCredit")
@@ -381,7 +381,7 @@ class RegisteredUserServiceViewSpec extends RegisteredUserServiceViewHelper {
         val balance = BigDecimal(0)
         val interest = BigDecimal(0)
         val viewModel = registeredUserServicePageViewModel(List.empty, None, balance, interest, Some(true))
-        val html = view(viewModel)(request, messages(application), config)
+        val html = view(viewModel)(using request, messages(application), config)
         val document = doc(html)
         "that include nothing owed message in normal text" in {
           val balanceMessage1 = document.getElementById("balanceZero")

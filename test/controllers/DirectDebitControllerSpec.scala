@@ -33,7 +33,7 @@ class DirectDebitControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to the url provided by direct debit" in {
 
       val mockDDConnector = mock[DirectDebitConnector]
-      when(mockDDConnector.initJourney()(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
+      when(mockDDConnector.initJourney()(using any())).thenReturn(createSuccessAccountResult(NextUrl("http://test")))
 
       val application =
         applicationBuilder()
@@ -54,7 +54,7 @@ class DirectDebitControllerSpec extends SpecBase with MockitoSugar {
 
   "render the error page when the call to direct debit fails" in {
     val mockDDConnector = mock[DirectDebitConnector]
-    when(mockDDConnector.initJourney()(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromDirectDebit)
+    when(mockDDConnector.initJourney()(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromDirectDebit))
 
     val application =
       applicationBuilder()

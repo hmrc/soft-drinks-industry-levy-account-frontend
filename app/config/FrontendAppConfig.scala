@@ -16,7 +16,7 @@
 
 package config
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{ Inject, Singleton }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
@@ -30,17 +30,14 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val registrationBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-registration-frontend")
   val variationsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-variations-frontend")
 
-
-  def startReturnUrl(year: Int, quarter: Int, isNilReturn: Boolean) = {
+  def startReturnUrl(year: Int, quarter: Int, isNilReturn: Boolean) =
     s"$returnsBaseUrl/soft-drinks-industry-levy-returns-frontend/submit-return/year/$year/quarter/$quarter/nil-return/$isNilReturn"
-  }
 
   val makeAChangeUrl = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/select-change"
   val correctAReturnUrl = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/correct-return/select"
 
-  val startRegistrationUrl: String = {
+  val startRegistrationUrl: String =
     s"$registrationBaseUrl/soft-drinks-industry-levy-registration/start"
-  }
 
   private val basGatewayBaseUrl: String = configuration.baseUrl("bas-gateway")
   val sdilBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy")
@@ -62,15 +59,14 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
     s"$payApiBaseUrl/pay-api/bta/sdil/journey/start"
   }
 
-
-  val loginUrl: String         = s"$basGatewayBaseUrl/bas-gateway/sign-in"
+  val loginUrl: String = s"$basGatewayBaseUrl/bas-gateway/sign-in"
   val loginContinueUrl: String = s"$accountBaseUrl/soft-drinks-industry-levy-account-frontend"
-  val signOutUrl: String       = s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
+  val signOutUrl: String = s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
 
   private val exitSurveyBaseUrl: String = configuration.baseUrl("feedback-frontend")
-  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/soft-drinks-industry-levy-account-frontend"
+  val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/soft-drinks-industry-levy-account-frontend"
 
-  val timeout: Int   = configuration.getInt("timeout-dialog.timeout")
+  val timeout: Int = configuration.getInt("timeout-dialog.timeout")
   val countdown: Int = configuration.getInt("timeout-dialog.countdown")
 
   val cacheTtl: Int = configuration.getInt("mongodb.timeToLiveInSeconds")
@@ -83,4 +79,3 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
   val sdilContactNumber: String = configuration.getString("sdilContactNumber")
 
 }
-

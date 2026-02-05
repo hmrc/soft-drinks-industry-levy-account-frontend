@@ -19,28 +19,28 @@ package controllers.actions
 import com.google.inject.Inject
 import controllers.routes
 import handlers.ErrorHandler
-import models.requests.{AuthenticatedRequest, IdentificationRequest}
+import models.requests.{ AuthenticatedRequest, IdentificationRequest }
 import play.api.mvc.Results._
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-
-class IdentificationActionImp @Inject()(errorHandler: ErrorHandler)
-                                       (implicit val executionContext: ExecutionContext)
-  extends IdentifierAction
-  with ActionHelpers {
-    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, IdentificationRequest[A]]] = {
-      (request.optUtr, request.optSubscription) match {
-        case (Some(_), Some(sub)) if sub.deregDate.isEmpty =>
-          Future.successful(Left(Redirect(routes.ServicePageController.onPageLoad)))
-        case (Some(_), optSub) => Future.successful(Right(IdentificationRequest(request, request.internalId, optSub, request.optUtr)))
-        case (None, Some(sub)) if sub.deregDate.nonEmpty => Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
-        case _ if request.optSdilRef.isDefined => errorHandler.notFoundTemplate(request).map(errorView => Left(NotFound(errorView)))
-        case _ => Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
-      }
+class IdentificationActionImp @Inject() (errorHandler: ErrorHandler)(implicit ec: ExecutionContext)
+    extends IdentifierAction with ActionHelpers {
+  
+  override protected def executionContext: ExecutionContext = ec
+  
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, IdentificationRequest[A]]] =
+    (request.optUtr, request.optSubscription) match {
+      case (Some(_), Some(sub)) if sub.deregDate.isEmpty =>
+        Future.successful(Left(Redirect(routes.ServicePageController.onPageLoad)))
+      case (Some(_), optSub) =>
+        Future.successful(Right(IdentificationRequest(request, request.internalId, optSub, request.optUtr)))
+      case (None, Some(sub)) if sub.deregDate.nonEmpty =>
+        Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
+      case _ if request.optSdilRef.isDefined =>
+        errorHandler.notFoundTemplate(using request).map(errorView => Left(NotFound(errorView)))
+      case _ => Future.successful(Right(IdentificationRequest(request, request.internalId, None, request.optUtr)))
     }
 }
 trait IdentifierAction extends ActionRefiner[AuthenticatedRequest, IdentificationRequest]
-
-

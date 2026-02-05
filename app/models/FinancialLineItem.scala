@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json._
 
-import java.time.{LocalDate => Date}
+import java.time.{ LocalDate => Date }
 
 sealed trait FinancialLineItem {
   def date: Date
