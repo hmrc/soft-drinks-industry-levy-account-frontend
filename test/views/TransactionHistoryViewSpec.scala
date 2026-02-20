@@ -26,7 +26,7 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
 
   val application = applicationBuilder().build()
   val view = application.injector.instanceOf[TransactionHistoryView]
-  implicit val request: Request[_] = FakeRequest()
+  implicit val request: Request[?] = FakeRequest()
   implicit val config: FrontendAppConfig = application
     .injector.instanceOf[FrontendAppConfig]
 
@@ -37,16 +37,16 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
     val li = "li"
   }
 
-  val htmlNoTransactions = view("Super Lemonade Plc", Map.empty[Int, List[TransactionHistoryItem]])(request, messages(application), config)
+  val htmlNoTransactions = view("Super Lemonade Plc", Map.empty[Int, List[TransactionHistoryItem]])(using request, messages(application), config)
   val documentNoTransactions = doc(htmlNoTransactions)
 
-  val htmlTransitionHistory1Item = view("Super Lemonade Plc", transitionHistoryItems1Item)(request, messages(application), config)
+  val htmlTransitionHistory1Item = view("Super Lemonade Plc", transitionHistoryItems1Item)(using request, messages(application), config)
   val documentTransitionHistory1Item = doc(htmlTransitionHistory1Item)
 
-  val htmlTransitionHistoryMultiItemsSameYear = view("Super Lemonade Plc", transitionHistoryItemsSameYear)(request, messages(application), config)
+  val htmlTransitionHistoryMultiItemsSameYear = view("Super Lemonade Plc", transitionHistoryItemsSameYear)(using request, messages(application), config)
   val documentTransitionHistoryMultiItemsSameYear = doc(htmlTransitionHistoryMultiItemsSameYear)
 
-  val htmlTransitionHistoryMultiItemsDiffYear = view("Super Lemonade Plc", transitionHistoryItemsDiffYears)(request, messages(application), config)
+  val htmlTransitionHistoryMultiItemsDiffYear = view("Super Lemonade Plc", transitionHistoryItemsDiffYears)(using request, messages(application), config)
   val documentTransitionHistoryMultiItemsDiffYear = doc(htmlTransitionHistoryMultiItemsDiffYear)
 
   val testCases = List(

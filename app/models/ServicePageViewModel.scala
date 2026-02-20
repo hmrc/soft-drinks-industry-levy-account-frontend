@@ -20,19 +20,20 @@ import java.time.LocalDate
 
 sealed trait ServicePageViewModel
 
-case class RegisteredUserServicePageViewModel(overdueReturns: List[ReturnPeriod],
-                                              sdilSubscription: RetrievedSubscription,
-                                              optLastReturn: Option[SdilReturn] = None,
-                                              balance: BigDecimal = 0,
-                                              interest: BigDecimal = 0,
-                                              optHasExistingDD: Option[Boolean] = None
-                               ) extends ServicePageViewModel
+case class RegisteredUserServicePageViewModel(
+  overdueReturns: List[ReturnPeriod],
+  sdilSubscription: RetrievedSubscription,
+  optLastReturn: Option[SdilReturn] = None,
+  balance: BigDecimal = 0,
+  interest: BigDecimal = 0,
+  optHasExistingDD: Option[Boolean] = None
+) extends ServicePageViewModel
 
-case class DeregisteredUserServicePageViewModel(sdilSubscription: RetrievedSubscription,
-                                                deregDate: LocalDate,
-                                                hasVariableReturns: Boolean,
-                                                optLastReturn: Option[SdilReturn] = None,
-                                                balance: BigDecimal = 0,
-                                                needsToSendFinalReturn: Boolean
-                                               ) extends ServicePageViewModel
-
+case class DeregisteredUserServicePageViewModel(
+  sdilSubscription: RetrievedSubscription,
+  deregDate: LocalDate,
+  hasVariableReturns: Boolean,
+  optLastReturn: Option[SdilReturn] = None,
+  balance: BigDecimal = 0,
+  needsToSendFinalReturn: Boolean
+) extends ServicePageViewModel

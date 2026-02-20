@@ -54,7 +54,7 @@ class AuthActionSpec extends SpecBase {
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -78,7 +78,7 @@ class AuthActionSpec extends SpecBase {
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -102,7 +102,7 @@ class AuthActionSpec extends SpecBase {
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -127,7 +127,7 @@ class AuthActionSpec extends SpecBase {
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
             val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -151,7 +151,7 @@ class AuthActionSpec extends SpecBase {
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -175,7 +175,7 @@ class AuthActionSpec extends SpecBase {
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
             val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -199,7 +199,7 @@ class AuthActionSpec extends SpecBase {
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -214,6 +214,6 @@ class AuthActionSpec extends SpecBase {
 class FakeFailingAuthConnector @Inject()(exceptionToReturn: Throwable) extends AuthConnector {
   val serviceUrl: String = ""
 
-  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
+  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(using hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
     Future.failed(exceptionToReturn)
 }

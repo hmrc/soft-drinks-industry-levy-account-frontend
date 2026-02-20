@@ -17,7 +17,7 @@
 package models
 
 import config.FrontendAppConfig
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 case class SetupDirectDebitRequest(returnUrl: String, backUrl: String) {
   def this(config: FrontendAppConfig) = this(

@@ -17,7 +17,6 @@
 package controllers.oldRoute
 
 import base.SpecBase
-import controllers.oldRoute.routes
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 

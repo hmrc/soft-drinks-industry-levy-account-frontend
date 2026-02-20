@@ -18,14 +18,14 @@ package views.helpers
 
 import config.FrontendAppConfig
 import controllers.routes
-import models.{RetrievedSubscription, ReturnPeriod, SdilReturn}
+import models.{ RetrievedSubscription, ReturnPeriod, SdilReturn }
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{ HtmlContent, Text }
 import uk.gov.hmrc.govukfrontend.views.viewmodels.insettext.InsetText
 import uk.gov.hmrc.govukfrontend.views.viewmodels.warningtext.WarningText
 
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDate, ZoneId}
+import java.time.{ Instant, LocalDate, ZoneId }
 
 object ServicePageHelper {
 
@@ -35,10 +35,15 @@ object ServicePageHelper {
   lazy val timeFormatter = DateTimeFormatter.ofPattern("h:mma")
 
   def createVoluntaryRegistrationInsetMessage(implicit messages: Messages): InsetText = {
-    val htmlMessage = s"<p>${messages("servicePage.voluntaryOnly.p1")}</p>" +
-      s"<p>${messages("servicePage.voluntaryOnly.p2")}" +
-      s" <a href = ${routes.ServicePageController.makeAChange.url}>${messages("servicePage.voluntaryOnly.link")}</a>" +
-      s" ${messages("servicePage.voluntaryOnly.p3")}</p>"
+    val msg1 = messages("servicePage.voluntaryOnly.p1")
+    val msg2 = messages("servicePage.voluntaryOnly.p2")
+    val linkText = messages("servicePage.voluntaryOnly.link")
+    val msg3 = messages("servicePage.voluntaryOnly.p3")
+
+    val htmlMessage = s"<p>$msg1</p>" +
+      s"<p>$msg2" +
+      s" <a href=${routes.ServicePageController.makeAChange.url}>$linkText</a>" +
+      s" $msg3</p>"
 
     InsetText(
       id = Some("voluntaryOnly"),
@@ -46,10 +51,10 @@ object ServicePageHelper {
     )
   }
 
-  def createWarningForOverdueReturns(pendingReturns: List[ReturnPeriod],
-                                     orgName: String)
-                                    (implicit messages: Messages): WarningText = {
-    val content = if(pendingReturns.size == 1) {
+  def createWarningForOverdueReturns(pendingReturns: List[ReturnPeriod], orgName: String)(implicit
+    messages: Messages
+  ): WarningText = {
+    val content = if (pendingReturns.size == 1) {
       val pendingReturn = pendingReturns.head
       val startMonth = pendingReturn.start.format(monthFormatter)
       val endDate = pendingReturn.end.format(monthYearFormatter)
@@ -64,20 +69,20 @@ object ServicePageHelper {
     )
   }
 
-  def returnsPendingBulletMessage(pendingReturn: ReturnPeriod)
-                                 (implicit messages: Messages): String = {
+  def returnsPendingBulletMessage(pendingReturn: ReturnPeriod)(implicit messages: Messages): String = {
 
     val startMonth = pendingReturn.start.format(monthFormatter)
     val endDate = pendingReturn.end.format(monthYearFormatter)
     messages("overdueReturn.bullet", startMonth, endDate)
   }
 
-  def noReturnsPendingMessage(lastReturn: SdilReturn)
-                             (implicit messages: Messages): InsetText = {
+  def noReturnsPendingMessage(lastReturn: SdilReturn)(implicit messages: Messages): InsetText = {
     val currentReturnPeriod = ReturnPeriod(LocalDate.now)
     val lastPeriodStart = currentReturnPeriod.previous.start.format(monthFormatter)
     val lastPeriodEnd = currentReturnPeriod.previous.end.format(monthYearFormatter)
-    val submittedOn = lastReturn.submittedOn.map(_.atZone(ZoneId.of("Europe/London"))).getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
+    val submittedOn = lastReturn.submittedOn
+      .map(_.atZone(ZoneId.of("Europe/London")))
+      .getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
     val submittedTime = submittedOn.format(timeFormatter).toLowerCase
     val submittedDate = submittedOn.format(dateFormatter)
     val currentPeriodStart = currentReturnPeriod.start.format(monthFormatter)
@@ -86,7 +91,8 @@ object ServicePageHelper {
     InsetText(
       id = Some("lastReturnInset"),
       content = Text(
-        messages("noOverdueReturns.paragraph",
+        messages(
+          "noOverdueReturns.paragraph",
           lastPeriodStart,
           lastPeriodEnd,
           submittedTime,
@@ -99,29 +105,24 @@ object ServicePageHelper {
     )
   }
 
-  def finalReturnSentMessage(lastReturn: SdilReturn)
-                     (implicit messages: Messages): InsetText = {
+  def finalReturnSentMessage(lastReturn: SdilReturn)(implicit messages: Messages): InsetText = {
     val currentReturnPeriod = ReturnPeriod(LocalDate.now)
     val lastPeriodStart = currentReturnPeriod.previous.start.format(monthFormatter)
     val lastPeriodEnd = currentReturnPeriod.previous.end.format(monthYearFormatter)
-    val submittedOn = lastReturn.submittedOn.map(_.atZone(ZoneId.of("Europe/London"))).getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
+    val submittedOn = lastReturn.submittedOn
+      .map(_.atZone(ZoneId.of("Europe/London")))
+      .getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
     val submittedTime = submittedOn.format(timeFormatter).toLowerCase
     val submittedDate = submittedOn.format(dateFormatter)
     InsetText(
       id = Some("finalReturnCompleted"),
       content = Text(
-        messages("finalReturnCompleted",
-          lastPeriodStart,
-          lastPeriodEnd,
-          submittedTime,
-          submittedDate
-        )
+        messages("finalReturnCompleted", lastPeriodStart, lastPeriodEnd, submittedTime, submittedDate)
       )
     )
   }
 
-  def finalReturnRequiredMessage(deRegDate: LocalDate)
-                             (implicit messages: Messages) = {
+  def finalReturnRequiredMessage(deRegDate: LocalDate)(implicit messages: Messages) = {
 
     val deregReturnPeriod = ReturnPeriod(deRegDate)
     val deregPeriodStart = deregReturnPeriod.previous.start.format(monthYearFormatter)
@@ -130,15 +131,17 @@ object ServicePageHelper {
   }
 
   def payBy(periodsDue: List[ReturnPeriod])(implicit messages: Messages): String = {
-    val payByDate = periodsDue.map(_.deadline).min(Ordering.fromLessThan[LocalDate]((a, b) => a.isBefore(b)))
+    implicit val localDateOrdering: Ordering[LocalDate] = Ordering.fromLessThan[LocalDate]((a, b) => a.isBefore(b))
+    val payByDate = periodsDue.map(_.deadline).min
     val formattedDate = payByDate.format(dateFormatter)
     messages("balance.need-to-pay-by", formattedDate)
-
   }
 
   def otherPaymentsContent(sdilReference: String)(implicit messages: Messages, config: FrontendAppConfig): String = {
-    val guidanceLink = s"""<a class="govuk-link" href="${config.howToPayGuidance}" target="_blank">${messages("howToPay.link")}</a>"""
-    s"${messages("howToPay.details.1")} <b>$sdilReference</b>.<br>$guidanceLink"
+    val linkText = messages("howToPay.link")
+    val howToPayMsg = messages("howToPay.details.1")
+    val guidanceLink = s"""<a class="govuk-link" href="${config.howToPayGuidance}" target="_blank">$linkText</a>"""
+    s"$howToPayMsg <b>$sdilReference</b>.<br>$guidanceLink"
   }
 
   def formatAbsPounds(bd: BigDecimal): String = f"£${bd.abs}%,.2f"
@@ -166,7 +169,8 @@ object ServicePageHelper {
     val formattedDeregNextStart = deregReturnPeriodNext.start.format(dateFormatter)
     val formattedDeregNextEnd = deregReturnPeriodNext.end.format(dateFormatter)
 
-    messages("servicePage.deregistered.pending.content.p1",
+    messages(
+      "servicePage.deregistered.pending.content.p1",
       formattedDeregStart,
       formattedDeregEnd,
       formattedDeregNextStart,

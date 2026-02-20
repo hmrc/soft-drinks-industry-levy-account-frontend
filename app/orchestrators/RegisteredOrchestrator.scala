@@ -18,10 +18,10 @@ package orchestrators
 
 import cats.data.EitherT
 import cats.implicits._
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{ Inject, Singleton }
 import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
-import errors.{AccountErrors, NoPendingReturns}
+import errors.{ AccountErrors, NoPendingReturns }
 import models.requests.RegisteredRequest
 import models._
 import play.api.mvc.AnyContent
@@ -30,43 +30,52 @@ import service.AccountResult
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConnector,
-                                       sessionCache: SessionCache,
-                                       frontendAppConfig: FrontendAppConfig) {
+class RegisteredOrchestrator @Inject() (
+  sdilConnector: SoftDrinksIndustryLevyConnector,
+  sessionCache: SessionCache,
+  frontendAppConfig: FrontendAppConfig
+) {
 
-  def handleServicePageRequest(implicit request: RegisteredRequest[AnyContent],
-                               hc: HeaderCarrier,
-                               ec: ExecutionContext): AccountResult[ServicePageViewModel] = {
+  def handleServicePageRequest(implicit
+    request: RegisteredRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): AccountResult[ServicePageViewModel] = {
     val subscription = request.subscription
     subscription.deregDate match {
       case Some(deregDate) => getServiceViewModelForDeregisteredUser(subscription, deregDate)
-      case None => getServiceViewModelForRegisteredUser(subscription)
+      case None            => getServiceViewModelForRegisteredUser(subscription)
     }
   }
 
-  def getTransactionHistoryForAllYears(implicit request: RegisteredRequest[AnyContent],
-                                      hc: HeaderCarrier,
-                                      ec: ExecutionContext): AccountResult[Map[Int, List[TransactionHistoryItem]]] = {
-    sdilConnector.balanceHistory(request.subscription.sdilRef, true, request.internalId)
+  def getTransactionHistoryForAllYears(implicit
+    request: RegisteredRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): AccountResult[Map[Int, List[TransactionHistoryItem]]] =
+    sdilConnector
+      .balanceHistory(request.subscription.sdilRef, true, request.internalId)
       .map {
         convertBalanceHistoryToTransactionHistory
       }
-  }
 
-  def handleStartAReturn(implicit request: RegisteredRequest[AnyContent],
-                         hc: HeaderCarrier,
-                         ec: ExecutionContext): AccountResult[ReturnPeriod] = EitherT {
+  def handleStartAReturn(implicit
+    request: RegisteredRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): AccountResult[ReturnPeriod] = EitherT {
     val internalId = request.internalId
     val utr = request.subscription.utr
     sdilConnector.returns_pending(internalId, utr).value.flatMap {
       case Right(pendingReturns) if pendingReturns.nonEmpty =>
         val sortedReturnsPending = pendingReturns.sortBy(_.start)
-        sessionCache.removeRecord(internalId)
+        sessionCache
+          .removeRecord(internalId)
           .map(_ => Right(sortedReturnsPending.head))
-      case Right(_) => Future.successful(Left(NoPendingReturns))
+      case Right(_)    => Future.successful(Left(NoPendingReturns))
       case Left(error) => Future.successful(Left(error))
     }
   }
@@ -76,10 +85,11 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     sessionCache.removeRecord(internalId)
   }
 
-  private def getServiceViewModelForRegisteredUser(subscription: RetrievedSubscription)
-                                                  (implicit request: RegisteredRequest[AnyContent],
-                                                   hc: HeaderCarrier,
-                                                   ec: ExecutionContext): AccountResult[ServicePageViewModel] = {
+  private def getServiceViewModelForRegisteredUser(subscription: RetrievedSubscription)(implicit
+    request: RegisteredRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): AccountResult[ServicePageViewModel] = {
     val internalId = request.internalId
     val utr = subscription.utr
     val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
@@ -91,25 +101,25 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
 
     for {
       returnsPending <- getPendingReturns
-      optLastReturn <- getOptLastReturn
-      balance <- getBalance
-      interest <- getInterest
-      hasExistingDD <- optHasDDSetup
-    } yield {
-      RegisteredUserServicePageViewModel(
-        returnsPending,
-        request.subscription,
-        optLastReturn,
-        balance,
-        interest,
-        hasExistingDD)
-    }
+      optLastReturn  <- getOptLastReturn
+      balance        <- getBalance
+      interest       <- getInterest
+      hasExistingDD  <- optHasDDSetup
+    } yield RegisteredUserServicePageViewModel(
+      returnsPending,
+      request.subscription,
+      optLastReturn,
+      balance,
+      interest,
+      hasExistingDD
+    )
   }
 
-  private def getServiceViewModelForDeregisteredUser(subscription: RetrievedSubscription, deregDate: LocalDate)
-                                                    (implicit request: RegisteredRequest[AnyContent],
-                                                     hc: HeaderCarrier,
-                                                     ec: ExecutionContext): AccountResult[ServicePageViewModel] = {
+  private def getServiceViewModelForDeregisteredUser(subscription: RetrievedSubscription, deregDate: LocalDate)(implicit
+    request: RegisteredRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): AccountResult[ServicePageViewModel] = {
     val internalId = request.internalId
     val utr = subscription.utr
     val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
@@ -120,52 +130,58 @@ class RegisteredOrchestrator @Inject()(sdilConnector: SoftDrinksIndustryLevyConn
     val getBalance = sdilConnector.balance(subscription.sdilRef, withAssessment = true, internalId)
 
     for {
-      optLastReturn <- getOptLastReturn
+      optLastReturn      <- getOptLastReturn
       hasVariableReturns <- checkIfHasVariableReturns
-      balance <- getBalance
-      optDeregReturn <- getOptDeRegReturn
-    } yield {
-      DeregisteredUserServicePageViewModel(
-        subscription,
-        deregDate,
-        hasVariableReturns,
-        optLastReturn,
-        balance,
-        optDeregReturn.isEmpty
-      )
-    }
+      balance            <- getBalance
+      optDeregReturn     <- getOptDeRegReturn
+    } yield DeregisteredUserServicePageViewModel(
+      subscription,
+      deregDate,
+      hasVariableReturns,
+      optLastReturn,
+      balance,
+      optDeregReturn.isEmpty
+    )
   }
 
-  private def getAndCalculateInterestIfReq(internalId: String)(implicit request: RegisteredRequest[AnyContent],
-                                  hc: HeaderCarrier,
-                                  ec: ExecutionContext): AccountResult[BigDecimal] =
-    sdilConnector.balanceHistory(request.subscription.sdilRef, withAssessment = true, internalId)
-    .map(items =>
-      items.distinct.collect {
-        case a: Interest => a.amount
-      }.sum
-    )
+  private def getAndCalculateInterestIfReq(internalId: String)(implicit
+    request: RegisteredRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): AccountResult[BigDecimal] =
+    sdilConnector
+      .balanceHistory(request.subscription.sdilRef, withAssessment = true, internalId)
+      .map(items =>
+        items.distinct.collect { case a: Interest =>
+          a.amount
+        }.sum
+      )
 
-  private def checkExistingDDIfEnabled(implicit request: RegisteredRequest[AnyContent],
-                                                               hc: HeaderCarrier,
-                                                               ec: ExecutionContext): AccountResult[Option[Boolean]] = {
-    if(frontendAppConfig.directDebitEnabled) {
+  private def checkExistingDDIfEnabled(implicit
+    request: RegisteredRequest[AnyContent],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): AccountResult[Option[Boolean]] =
+    if (frontendAppConfig.directDebitEnabled) {
       sdilConnector.checkDirectDebitStatus(request.subscription.sdilRef).map(Some(_))
     } else {
       EitherT.right[AccountErrors](Future.successful[Option[Boolean]](None))
     }
-  }
 
-  private def convertBalanceHistoryToTransactionHistory(balanceHistory: List[FinancialLineItem]): Map[Int, List[TransactionHistoryItem]] = {
-    val transactionHistoryItem = balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]){(transactionHistory, financialListItem) =>
-      List(new TransactionHistoryItem(financialListItem, transactionHistory)) ++ transactionHistory
+  private def convertBalanceHistoryToTransactionHistory(
+    balanceHistory: List[FinancialLineItem]
+  ): Map[Int, List[TransactionHistoryItem]] = {
+    val transactionHistoryItem = balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]) {
+      (transactionHistory, financialListItem) =>
+        List(new TransactionHistoryItem(financialListItem, transactionHistory)) ++ transactionHistory
     }
 
-    transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]){
+    transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]) {
       (transactionHistoryForYears, transactionHistoryItem) =>
         val transactionYear = transactionHistoryItem.financialLineItem.date.getYear
-        val updatedTransactionItemsForYear = transactionHistoryForYears.get(transactionYear)
-        .fold(List(transactionHistoryItem))(_ ++ List(transactionHistoryItem))
+        val updatedTransactionItemsForYear = transactionHistoryForYears
+          .get(transactionYear)
+          .fold(List(transactionHistoryItem))(_ ++ List(transactionHistoryItem))
         transactionHistoryForYears ++ Map(transactionYear -> updatedTransactionItemsForYear)
     }
   }

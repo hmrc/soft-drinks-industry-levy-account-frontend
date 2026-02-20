@@ -52,12 +52,12 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
   "setup" - {
     "must redirect to the url provided by pay-api" in {
 
-      when(mockSdilConnector.balance(any(), any(), any())(any())) thenReturn createSuccessAccountResult(BigDecimal(1000))
-      when(mockSdilConnector.returns_get(any(), any(), any())(any())) thenReturn createSuccessAccountResult(Some(emptyReturn))
-      when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(allFinancialItems)
+      when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
+      when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(Some(emptyReturn)))
+      when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
 
       val mockPayApiConnector = mock[PayApiConnector]
-      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
+      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(NextUrl("http://test")))
 
       val application =
         applicationBuilder()
@@ -79,12 +79,12 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to the url provided by pay-api when no return amount returned" in {
 
-      when(mockSdilConnector.balance(any(), any(), any())(any())) thenReturn createSuccessAccountResult(BigDecimal(1000))
-      when(mockSdilConnector.returns_get(any(), any(), any())(any())) thenReturn createSuccessAccountResult(Some(emptyReturn))
-      when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(financialItemsWithNoReturn)
+      when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
+      when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(Some(emptyReturn)))
+      when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(financialItemsWithNoReturn))
 
       val mockPayApiConnector = mock[PayApiConnector]
-      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(any())) thenReturn createSuccessAccountResult(NextUrl("http://test"))
+      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(NextUrl("http://test")))
 
       val application =
         applicationBuilder()
@@ -106,12 +106,12 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
 
 
       "render the error page when the call to pay-api fails" in {
-        when(mockSdilConnector.balance(any(), any(), any())(any())) thenReturn createSuccessAccountResult(BigDecimal(1000))
-        when(mockSdilConnector.returns_get(any(), any(), any())(any())) thenReturn createSuccessAccountResult(None)
-        when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(allFinancialItems)
+        when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
+        when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(None))
+        when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
 
         val mockPayApiConnector = mock[PayApiConnector]
-        when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromPayAPI)
+        when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromPayAPI))
 
         val application =
           applicationBuilder()
@@ -131,9 +131,9 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "render the error page when the call to get balance fails" in {
-        when(mockSdilConnector.returns_get(any(), any(), any())(any())) thenReturn createSuccessAccountResult(Some(emptyReturn))
-        when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(allFinancialItems)
-        when(mockSdilConnector.balance(any(), any(), any())(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromSDIL)
+        when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(Some(emptyReturn)))
+        when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
+        when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
 
 
         val application =
@@ -153,9 +153,9 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "render the error page when the call to get a return fails" in {
-        when(mockSdilConnector.balance(any(), any(), any())(any())) thenReturn createSuccessAccountResult(BigDecimal(1000))
-        when(mockSdilConnector.returns_get(any(), any(), any())(any())) thenReturn createFailureAccountResult(UnexpectedResponseFromSDIL)
-        when(mockSdilConnector.balanceHistory(any(), any(), any())(any())) thenReturn createSuccessAccountResult(allFinancialItems)
+        when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
+        when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+        when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
 
         val application =
           applicationBuilder()

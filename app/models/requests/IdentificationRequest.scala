@@ -17,10 +17,11 @@
 package models.requests
 
 import models.RetrievedSubscription
-import play.api.mvc.{Request, WrappedRequest}
+import play.api.mvc.{ Request, WrappedRequest }
 
-case class IdentificationRequest[A](request: Request[A],
-                                    internalId: String,
-                                    optSubscription: Option[RetrievedSubscription],
-                                    optUtr: Option[String]
-                                ) extends WrappedRequest[A](request)
+case class IdentificationRequest[A](
+  request: Request[A],
+  internalId: String,
+  optSubscription: Option[RetrievedSubscription],
+  optUtr: Option[String]
+) extends WrappedRequest[A](request)

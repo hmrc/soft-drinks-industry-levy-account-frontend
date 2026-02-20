@@ -26,23 +26,22 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.Future
 
-class TestOnlyController @Inject()(val controllerComponents: MessagesControllerComponents,
-                                   config: FrontendAppConfig)
-  extends FrontendBaseController with I18nSupport {
+class TestOnlyController @Inject() (val controllerComponents: MessagesControllerComponents, config: FrontendAppConfig)
+    extends FrontendBaseController with I18nSupport {
 
-  def stubDirectDebitJourney() = Action.async {  request =>
+  def stubDirectDebitJourney() = Action.async { request =>
     Future.successful(Redirect(config.homePage))
   }
 
-  def stubDirectDebitInitialise() = Action.async {  request =>
+  def stubDirectDebitInitialise() = Action.async { request =>
     Future.successful(Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubDirectDebitJourney().url))))
   }
 
-  def stubPayApiJourney() = Action.async {  request =>
+  def stubPayApiJourney() = Action.async { request =>
     Future.successful(Redirect(config.homePage))
   }
 
-  def stubPayApiInitialise() = Action.async {  request =>
+  def stubPayApiInitialise() = Action.async { request =>
     Future.successful(Ok(Json.toJson(NextUrl(routes.TestOnlyController.stubPayApiJourney().url))))
   }
 

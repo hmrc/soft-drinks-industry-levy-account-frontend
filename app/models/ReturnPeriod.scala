@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Json, OFormat }
 
 import java.time.LocalDate
 
@@ -46,13 +46,12 @@ case class ReturnPeriod(year: Int, quarter: Int) {
     ReturnPeriod(nextReturnYear, nextReturnQuarter)
   }
 
-  def previous: ReturnPeriod = {
+  def previous: ReturnPeriod =
     if (quarter == 0) {
-      ReturnPeriod((year - 1), 3)
+      ReturnPeriod(year - 1, 3)
     } else {
-      ReturnPeriod(year, (quarter - 1))
+      ReturnPeriod(year, quarter - 1)
     }
-  }
 }
 
 object ReturnPeriod {

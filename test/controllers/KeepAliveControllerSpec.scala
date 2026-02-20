@@ -33,7 +33,7 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
     "must keep the answers alive and return OK" in {
 
       val mockSessionCache = mock[SessionCache]
-      when(mockSessionCache.extendSession(any())) thenReturn Future.successful(true)
+      when(mockSessionCache.extendSession(any())).thenReturn(Future.successful(true))
 
       val application =
         applicationBuilder()

@@ -18,27 +18,20 @@ package controllers.actions
 
 import com.google.inject.Inject
 import controllers.routes
-import models.requests.{AuthenticatedRequest, RegisteredRequest}
+import models.requests.{ AuthenticatedRequest, RegisteredRequest }
 import play.api.mvc.Results._
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-
-class RegisteredActionImp @Inject()()
-                                     (implicit val executionContext: ExecutionContext)
-  extends RegisteredAction
-  with ActionHelpers {
-    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RegisteredRequest[A]]] = {
-
-      request.optSubscription match {
-        case None =>
-          Future.successful(Left(Redirect(routes.RegisterController.start)))
-        case Some(sub) =>
-          Future.successful(Right(RegisteredRequest(request, request.internalId, request.enrolments, sub)))
-      }
+class RegisteredActionImp @Inject() ()(implicit val executionContext: ExecutionContext)
+    extends RegisteredAction with ActionHelpers {
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RegisteredRequest[A]]] =
+    request.optSubscription match {
+      case None =>
+        Future.successful(Left(Redirect(routes.RegisterController.start)))
+      case Some(sub) =>
+        Future.successful(Right(RegisteredRequest(request, request.internalId, request.enrolments, sub)))
     }
 }
 trait RegisteredAction extends ActionRefiner[AuthenticatedRequest, RegisteredRequest]
-
-

@@ -20,36 +20,32 @@ import cats.data.EitherT
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import errors.UnexpectedResponseFromDirectDebit
-import models.{NextUrl, SetupDirectDebitRequest}
+import models.{ NextUrl, SetupDirectDebitRequest }
 import play.api.libs.json.Json
 import service.AccountResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import utilities.GenericLogger
 import play.api.libs.ws.writeableOf_JsValue
 
 import scala.concurrent.ExecutionContext
 
-class DirectDebitConnector @Inject()(val http: HttpClientV2,
-                                     config: FrontendAppConfig,
-                                     genericLogger: GenericLogger
-                                   )(implicit ec: ExecutionContext) {
-
-
+class DirectDebitConnector @Inject() (val http: HttpClientV2, config: FrontendAppConfig, genericLogger: GenericLogger)(
+  implicit ec: ExecutionContext
+) {
 
   def initJourney()(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
     val ddRequest = new SetupDirectDebitRequest(config)
-    http.post(url"${config.directDebitUrl}")
+    http
+      .post(url"${config.directDebitUrl}")
       .withBody(Json.toJson(ddRequest))
       .execute[NextUrl]
       .map(Right(_))
-      .recover{
-        case _ =>
-          genericLogger.logger.error(s"[DirectDebitConnector][initJourney] - unexpected response")
-          Left(UnexpectedResponseFromDirectDebit)
+      .recover { case _ =>
+        genericLogger.logger.error(s"[DirectDebitConnector][initJourney] - unexpected response")
+        Left(UnexpectedResponseFromDirectDebit)
       }
   }
-
 
 }

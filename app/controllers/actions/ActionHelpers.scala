@@ -34,9 +34,7 @@ trait ActionHelpers {
     val sdil = for {
       enrolment <- enrolments.enrolments if enrolment.key.equalsIgnoreCase("HMRC-OBTDS-ORG")
       sdil      <- enrolment.getIdentifier("EtmpRegistrationNumber") if sdil.value.slice(TWO, FOUR) == "SD"
-    } yield {
-      sdil
-    }
+    } yield sdil
 
     sdil.headOption
   }
@@ -48,16 +46,15 @@ trait ActionHelpers {
       .flatMap(_.getIdentifier("UTR").map(_.value))
 
   protected def invalidRole(credentialRole: Option[CredentialRole]): Option[Result] =
-    credentialRole collect {
-      case Assistant =>
-      //Todo implement forbidden invalidRole page
-        Redirect(routes.UnauthorisedController.onPageLoad)
+    credentialRole collect { case Assistant =>
+      // Todo implement forbidden invalidRole page
+      Redirect(routes.UnauthorisedController.onPageLoad)
     }
 
   protected def invalidAffinityGroup(affinityGroup: Option[AffinityGroup]): Option[Result] =
     affinityGroup match {
       case Some(Agent) | None =>
-        //Todo implement forbidden invalidAffinity group page
+        // Todo implement forbidden invalidAffinity group page
         Some(Redirect(routes.UnauthorisedController.onPageLoad))
       case _ => None
     }

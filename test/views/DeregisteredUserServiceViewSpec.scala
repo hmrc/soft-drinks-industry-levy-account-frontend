@@ -26,7 +26,7 @@ class DeregisteredUserServiceViewSpec extends DeregisteredUserServiceViewHelper 
 
   val application = applicationBuilder().build()
   val view = application.injector.instanceOf[DeregisteredUserServiceView]
-  implicit val request: Request[_] = FakeRequest()
+  implicit val request: Request[?] = FakeRequest()
   implicit val config: FrontendAppConfig = application
     .injector.instanceOf[FrontendAppConfig]
 
