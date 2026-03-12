@@ -3,9 +3,9 @@ import sbt._
 object AppDependencies {
 
   private val playVersion = s"-play-30"
-  private val bootstrapVersion = "10.5.0"
+  private val bootstrapVersion = "10.7.0"
   private val hmrcMongoVersion = "2.12.0"
-  private val playFrontendHMRCVersion = "12.29.0"
+  private val playFrontendHMRCVersion = "12.32.0"
 
   val compile: Seq[ModuleID] = Seq(
     play.sbt.PlayImport.ws,
@@ -18,7 +18,7 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "org.jsoup" % "jsoup" % "1.21.2",
+    "org.jsoup" % "jsoup" % "1.22.1",
     "uk.gov.hmrc" %% s"bootstrap-test$playVersion" % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% s"hmrc-mongo-test$playVersion" % hmrcMongoVersion,
     "io.github.wolfendale" %% "scalacheck-gen-regexp" % "1.1.0"
