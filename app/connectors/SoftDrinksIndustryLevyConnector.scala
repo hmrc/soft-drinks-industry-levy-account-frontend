@@ -25,11 +25,12 @@ import repositories.{ SessionCache, SessionKeys }
 import service.AccountResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, HttpResponse, StringContextOps }
 import utilities.GenericLogger
 
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.control.NonFatal
 
 class SoftDrinksIndustryLevyConnector @Inject() (
   val http: HttpClientV2,
@@ -40,8 +41,54 @@ class SoftDrinksIndustryLevyConnector @Inject() (
 
   lazy val sdilUrl: String = frontendAppConfig.sdilBaseUrl
 
-  private def getSubscriptionUrl(identifierValue: String, identifierType: String): String =
-    s"$sdilUrl/subscription/$identifierType/$identifierValue"
+  private val logger = genericLogger.logger
+
+  private class RawHttpReads extends HttpReads[HttpResponse] {
+    override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
+  }
+
+  private val rawHttpReads = new RawHttpReads
+
+  private def outboundHeaderCarrier(hc: HeaderCarrier): HeaderCarrier =
+    HeaderCarrier(
+      requestId = hc.requestId,
+      sessionId = hc.sessionId
+    )
+
+  private def sdilContext(
+    path: String,
+    status: Option[Int] = None,
+    startTime: Option[Long] = None
+  ): String =
+    Seq(
+      Some(s"path=$path"),
+      status.map(st => s"status=$st"),
+      startTime.map(st => s"durationMs=${System.currentTimeMillis() - st}")
+    ).flatten.mkString(" ")
+
+  private def executeGet[A](operation: String, path: String)(implicit hc: HeaderCarrier, rds: HttpReads[A]): Future[A] = {
+    val urlString = s"$sdilUrl$path"
+    val startTime = System.currentTimeMillis()
+    logger.info(
+      s"SDIL $operation request ${sdilContext(path, startTime = Some(startTime))}"
+    )
+    http
+      .get(url"$urlString")(using outboundHeaderCarrier(hc))
+      .execute[HttpResponse](using rawHttpReads, ec)
+      .map { response =>
+        logger.info(
+          s"SDIL $operation response ${sdilContext(path, status = Some(response.status), startTime = Some(startTime))}"
+        )
+        rds.read("GET", urlString, response)
+      }
+      .recoverWith { case NonFatal(e) =>
+        logger.error(
+          s"SDIL $operation failure ${sdilContext(path, startTime = Some(startTime))} error=${e.getMessage}",
+          e
+        )
+        Future.failed(e)
+      }
+  }
 
   def retrieveSubscription(identifierValue: String, identifierType: String, internalId: String)(implicit
     hc: HeaderCarrier
@@ -49,9 +96,10 @@ class SoftDrinksIndustryLevyConnector @Inject() (
     sdilSessionCache.fetchEntry[OptRetrievedSubscription](internalId, SessionKeys.SUBSCRIPTION).flatMap {
       case Some(optSubscription) => Future.successful(Right(optSubscription.optRetrievedSubscription))
       case None =>
-        http
-          .get(url"${getSubscriptionUrl(identifierValue: String, identifierType)}")
-          .execute[Option[RetrievedSubscription]]
+        executeGet[Option[RetrievedSubscription]](
+          operation = "retrieveSubscription",
+          path = s"/subscription/$identifierType/$identifierValue"
+        )
           .flatMap { optRetrievedSubscription =>
             sdilSessionCache
               .save(internalId, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(optRetrievedSubscription))
@@ -60,9 +108,7 @@ class SoftDrinksIndustryLevyConnector @Inject() (
               }
 
           }
-          .recover { case _ =>
-            genericLogger.logger
-              .error(s"[SoftDrinksIndustryLevyConnector][retrieveSubscription] - unexpected response for $internalId")
+          .recover { case NonFatal(_) =>
             Left(UnexpectedResponseFromSDIL)
           }
     }
@@ -73,18 +119,16 @@ class SoftDrinksIndustryLevyConnector @Inject() (
       sdilSessionCache.fetchEntry[List[ReturnPeriod]](internalId, SessionKeys.pendingReturn(utr)).flatMap {
         case Some(pendingReturns) => Future.successful(Right(pendingReturns))
         case None =>
-          val pendingUrl = s"$sdilUrl/returns/$utr/pending"
-          http
-            .get(url"$pendingUrl")
-            .execute[List[ReturnPeriod]]
+          executeGet[List[ReturnPeriod]](
+            operation = "returns_pending",
+            path = s"/returns/$utr/pending"
+          )
             .flatMap { pendingReturns =>
               sdilSessionCache
                 .save[List[ReturnPeriod]](internalId, SessionKeys.pendingReturn(utr), pendingReturns)
                 .map(_ => Right(pendingReturns))
             }
-            .recover { case _ =>
-              genericLogger.logger
-                .error(s"[SoftDrinksIndustryLevyConnector][returns_pending] - unexpected response for $internalId")
+            .recover { case NonFatal(_) =>
               Left(UnexpectedResponseFromSDIL)
             }
       }
@@ -95,18 +139,16 @@ class SoftDrinksIndustryLevyConnector @Inject() (
       sdilSessionCache.fetchEntry[List[ReturnPeriod]](internalId, SessionKeys.variableReturn(utr)).flatMap {
         case Some(pendingReturns) => Future.successful(Right(pendingReturns))
         case None =>
-          val variableUrl = s"$sdilUrl/returns/$utr/variable"
-          http
-            .get(url"$variableUrl")
-            .execute[List[ReturnPeriod]]
+          executeGet[List[ReturnPeriod]](
+            operation = "returns_variable",
+            path = s"/returns/$utr/variable"
+          )
             .flatMap { pendingReturns =>
               sdilSessionCache
                 .save[List[ReturnPeriod]](internalId, SessionKeys.variableReturn(utr), pendingReturns)
                 .map(_ => Right(pendingReturns))
             }
-            .recover { case _ =>
-              genericLogger.logger
-                .error(s"[SoftDrinksIndustryLevyConnector][returns_variable] - unexpected response for $internalId")
+            .recover { case NonFatal(_) =>
               Left(UnexpectedResponseFromSDIL)
             }
       }
@@ -120,10 +162,10 @@ class SoftDrinksIndustryLevyConnector @Inject() (
       .flatMap {
         case Some(optPreviousReturn) => Future.successful(Right(optPreviousReturn.optReturn))
         case None =>
-          val getReturnUrl = s"$sdilUrl/returns/$utr/year/${period.year}/quarter/${period.quarter}"
-          http
-            .get(url"$getReturnUrl")
-            .execute[Option[SdilReturn]]
+          executeGet[Option[SdilReturn]](
+            operation = "returns_get",
+            path = s"/returns/$utr/year/${period.year}/quarter/${period.quarter}"
+          )
             .flatMap { optReturn =>
               sdilSessionCache
                 .save[OptPreviousSubmittedReturn](
@@ -133,10 +175,7 @@ class SoftDrinksIndustryLevyConnector @Inject() (
                 )
                 .map(_ => Right(optReturn))
             }
-            .recover { case _ =>
-              genericLogger.logger.error(
-                s"[SoftDrinksIndustryLevyConnector][returns_get] - unexpected response for $internalId"
-              )
+            .recover { case NonFatal(_) =>
               Left(UnexpectedResponseFromSDIL)
             }
       }
@@ -151,18 +190,17 @@ class SoftDrinksIndustryLevyConnector @Inject() (
       case Some(b) =>
         Future.successful(Right(b))
       case None =>
-        val balanceUrl = s"$sdilUrl/balance/$sdilRef/$withAssessment"
-        http
-          .get(url"$balanceUrl")
-          .execute[BigDecimal]
+        executeGet[BigDecimal](
+          operation = "balance",
+          path = s"/balance/$sdilRef/$withAssessment"
+        )
           .flatMap { b =>
             sdilSessionCache
               .save[BigDecimal](internalId, SessionKeys.balance(withAssessment), b)
               .map(_ => Right(b))
 
           }
-          .recover { case _ =>
-            genericLogger.logger.error(s"[SoftDrinksIndustryLevyConnector][balance] - unexpected response for $sdilRef")
+          .recover { case NonFatal(_) =>
             Left(UnexpectedResponseFromSDIL)
           }
     }
@@ -178,37 +216,31 @@ class SoftDrinksIndustryLevyConnector @Inject() (
       .flatMap {
         case Some(b) => Future.successful(Right(b))
         case None =>
-          val balanceHistoryUrl = s"$sdilUrl/balance/$sdilRef/history/all/$withAssessment"
-          http
-            .get(url"$balanceHistoryUrl")
-            .execute[List[FinancialLineItem]]
+          executeGet[List[FinancialLineItem]](
+            operation = "balanceHistory",
+            path = s"/balance/$sdilRef/history/all/$withAssessment"
+          )
             .flatMap { bh =>
               sdilSessionCache
                 .save[List[FinancialLineItem]](internalId, SessionKeys.balanceHistory(withAssessment), bh)
                 .map(_ => Right(bh))
 
             }
-            .recover { case _ =>
-              genericLogger.logger.error(
-                s"[SoftDrinksIndustryLevyConnector][balanceHistory] - unexpected response for $sdilRef"
-              )
+            .recover { case NonFatal(_) =>
               Left(UnexpectedResponseFromSDIL)
             }
       }
   }
 
   def checkDirectDebitStatus(sdilRef: String)(implicit hc: HeaderCarrier): AccountResult[Boolean] = EitherT {
-    val ddStatusUrl = s"$sdilUrl/check-direct-debit-status/$sdilRef"
-    http
-      .get(url"$ddStatusUrl")
-      .execute[DisplayDirectDebitResponse]
+    executeGet[DisplayDirectDebitResponse](
+      operation = "checkDirectDebitStatus",
+      path = s"/check-direct-debit-status/$sdilRef"
+    )
       .map { result =>
         Right(result.directDebitMandateFound)
       }
-      .recover { case _ =>
-        genericLogger.logger.error(
-          s"[SoftDrinksIndustryLevyConnector][checkDirectDebitStatus] - unexpected response for $sdilRef"
-        )
+      .recover { case NonFatal(_) =>
         Left(UnexpectedResponseFromSDIL)
       }
   }
