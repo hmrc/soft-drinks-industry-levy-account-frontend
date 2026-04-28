@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import Service.SdilSubscriptionService
 import base.SpecBase
 import com.google.inject.Inject
 import config.FrontendAppConfig
@@ -24,8 +25,8 @@ import controllers.routes
 import handlers.ErrorHandler
 import play.api.mvc.{AnyContent, BodyParsers, Request, Results}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
+import play.api.test.Helpers.*
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
@@ -51,10 +52,11 @@ class AuthActionSpec extends SpecBase {
           val appConfig   = application.injector.instanceOf[FrontendAppConfig]
           val errorHandler = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
+          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
           val ec = application.injector.instanceOf[ExecutionContext]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -76,9 +78,10 @@ class AuthActionSpec extends SpecBase {
           val errorHandler = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -100,9 +103,10 @@ class AuthActionSpec extends SpecBase {
           val errorHandler = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -125,9 +129,10 @@ class AuthActionSpec extends SpecBase {
           val errorHandler = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
             val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -149,9 +154,10 @@ class AuthActionSpec extends SpecBase {
           val errorHandler = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -173,9 +179,10 @@ class AuthActionSpec extends SpecBase {
           val errorHandler = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
             val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -197,9 +204,10 @@ class AuthActionSpec extends SpecBase {
           val errorHandler = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
           val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
 
           val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
