@@ -16,12 +16,18 @@
 
 package controllers.actions
 
+import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
+import models.RetrievedSubscription
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
+import uk.gov.hmrc.http.HeaderCarrier
+
+import java.time.LocalDate
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ActionHelpers {
 
@@ -30,14 +36,14 @@ trait ActionHelpers {
 
   val registrationRetrieval = allEnrolments and credentialRole and internalId and affinityGroup
 
-  protected def getSdilEnrolment(enrolments: Enrolments): Option[EnrolmentIdentifier] = {
-    val sdil = for {
+   def getAllSdilEnrolments(enrolments: Enrolments): Seq[String] = {
+    (for {
       enrolment <- enrolments.enrolments if enrolment.key.equalsIgnoreCase("HMRC-OBTDS-ORG")
-      sdil      <- enrolment.getIdentifier("EtmpRegistrationNumber") if sdil.value.slice(TWO, FOUR) == "SD"
-    } yield sdil
-
-    sdil.headOption
+      sdil <- enrolment.getIdentifier("EtmpRegistrationNumber")
+      if sdil.value.slice(TWO, FOUR) == "SD"
+    } yield sdil.value).toSeq
   }
+
 
   protected def getUtr(enrolments: Enrolments): Option[String] =
     enrolments

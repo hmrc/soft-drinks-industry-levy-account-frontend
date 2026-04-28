@@ -16,22 +16,23 @@
 
 package controllers.actions
 
+import Service.SdilSubscriptionService
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
 import handlers.ErrorHandler
 import models.requests.AuthenticatedRequest
-import play.api.mvc.Results._
-import play.api.mvc._
+import play.api.mvc.Results.*
+import play.api.mvc.*
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthenticatedAction
     extends ActionRefiner[Request, AuthenticatedRequest] with ActionBuilder[AuthenticatedRequest, AnyContent]
@@ -40,7 +41,8 @@ class AuthenticatedAuthenticatedAction @Inject() (
   override val authConnector: AuthConnector,
   val parser: BodyParsers.Default,
   sdilConnector: SoftDrinksIndustryLevyConnector,
-  errorHandler: ErrorHandler
+  errorHandler: ErrorHandler,
+  sdilService: SdilSubscriptionService
 )(implicit ec: ExecutionContext, config: FrontendAppConfig)
     extends AuthenticatedAction with AuthorisedFunctions with ActionHelpers {
 
@@ -56,8 +58,8 @@ class AuthenticatedAuthenticatedAction @Inject() (
           errorHandler.internalServerErrorTemplate(using request).map(errorView => Left(InternalServerError(errorView)))
         ) { internalId =>
           val maybeUtr = getUtr(enrolments)
-          val maybeSdil = getSdilEnrolment(enrolments)
-          (maybeUtr, maybeSdil) match {
+          val sdilRefs = getAllSdilEnrolments(enrolments)
+          (maybeUtr, sdilRefs.nonEmpty) match {
             case (Some(utr), _) =>
               sdilConnector
                 .retrieveSubscription(utr, "utr", internalId)
@@ -72,7 +74,7 @@ class AuthenticatedAuthenticatedAction @Inject() (
                           enrolments,
                           optSubscription,
                           maybeUtr,
-                          maybeSdil.map(_.value)
+                          None
                         )
                       )
                     )
@@ -81,29 +83,44 @@ class AuthenticatedAuthenticatedAction @Inject() (
                       .internalServerErrorTemplate(using request)
                       .map(errorView => Left(InternalServerError(errorView)))
                 }
-            case (_, Some(sdilEnrolment)) =>
-              sdilConnector
-                .retrieveSubscription(sdilEnrolment.value, "sdil", internalId)
-                .value
-                .flatMap {
-                  case Right(optSubscription) =>
-                    Future.successful(
-                      Right(
-                        AuthenticatedRequest(
-                          request,
-                          internalId,
-                          enrolments,
-                          optSubscription,
-                          maybeUtr,
-                          maybeSdil.map(_.value)
+            case (_, true) =>
+              sdilService.resolveActiveSdilRef(sdilRefs,internalId).flatMap {
+                case Some(activeSdilRef) =>
+                  sdilConnector
+                    .retrieveSubscription(activeSdilRef, "sdil", internalId)
+                    .value
+                    .flatMap {
+                      case Right(optSubscription) =>
+                        Future.successful(
+                          Right(
+                            AuthenticatedRequest(
+                              request,
+                              internalId,
+                              enrolments,
+                              optSubscription,
+                              maybeUtr,
+                              Some(activeSdilRef)
+                            )
+                          )
                         )
-                      )
+                      case Left(_) =>
+                        errorHandler
+                          .internalServerErrorTemplate(using request)
+                          .map(errorView => Left(InternalServerError(errorView)))
+                    }
+                case None => Future.successful(
+                  Right(
+                    AuthenticatedRequest(
+                      request,
+                      internalId,
+                      enrolments,
+                      None,
+                      maybeUtr,
+                      None
                     )
-                  case Left(_) =>
-                    errorHandler
-                      .internalServerErrorTemplate(using request)
-                      .map(errorView => Left(InternalServerError(errorView)))
-                }
+                  )
+                )
+              }
             case _ =>
               invalidRole(role).orElse(invalidAffinityGroup(affinity)) match {
                 case Some(error) => Future.successful(Left(error))

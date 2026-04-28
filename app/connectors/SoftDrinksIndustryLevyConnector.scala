@@ -115,6 +115,7 @@ class SoftDrinksIndustryLevyConnector @Inject() (
     }
   }
 
+
   def returns_pending(internalId: String, utr: String)(implicit hc: HeaderCarrier): AccountResult[List[ReturnPeriod]] =
     EitherT {
       sdilSessionCache.fetchEntry[List[ReturnPeriod]](internalId, SessionKeys.pendingReturn(utr)).flatMap {
