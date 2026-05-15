@@ -59,34 +59,32 @@ class SoftDrinksIndustryLevyConnector @Inject() (
   private def sdilContext(
     path: String,
     status: Option[Int] = None,
-    durationMs: Option[Long] = None
+    startTime: Option[Long] = None
   ): String =
     Seq(
       Some(s"path=$path"),
       status.map(st => s"status=$st"),
-      durationMs.map(d => s"durationMs=$d")
+      startTime.map(st => s"durationMs=${System.currentTimeMillis() - st}")
     ).flatten.mkString(" ")
 
   private def executeGet[A](operation: String, path: String)(implicit hc: HeaderCarrier, rds: HttpReads[A]): Future[A] = {
     val urlString = s"$sdilUrl$path"
     val startTime = System.currentTimeMillis()
     logger.info(
-      s"SDIL $operation request ${sdilContext(path)}"
+      s"SDIL $operation request ${sdilContext(path, startTime = Some(startTime))}"
     )
     http
       .get(url"$urlString")(using outboundHeaderCarrier(hc))
       .execute[HttpResponse](using rawHttpReads, ec)
       .map { response =>
-        val durationMs= System.currentTimeMillis() - startTime
         logger.info(
-          s"SDIL $operation response ${sdilContext(path, status = Some(response.status), durationMs = Some(durationMs))}"
+          s"SDIL $operation response ${sdilContext(path, status = Some(response.status), startTime = Some(startTime))}"
         )
         rds.read("GET", urlString, response)
       }
       .recoverWith { case NonFatal(e) =>
-        val durationMs= System.currentTimeMillis() - startTime
         logger.error(
-          s"SDIL $operation failure ${sdilContext(path, durationMs = Some(durationMs))} error=${e.getMessage}",
+          s"SDIL $operation failure ${sdilContext(path, startTime = Some(startTime))} error=${e.getMessage}",
           e
         )
         Future.failed(e)
@@ -115,19 +113,6 @@ class SoftDrinksIndustryLevyConnector @Inject() (
             Left(UnexpectedResponseFromSDIL)
           }
     }
-  }
-
-  def retrieveSubscriptionNoCache(identifierValue: String, identifierType: String)(implicit
-    hc: HeaderCarrier
-  ): AccountResult[Option[RetrievedSubscription]] = EitherT {
-    executeGet[Option[RetrievedSubscription]](
-      operation = "retrieveSubscription",
-      path = s"/subscription/$identifierType/$identifierValue"
-    )
-      .map(Right(_))
-      .recover { case NonFatal(_) =>
-        Left(UnexpectedResponseFromSDIL)
-      }
   }
 
   def returns_pending(internalId: String, utr: String)(implicit hc: HeaderCarrier): AccountResult[List[ReturnPeriod]] =
