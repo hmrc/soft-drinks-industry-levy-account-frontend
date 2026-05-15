@@ -20,8 +20,8 @@ import controllers.routes
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.auth.core.*
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 
 trait ActionHelpers {
 
@@ -30,12 +30,14 @@ trait ActionHelpers {
 
   val registrationRetrieval = allEnrolments and credentialRole and internalId and affinityGroup
 
-  def getAllSdilEnrolments(enrolments: Enrolments): Seq[String] =
-    (for {
+  protected def getSdilEnrolment(enrolments: Enrolments): Option[EnrolmentIdentifier] = {
+    val sdil = for {
       enrolment <- enrolments.enrolments if enrolment.key.equalsIgnoreCase("HMRC-OBTDS-ORG")
-      sdil      <- enrolment.getIdentifier("EtmpRegistrationNumber")
-      if sdil.value.slice(TWO, FOUR) == "SD"
-    } yield sdil.value).toSeq
+      sdil      <- enrolment.getIdentifier("EtmpRegistrationNumber") if sdil.value.slice(TWO, FOUR) == "SD"
+    } yield sdil
+
+    sdil.headOption
+  }
 
   protected def getUtr(enrolments: Enrolments): Option[String] =
     enrolments

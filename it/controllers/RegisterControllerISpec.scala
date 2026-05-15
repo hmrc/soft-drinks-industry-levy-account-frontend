@@ -94,7 +94,7 @@ class RegisterControllerISpec extends ServicePageITHelper with Specifications {
       }
     }
 
-    "should redirect to registration when no active sdil subscription exists for the enrolled sdilRef" in {
+    "should render the NotFound page when no utr, subscription but has sdilRef" in {
       build
         .user.isAuthorisedAndEnrolledSDILRef
         .sdilBackend.retrieveSubscriptionNone("sdil", SDIL_REF)
@@ -103,8 +103,9 @@ class RegisterControllerISpec extends ServicePageITHelper with Specifications {
         val result1 = createClientRequestGet(client, baseUrl + startPath)
 
         whenReady(result1) { res =>
-          res.status mustBe 303
-          res.header(HeaderNames.LOCATION).get must include("/soft-drinks-industry-levy-registration/start")
+          res.status mustBe 404
+          val page = Jsoup.parse(res.body)
+          page.title() mustBe "Page not found - Soft Drinks Industry Levy - GOV.UK"
         }
       }
     }
