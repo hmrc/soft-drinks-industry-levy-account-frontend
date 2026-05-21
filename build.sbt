@@ -15,7 +15,8 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
-      "-Wconf:cat=deprecation:s"
+      "-Wconf:cat=deprecation:s",
+      "-Wconf:msg=unused private member*:s",
     ),
     scalacOptions := scalacOptions.value.distinct,
     ScoverageKeys.coverageExcludedPackages := ".*\\$anon.*"
