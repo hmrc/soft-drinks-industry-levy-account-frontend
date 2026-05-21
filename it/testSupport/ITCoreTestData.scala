@@ -26,6 +26,7 @@ object ITCoreTestData extends TryValues {
   val localDate = LocalDate.now()
   val UTR = "0000001611"
   val SDIL_REF = "XKSDIL000000022"
+  val INACTIVE_SDIL_REF = "XKSDIL000000026"
 
   val deregDate = localDate.minusMonths(6)
 
@@ -76,6 +77,10 @@ object ITCoreTestData extends TryValues {
 
 
   val aSubscriptionWithDeRegDate = aSubscription.copy(
+    deregDate = Some(deregDate))
+
+  val aSubscriptionWithInactiveSdilRefAndDeRegDate = aSubscription.copy(
+    sdilRef = INACTIVE_SDIL_REF,
     deregDate = Some(deregDate))
 
   val aSmallProducerSubscription = {

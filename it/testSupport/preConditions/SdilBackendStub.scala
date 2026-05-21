@@ -17,7 +17,7 @@
 package testSupport.preConditions
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import models.{DisplayDirectDebitResponse, FinancialLineItem, ReturnPeriod, SdilReturn}
+import models.{DisplayDirectDebitResponse, FinancialLineItem, RetrievedSubscription, ReturnPeriod, SdilReturn}
 import play.api.libs.json.Json
 import testSupport.ITCoreTestData._
 
@@ -26,12 +26,12 @@ case class SdilBackendStub()
 {
 
 
-  def retrieveSubscription(identifier: String, refNum: String) = {
+  def retrieveSubscription(identifier: String, refNum: String, subscription: RetrievedSubscription = aSubscription) = {
     stubFor(
       get(
         urlPathEqualTo(s"/subscription/$identifier/$refNum"))
         .willReturn(
-          ok(Json.toJson(aSubscription).toString())))
+          ok(Json.toJson(subscription).toString())))
     builder
   }
 
@@ -215,4 +215,3 @@ case class SdilBackendStub()
   }
 
 }
-
