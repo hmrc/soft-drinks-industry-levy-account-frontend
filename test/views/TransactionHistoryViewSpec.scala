@@ -25,28 +25,29 @@ import views.html.TransactionHistoryView
 class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
 
   val application = applicationBuilder().build()
-  val view = application.injector.instanceOf[TransactionHistoryView]
-  implicit val request: Request[?] = FakeRequest()
-  implicit val config: FrontendAppConfig = application
-    .injector.instanceOf[FrontendAppConfig]
+  val view        = application.injector.instanceOf[TransactionHistoryView]
+  implicit val request: Request[?]        = FakeRequest()
+  implicit val config:  FrontendAppConfig = application.injector.instanceOf[FrontendAppConfig]
 
   object Selectors {
     val heading = "govuk-heading-m"
     val caption = "govuk-caption-m"
-    val body = "govuk-body"
-    val li = "li"
+    val body    = "govuk-body"
+    val li      = "li"
   }
 
-  val htmlNoTransactions = view("Super Lemonade Plc", Map.empty[Int, List[TransactionHistoryItem]])(using request, messages(application), config)
+  val htmlNoTransactions     = view("Super Lemonade Plc", Map.empty[Int, List[TransactionHistoryItem]])(using request, messages(application), config)
   val documentNoTransactions = doc(htmlNoTransactions)
 
-  val htmlTransitionHistory1Item = view("Super Lemonade Plc", transitionHistoryItems1Item)(using request, messages(application), config)
+  val htmlTransitionHistory1Item     = view("Super Lemonade Plc", transitionHistoryItems1Item)(using request, messages(application), config)
   val documentTransitionHistory1Item = doc(htmlTransitionHistory1Item)
 
-  val htmlTransitionHistoryMultiItemsSameYear = view("Super Lemonade Plc", transitionHistoryItemsSameYear)(using request, messages(application), config)
+  val htmlTransitionHistoryMultiItemsSameYear =
+    view("Super Lemonade Plc", transitionHistoryItemsSameYear)(using request, messages(application), config)
   val documentTransitionHistoryMultiItemsSameYear = doc(htmlTransitionHistoryMultiItemsSameYear)
 
-  val htmlTransitionHistoryMultiItemsDiffYear = view("Super Lemonade Plc", transitionHistoryItemsDiffYears)(using request, messages(application), config)
+  val htmlTransitionHistoryMultiItemsDiffYear =
+    view("Super Lemonade Plc", transitionHistoryItemsDiffYears)(using request, messages(application), config)
   val documentTransitionHistoryMultiItemsDiffYear = doc(htmlTransitionHistoryMultiItemsDiffYear)
 
   val testCases = List(
@@ -56,8 +57,7 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
     ("multiple fininical items for different years", documentTransitionHistoryMultiItemsDiffYear, transitionHistoryItemsDiffYears)
   )
 
-
-  "View" - {
+  "View" -
     testCases.foreach { case (description, document, transactionHistoryItemsForYears) =>
       s"when there is $description" - {
         "should contain the expected title" in {
@@ -72,7 +72,7 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
           document.getElementsByClass(Selectors.body).first().text() mustBe "Super Lemonade Plc"
         }
 
-        if (transactionHistoryItemsForYears.isEmpty) {
+        if transactionHistoryItemsForYears.isEmpty then {
           "should not contain any tabs" in {
             document.getElementsByClass("govuk-tabs").size() mustBe 0
           }
@@ -100,7 +100,7 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
               s"that has a panel for $year" - {
                 val panel = tabs.getElementById(s"year-$year")
                 "with the expected class" in {
-                  val expectedPanelClassName = if (index == 0) {
+                  val expectedPanelClassName = if index == 0 then {
                     "govuk-tabs__panel"
                   } else {
                     "govuk-tabs__panel govuk-tabs__panel--hidden"
@@ -127,15 +127,14 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
                   "that has the expected table rows" in {
                     val tableRows = table.getElementsByClass("govuk-table__body").first().getElementsByTag("tr")
                     tableRows.size() mustBe transactionHistoryItems.size
-                    transactionHistoryItems.zipWithIndex.foreach {
-                      case (transactionHistoryItem, index1) =>
-                        val tableRow = tableRows.get(index1)
-                        val rowValues = tableRow.getElementsByTag("td")
-                        rowValues.get(0).text() mustBe expectedDateField(transactionHistoryItem)
-                        rowValues.get(1).text() mustBe expectedTransactionField(transactionHistoryItem)
-                        rowValues.get(2).text() mustBe expectedCredit(transactionHistoryItem)
-                        rowValues.get(3).text() mustBe expectedDebit(transactionHistoryItem)
-                        rowValues.get(4).text() mustBe formatPounds(transactionHistoryItem.balance)
+                    transactionHistoryItems.zipWithIndex.foreach { case (transactionHistoryItem, index1) =>
+                      val tableRow  = tableRows.get(index1)
+                      val rowValues = tableRow.getElementsByTag("td")
+                      rowValues.get(0).text() mustBe expectedDateField(transactionHistoryItem)
+                      rowValues.get(1).text() mustBe expectedTransactionField(transactionHistoryItem)
+                      rowValues.get(2).text() mustBe expectedCredit(transactionHistoryItem)
+                      rowValues.get(3).text() mustBe expectedDebit(transactionHistoryItem)
+                      rowValues.get(4).text() mustBe formatPounds(transactionHistoryItem.balance)
                     }
                   }
                 }
@@ -155,6 +154,5 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
         validateAccessibilityStatementLinkPresent(document)
       }
     }
-  }
 
 }

@@ -16,13 +16,13 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 case class RosmRegistration(
-  safeId: String,
+  safeId:       String,
   organisation: Option[OrganisationDetails],
-  individual: Option[IndividualDetails],
-  address: UkAddress
+  individual:   Option[IndividualDetails],
+  address:      UkAddress
 ) {
 
   lazy val organisationName: String =

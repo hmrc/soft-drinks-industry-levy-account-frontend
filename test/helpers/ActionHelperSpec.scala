@@ -26,30 +26,28 @@ import models.RetrievedSubscription
 import java.time.LocalDate
 
 class ActionHelperSpec extends SpecBase {
-  
+
   object Helpers extends ActionHelpers
-    
+
   "getAllSdilEnrolments" - {
 
-      "return multiple SDIL refs from enrolments" in {
+    "return multiple SDIL refs from enrolments" in {
 
-        val enrolments = Enrolments(Set(
-          Enrolment("HMRC-OBTDS-ORG",
-            Seq(EnrolmentIdentifier("EtmpRegistrationNumber", "XCSDIL00045983")), "Activated"),
-          Enrolment("HMRC-OBTDS-ORG",
-            Seq(EnrolmentIdentifier("EtmpRegistrationNumber", "XRSDIL00045793")), "Activated"),
-          Enrolment("HMRC-OBTDS-ORG",
-            Seq(EnrolmentIdentifier("EtmpRegistrationNumber", "XRSXIL00045793")), "Activated")
-        ))
-        val result = Helpers.getAllSdilEnrolments(enrolments)
-        result must contain allOf("XCSDIL00045983", "XRSDIL00045793")
-      }
+      val enrolments = Enrolments(
+        Set(
+          Enrolment("HMRC-OBTDS-ORG", Seq(EnrolmentIdentifier("EtmpRegistrationNumber", "XCSDIL00045983")), "Activated"),
+          Enrolment("HMRC-OBTDS-ORG", Seq(EnrolmentIdentifier("EtmpRegistrationNumber", "XRSDIL00045793")), "Activated"),
+          Enrolment("HMRC-OBTDS-ORG", Seq(EnrolmentIdentifier("EtmpRegistrationNumber", "XRSXIL00045793")), "Activated")
+        )
+      )
+      val result = Helpers.getAllSdilEnrolments(enrolments)
+      result must contain allOf ("XCSDIL00045983", "XRSDIL00045793")
+    }
 
-      "return empty when no SDIL enrolments exist" in {
-        val enrolments = Enrolments(Set.empty)
-        val result = Helpers.getAllSdilEnrolments(enrolments)
-        result mustBe empty
-      }
+    "return empty when no SDIL enrolments exist" in {
+      val enrolments = Enrolments(Set.empty)
+      val result     = Helpers.getAllSdilEnrolments(enrolments)
+      result mustBe empty
     }
   }
-
+}

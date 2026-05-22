@@ -30,11 +30,11 @@ import scala.concurrent.Future
 class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
 
   val mockConnector = mock[SoftDrinksIndustryLevyConnector]
-  val service = new SdilSubscriptionService(mockConnector)
+  val service       = new SdilSubscriptionService(mockConnector)
 
   "resolveActiveSdilRef" - {
     "return first SDIL ref when it is active" in {
-      val active = TestData.aSubscription.copy(deregDate = None)
+      val active  = TestData.aSubscription.copy(deregDate = None)
       val expired = TestData.aSubscription.copy(deregDate = Some(LocalDate.now.minusDays(1)))
       when(
         mockConnector.retrieveSubscriptionNoCache("sdilRef1", "sdil")
@@ -48,7 +48,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
       )
 
       val result = service.resolveActiveSdilRef(
-        Seq("sdilRef1", "sdilRef2"), "intId"
+        Seq("sdilRef1", "sdilRef2"),
+        "intId"
       )
 
       result.futureValue mustBe Some("sdilRef1")
@@ -56,7 +57,7 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
 
     "skip expired ref and return next active one" in {
       val expired = TestData.aSubscription.copy(deregDate = Some(LocalDate.now.minusDays(1)))
-      val active = TestData.aSubscription.copy(deregDate = None)
+      val active  = TestData.aSubscription.copy(deregDate = None)
       when(
         mockConnector.retrieveSubscriptionNoCache("sdilRef1", "sdil")
       ).thenReturn(EitherT.fromEither[Future](Right(Some(expired))))
@@ -65,7 +66,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
       ).thenReturn(EitherT.fromEither[Future](Right(Some(active))))
 
       val result = service.resolveActiveSdilRef(
-        Seq("sdilRef1", "sdilRef2"), "intId"
+        Seq("sdilRef1", "sdilRef2"),
+        "intId"
       )
 
       result.futureValue mustBe Some("sdilRef2")
@@ -83,7 +85,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
       ).thenReturn(EitherT.fromEither[Future](Right(Some(expired))))
 
       val result = service.resolveActiveSdilRef(
-        Seq("sdilRef1", "sdilRef2"), "intId"
+        Seq("sdilRef1", "sdilRef2"),
+        "intId"
       )
 
       result.futureValue mustBe None
@@ -97,7 +100,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
       ).thenReturn(EitherT.fromEither[Future](Right(Some(expired))))
 
       val result = service.resolveActiveSdilRef(
-        Seq("sdilRef1"), "intId"
+        Seq("sdilRef1"),
+        "intId"
       )
 
       result.futureValue mustBe Some("sdilRef1")
@@ -109,7 +113,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
       ).thenReturn(EitherT.fromEither[Future](Right(None)))
 
       val result = service.resolveActiveSdilRef(
-        Seq("sdilRef1"), "intId"
+        Seq("sdilRef1"),
+        "intId"
       )
 
       result.futureValue mustBe None
@@ -118,7 +123,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
     "return None if no refs provided" in {
 
       val result = service.resolveActiveSdilRef(
-        Seq.empty, "intId"
+        Seq.empty,
+        "intId"
       )
       result.futureValue mustBe None
     }
@@ -133,7 +139,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
       ).thenReturn(EitherT.fromEither[Future](Right(Some(active))))
 
       val result = service.resolveActiveSdilRef(
-        Seq("sdilRef1", "sdilRef2"), "intId"
+        Seq("sdilRef1", "sdilRef2"),
+        "intId"
       )
 
       result.futureValue mustBe Some("sdilRef2")
@@ -145,7 +152,8 @@ class SdilSubscriptionServiceSpec extends SpecBase with MockitoSugar {
       ).thenReturn(EitherT.fromEither[Future](Left(UnexpectedResponseFromSDIL)))
 
       val result = service.resolveActiveSdilRef(
-        Seq("sdilRef1"), "intId"
+        Seq("sdilRef1"),
+        "intId"
       )
 
       result.failed.futureValue mustBe a[IllegalStateException]

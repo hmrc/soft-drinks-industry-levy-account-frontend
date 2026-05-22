@@ -16,7 +16,7 @@
 
 package views
 
-import base.TestData._
+import base.TestData.*
 import models.SdilReturn
 import org.jsoup.nodes.Element
 
@@ -25,20 +25,20 @@ import java.time.{Instant, ZoneId}
 
 trait ServiceViewHelper extends ViewSpecHelper {
 
-  lazy val monthFormatter = DateTimeFormatter.ofPattern("MMMM")
+  lazy val monthFormatter     = DateTimeFormatter.ofPattern("MMMM")
   lazy val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
-  lazy val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-  lazy val timeFormatter = DateTimeFormatter.ofPattern("h:mma")
+  lazy val dateFormatter      = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  lazy val timeFormatter      = DateTimeFormatter.ofPattern("h:mma")
 
   def noReturnsPendingMessage(lastReturn: SdilReturn): String = {
-    val submittedOn = lastReturn.submittedOn.map(_.atZone(ZoneId.of("Europe/London"))).getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
+    val submittedOn     = lastReturn.submittedOn.map(_.atZone(ZoneId.of("Europe/London"))).getOrElse(Instant.now().atZone(ZoneId.of("Europe/London")))
     val lastPeriodStart = pendingReturn1.start.format(monthFormatter)
-    val lastPeriodEnd = pendingReturn1.end.format(monthYearFormatter)
-    val submittedTime = submittedOn.format(timeFormatter).toLowerCase
-    val submittedDate = submittedOn.format(dateFormatter)
+    val lastPeriodEnd   = pendingReturn1.end.format(monthYearFormatter)
+    val submittedTime   = submittedOn.format(timeFormatter).toLowerCase
+    val submittedDate   = submittedOn.format(dateFormatter)
     val currentPeriodStart = currentReturnPeriod.start.format(monthFormatter)
-    val currentPeriodEnd = currentReturnPeriod.end.format(monthYearFormatter)
-    val nextReturnDueDate = currentReturnPeriod.deadline.format(dateFormatter)
+    val currentPeriodEnd   = currentReturnPeriod.end.format(monthYearFormatter)
+    val nextReturnDueDate  = currentReturnPeriod.deadline.format(dateFormatter)
 
     s"Your return for $lastPeriodStart to $lastPeriodEnd was submitted at $submittedTime on $submittedDate." +
       s" Your next return will be for $currentPeriodStart to $currentPeriodEnd." +
@@ -55,7 +55,9 @@ trait ServiceViewHelper extends ViewSpecHelper {
 
     "that has the expected content" - {
       "which includes you need to tell about liable drinks message" in {
-        detailsContent.getElementById("needInReturnP1").text() mustBe "You will need to tell us how many litres of liable drink in each band you need to report that were:"
+        detailsContent
+          .getElementById("needInReturnP1")
+          .text() mustBe "You will need to tell us how many litres of liable drink in each band you need to report that were:"
       }
 
       "which includes the list of liable drinks" in {
@@ -68,15 +70,21 @@ trait ServiceViewHelper extends ViewSpecHelper {
       }
 
       "which includes a message about diluted drinks" in {
-        detailsContent.getElementById("needInReturnP2").text() mustBe "If the drink is dilutable, you must report the amount of ready-to-drink litres made when it is diluted according to the dilution ratio stated on the packaging."
+        detailsContent
+          .getElementById("needInReturnP2")
+          .text() mustBe "If the drink is dilutable, you must report the amount of ready-to-drink litres made when it is diluted according to the dilution ratio stated on the packaging."
       }
 
       "which includes a bold message about claiming credit" in {
-        element.getElementsByClass("govuk-body govuk-!-font-weight-bold").text() mustBe "You can only claim credit if you've registered for the levy and paid it directly to HMRC. Claiming credits you're not entitled to is a criminal offence."
+        element
+          .getElementsByClass("govuk-body govuk-!-font-weight-bold")
+          .text() mustBe "You can only claim credit if you've registered for the levy and paid it directly to HMRC. Claiming credits you're not entitled to is a criminal offence."
       }
 
       "which includes you need to tell about liable credit drinks message" in {
-        detailsContent.getElementById("needInReturnP4").text() mustBe "You can claim a credit for liable drinks that you have reported in either a previous or the current return that have been:"
+        detailsContent
+          .getElementById("needInReturnP4")
+          .text() mustBe "You can claim a credit for liable drinks that you have reported in either a previous or the current return that have been:"
       }
 
       "which includes the list of liable credit drinks" in {
@@ -93,6 +101,5 @@ trait ServiceViewHelper extends ViewSpecHelper {
       }
     }
   }
-
 
 }

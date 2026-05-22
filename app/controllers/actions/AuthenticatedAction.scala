@@ -35,17 +35,18 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-trait AuthenticatedAction
-    extends ActionRefiner[Request, AuthenticatedRequest] with ActionBuilder[AuthenticatedRequest, AnyContent]
+trait AuthenticatedAction extends ActionRefiner[Request, AuthenticatedRequest] with ActionBuilder[AuthenticatedRequest, AnyContent]
 
 class AuthenticatedAuthenticatedAction @Inject() (
   override val authConnector: AuthConnector,
-  val parser: BodyParsers.Default,
-  sdilConnector: SoftDrinksIndustryLevyConnector,
-  errorHandler: ErrorHandler,
-  sdilService: SdilSubscriptionService
+  val parser:                 BodyParsers.Default,
+  sdilConnector:              SoftDrinksIndustryLevyConnector,
+  errorHandler:               ErrorHandler,
+  sdilService:                SdilSubscriptionService
 )(implicit ec: ExecutionContext, config: FrontendAppConfig)
-    extends AuthenticatedAction with AuthorisedFunctions with ActionHelpers {
+    extends AuthenticatedAction
+    with AuthorisedFunctions
+    with ActionHelpers {
 
   override protected def executionContext: ExecutionContext = ec
 
@@ -60,66 +61,69 @@ class AuthenticatedAuthenticatedAction @Inject() (
         ) { internalId =>
           val maybeUtr = getUtr(enrolments)
           val sdilRefs = getAllSdilEnrolments(enrolments)
-          sdilService.resolveActiveSdilRef(sdilRefs, internalId).flatMap { maybeSdil =>
-            (maybeUtr, maybeSdil) match {
-              case (_, Some(sdilRef)) =>
-                sdilConnector
-                  .retrieveSubscription(sdilRef, "sdil", internalId)
-                  .value
-                  .flatMap {
-                    case Right(optSubscription) =>
-                      Future.successful(
-                        Right(
-                          AuthenticatedRequest(
-                            request,
-                            internalId,
-                            enrolments,
-                            optSubscription,
-                            maybeUtr,
-                            maybeSdil
+          sdilService
+            .resolveActiveSdilRef(sdilRefs, internalId)
+            .flatMap { maybeSdil =>
+              (maybeUtr, maybeSdil) match {
+                case (_, Some(sdilRef)) =>
+                  sdilConnector
+                    .retrieveSubscription(sdilRef, "sdil", internalId)
+                    .value
+                    .flatMap {
+                      case Right(optSubscription) =>
+                        Future.successful(
+                          Right(
+                            AuthenticatedRequest(
+                              request,
+                              internalId,
+                              enrolments,
+                              optSubscription,
+                              maybeUtr,
+                              maybeSdil
+                            )
                           )
                         )
-                      )
-                    case Left(_) =>
-                      errorHandler
-                        .internalServerErrorTemplate(using request)
-                        .map(errorView => Left(InternalServerError(errorView)))
-                  }
-              case (Some(utr), _) =>
-                sdilConnector
-                  .retrieveSubscription(utr, "utr", internalId)
-                  .value
-                  .flatMap {
-                    case Right(optSubscription) =>
-                      Future.successful(
-                        Right(
-                          AuthenticatedRequest(
-                            request,
-                            internalId,
-                            enrolments,
-                            optSubscription,
-                            maybeUtr,
-                            maybeSdil
+                      case Left(_) =>
+                        errorHandler
+                          .internalServerErrorTemplate(using request)
+                          .map(errorView => Left(InternalServerError(errorView)))
+                    }
+                case (Some(utr), _) =>
+                  sdilConnector
+                    .retrieveSubscription(utr, "utr", internalId)
+                    .value
+                    .flatMap {
+                      case Right(optSubscription) =>
+                        Future.successful(
+                          Right(
+                            AuthenticatedRequest(
+                              request,
+                              internalId,
+                              enrolments,
+                              optSubscription,
+                              maybeUtr,
+                              maybeSdil
+                            )
                           )
                         )
-                      )
-                    case Left(_) =>
-                      errorHandler
-                        .internalServerErrorTemplate(using request)
-                        .map(errorView => Left(InternalServerError(errorView)))
+                      case Left(_) =>
+                        errorHandler
+                          .internalServerErrorTemplate(using request)
+                          .map(errorView => Left(InternalServerError(errorView)))
+                    }
+                case _ =>
+                  invalidRole(role).orElse(invalidAffinityGroup(affinity)) match {
+                    case Some(error) => Future.successful(Left(error))
+                    case None        =>
+                      Future.successful(Right(AuthenticatedRequest(request, internalId, enrolments, None, maybeUtr, None)))
                   }
-              case _ =>
-                invalidRole(role).orElse(invalidAffinityGroup(affinity)) match {
-                  case Some(error) => Future.successful(Left(error))
-                  case None =>
-                    Future.successful(Right(AuthenticatedRequest(request, internalId, enrolments, None, maybeUtr, None)))
-                }
+              }
             }
-          }.recoverWith { case NonFatal(_) =>
-            errorHandler
-              .internalServerErrorTemplate(using request)
-              .map(errorView => Left(InternalServerError(errorView)))
-          }
+            .recoverWith { case NonFatal(_) =>
+              errorHandler
+                .internalServerErrorTemplate(using request)
+                .map(errorView => Left(InternalServerError(errorView)))
+            }
         }
       }
       .recover {

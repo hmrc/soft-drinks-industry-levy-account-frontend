@@ -16,35 +16,36 @@
 
 package controllers
 
-import cats.implicits._
+import cats.implicits.*
 import com.google.inject.Inject
-import connectors.{ PayApiConnector, SoftDrinksIndustryLevyConnector }
-import controllers.actions.{ AuthenticatedAction, RegisteredAction }
+import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
+import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
-import models.{ ReturnPeriod, SdilReturn }
+import models.{ReturnPeriod, SdilReturn}
 import play.api.i18n.I18nSupport
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import service.AccountResult
 
 import java.time.LocalDate
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentsController @Inject() (
   val controllerComponents: MessagesControllerComponents,
-  authenticated: AuthenticatedAction,
-  registered: RegisteredAction,
-  sdilConnector: SoftDrinksIndustryLevyConnector,
-  paymentsConnector: PayApiConnector,
-  errorHandler: ErrorHandler
+  authenticated:            AuthenticatedAction,
+  registered:               RegisteredAction,
+  sdilConnector:            SoftDrinksIndustryLevyConnector,
+  paymentsConnector:        PayApiConnector,
+  errorHandler:             ErrorHandler
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController with I18nSupport {
+    extends FrontendBaseController
+    with I18nSupport {
 
   def setup(): Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
     val sdilRef = request.subscription.sdilRef
-    val utr = request.subscription.utr
-    val res = for {
+    val utr     = request.subscription.utr
+    val res     = for {
       balance         <- sdilConnector.balance(sdilRef, withAssessment = true, request.internalId)
       optLastReturn   <- getOptLastReturn(utr, request.internalId)
       optReturnAmount <- getOptLastReturnAmount(sdilRef, request.internalId)
@@ -71,9 +72,7 @@ class PaymentsController @Inject() (
 
     val lastReturnAmount = sdilConnector
       .balanceHistory(sdilRef, withAssessment = true, internalId)
-      .map(items =>
-        items.collectFirst { case item if item.messageKey == "returnCharge" => item.amount }.getOrElse(BigDecimal(0))
-      )
+      .map(items => items.collectFirst { case item if item.messageKey == "returnCharge" => item.amount }.getOrElse(BigDecimal(0)))
     lastReturnAmount
   }
 

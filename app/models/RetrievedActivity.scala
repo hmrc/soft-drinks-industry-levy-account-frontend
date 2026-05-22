@@ -16,13 +16,13 @@
 
 package models
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
 case class RetrievedActivity(
-  smallProducer: Boolean,
-  largeProducer: Boolean,
-  contractPacker: Boolean,
-  importer: Boolean,
+  smallProducer:         Boolean,
+  largeProducer:         Boolean,
+  contractPacker:        Boolean,
+  importer:              Boolean,
   voluntaryRegistration: Boolean
 ) {
 

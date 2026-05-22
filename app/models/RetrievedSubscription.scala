@@ -16,21 +16,21 @@
 
 package models
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
 case class RetrievedSubscription(
-  utr: String,
-  sdilRef: String,
-  orgName: String,
-  address: UkAddress,
-  activity: RetrievedActivity,
-  liabilityDate: LocalDate,
+  utr:             String,
+  sdilRef:         String,
+  orgName:         String,
+  address:         UkAddress,
+  activity:        RetrievedActivity,
+  liabilityDate:   LocalDate,
   productionSites: List[Site],
-  warehouseSites: List[Site],
-  contact: Contact,
-  deregDate: Option[LocalDate] = None
+  warehouseSites:  List[Site],
+  contact:         Contact,
+  deregDate:       Option[LocalDate] = None
 )
 
 object RetrievedSubscription {

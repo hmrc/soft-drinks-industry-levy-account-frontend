@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 case class UkAddress(lines: List[String], postCode: String, alfId: Option[String] = None)
 

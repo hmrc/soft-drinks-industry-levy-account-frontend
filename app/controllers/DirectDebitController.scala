@@ -18,24 +18,25 @@ package controllers
 
 import com.google.inject.Inject
 import connectors.DirectDebitConnector
-import controllers.actions.{ AuthenticatedAction, RegisteredAction }
+import controllers.actions.{AuthenticatedAction, RegisteredAction}
 import handlers.ErrorHandler
 import play.api.i18n.I18nSupport
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utilities.GenericLogger
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class DirectDebitController @Inject() (
   val controllerComponents: MessagesControllerComponents,
-  val genericLogger: GenericLogger,
-  authenticated: AuthenticatedAction,
-  registered: RegisteredAction,
-  directDebitConnector: DirectDebitConnector,
-  errorHandler: ErrorHandler
+  val genericLogger:        GenericLogger,
+  authenticated:            AuthenticatedAction,
+  registered:               RegisteredAction,
+  directDebitConnector:     DirectDebitConnector,
+  errorHandler:             ErrorHandler
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController with I18nSupport {
+    extends FrontendBaseController
+    with I18nSupport {
 
   def setup(): Action[AnyContent] = (authenticated andThen registered).async { implicit request =>
     directDebitConnector.initJourney().value.flatMap {

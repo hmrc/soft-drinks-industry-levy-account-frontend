@@ -17,32 +17,32 @@
 package orchestrators
 
 import cats.data.EitherT
-import cats.implicits._
-import com.google.inject.{ Inject, Singleton }
+import cats.implicits.*
+import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
-import errors.{ AccountErrors, NoPendingReturns }
+import errors.{AccountErrors, NoPendingReturns}
 import models.requests.RegisteredRequest
-import models._
+import models.*
 import play.api.mvc.AnyContent
 import repositories.SessionCache
 import service.AccountResult
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisteredOrchestrator @Inject() (
-  sdilConnector: SoftDrinksIndustryLevyConnector,
-  sessionCache: SessionCache,
+  sdilConnector:     SoftDrinksIndustryLevyConnector,
+  sessionCache:      SessionCache,
   frontendAppConfig: FrontendAppConfig
 ) {
 
   def handleServicePageRequest(implicit
     request: RegisteredRequest[AnyContent],
-    hc: HeaderCarrier,
-    ec: ExecutionContext
+    hc:      HeaderCarrier,
+    ec:      ExecutionContext
   ): AccountResult[ServicePageViewModel] = {
     val subscription = request.subscription
     subscription.deregDate match {
@@ -53,8 +53,8 @@ class RegisteredOrchestrator @Inject() (
 
   def getTransactionHistoryForAllYears(implicit
     request: RegisteredRequest[AnyContent],
-    hc: HeaderCarrier,
-    ec: ExecutionContext
+    hc:      HeaderCarrier,
+    ec:      ExecutionContext
   ): AccountResult[Map[Int, List[TransactionHistoryItem]]] =
     sdilConnector
       .balanceHistory(request.subscription.sdilRef, true, request.internalId)
@@ -64,11 +64,11 @@ class RegisteredOrchestrator @Inject() (
 
   def handleStartAReturn(implicit
     request: RegisteredRequest[AnyContent],
-    hc: HeaderCarrier,
-    ec: ExecutionContext
+    hc:      HeaderCarrier,
+    ec:      ExecutionContext
   ): AccountResult[ReturnPeriod] = EitherT {
     val internalId = request.internalId
-    val utr = request.subscription.utr
+    val utr        = request.subscription.utr
     sdilConnector.returns_pending(internalId, utr).value.flatMap {
       case Right(pendingReturns) if pendingReturns.nonEmpty =>
         val sortedReturnsPending = pendingReturns.sortBy(_.start)
@@ -87,17 +87,17 @@ class RegisteredOrchestrator @Inject() (
 
   private def getServiceViewModelForRegisteredUser(subscription: RetrievedSubscription)(implicit
     request: RegisteredRequest[AnyContent],
-    hc: HeaderCarrier,
-    ec: ExecutionContext
+    hc:      HeaderCarrier,
+    ec:      ExecutionContext
   ): AccountResult[ServicePageViewModel] = {
-    val internalId = request.internalId
-    val utr = subscription.utr
-    val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
+    val internalId        = request.internalId
+    val utr               = subscription.utr
+    val lastReturnPeriod  = ReturnPeriod(LocalDate.now).previous
     val getPendingReturns = sdilConnector.returns_pending(internalId, utr).map(_.sortBy(_.start))
-    val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
-    val getBalance = sdilConnector.balance(subscription.sdilRef, withAssessment = true, internalId)
-    val getInterest = getAndCalculateInterestIfReq(internalId)
-    val optHasDDSetup = checkExistingDDIfEnabled
+    val getOptLastReturn  = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
+    val getBalance        = sdilConnector.balance(subscription.sdilRef, withAssessment = true, internalId)
+    val getInterest       = getAndCalculateInterestIfReq(internalId)
+    val optHasDDSetup     = checkExistingDDIfEnabled
 
     for {
       returnsPending <- getPendingReturns
@@ -117,17 +117,17 @@ class RegisteredOrchestrator @Inject() (
 
   private def getServiceViewModelForDeregisteredUser(subscription: RetrievedSubscription, deregDate: LocalDate)(implicit
     request: RegisteredRequest[AnyContent],
-    hc: HeaderCarrier,
-    ec: ExecutionContext
+    hc:      HeaderCarrier,
+    ec:      ExecutionContext
   ): AccountResult[ServicePageViewModel] = {
-    val internalId = request.internalId
-    val utr = subscription.utr
-    val lastReturnPeriod = ReturnPeriod(LocalDate.now).previous
-    val deregReturnPeriod = ReturnPeriod(deregDate)
+    val internalId                = request.internalId
+    val utr                       = subscription.utr
+    val lastReturnPeriod          = ReturnPeriod(LocalDate.now).previous
+    val deregReturnPeriod         = ReturnPeriod(deregDate)
     val checkIfHasVariableReturns = sdilConnector.returns_variable(internalId, utr).map(_.nonEmpty)
-    val getOptLastReturn = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
-    val getOptDeRegReturn = sdilConnector.returns_get(utr, deregReturnPeriod, internalId)
-    val getBalance = sdilConnector.balance(subscription.sdilRef, withAssessment = true, internalId)
+    val getOptLastReturn          = sdilConnector.returns_get(utr, lastReturnPeriod, internalId)
+    val getOptDeRegReturn         = sdilConnector.returns_get(utr, deregReturnPeriod, internalId)
+    val getBalance                = sdilConnector.balance(subscription.sdilRef, withAssessment = true, internalId)
 
     for {
       optLastReturn      <- getOptLastReturn
@@ -146,8 +146,8 @@ class RegisteredOrchestrator @Inject() (
 
   private def getAndCalculateInterestIfReq(internalId: String)(implicit
     request: RegisteredRequest[AnyContent],
-    hc: HeaderCarrier,
-    ec: ExecutionContext
+    hc:      HeaderCarrier,
+    ec:      ExecutionContext
   ): AccountResult[BigDecimal] =
     sdilConnector
       .balanceHistory(request.subscription.sdilRef, withAssessment = true, internalId)
@@ -159,10 +159,10 @@ class RegisteredOrchestrator @Inject() (
 
   private def checkExistingDDIfEnabled(implicit
     request: RegisteredRequest[AnyContent],
-    hc: HeaderCarrier,
-    ec: ExecutionContext
+    hc:      HeaderCarrier,
+    ec:      ExecutionContext
   ): AccountResult[Option[Boolean]] =
-    if (frontendAppConfig.directDebitEnabled) {
+    if frontendAppConfig.directDebitEnabled then {
       sdilConnector.checkDirectDebitStatus(request.subscription.sdilRef).map(Some(_))
     } else {
       EitherT.right[AccountErrors](Future.successful[Option[Boolean]](None))
@@ -171,18 +171,17 @@ class RegisteredOrchestrator @Inject() (
   private def convertBalanceHistoryToTransactionHistory(
     balanceHistory: List[FinancialLineItem]
   ): Map[Int, List[TransactionHistoryItem]] = {
-    val transactionHistoryItem = balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]) {
-      (transactionHistory, financialListItem) =>
+    val transactionHistoryItem =
+      balanceHistory.distinct.sortBy(_.date).foldLeft(List.empty[TransactionHistoryItem]) { (transactionHistory, financialListItem) =>
         List(new TransactionHistoryItem(financialListItem, transactionHistory)) ++ transactionHistory
-    }
+      }
 
-    transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]) {
-      (transactionHistoryForYears, transactionHistoryItem) =>
-        val transactionYear = transactionHistoryItem.financialLineItem.date.getYear
-        val updatedTransactionItemsForYear = transactionHistoryForYears
-          .get(transactionYear)
-          .fold(List(transactionHistoryItem))(_ ++ List(transactionHistoryItem))
-        transactionHistoryForYears ++ Map(transactionYear -> updatedTransactionItemsForYear)
+    transactionHistoryItem.foldLeft(Map.empty[Int, List[TransactionHistoryItem]]) { (transactionHistoryForYears, transactionHistoryItem) =>
+      val transactionYear                = transactionHistoryItem.financialLineItem.date.getYear
+      val updatedTransactionItemsForYear = transactionHistoryForYears
+        .get(transactionYear)
+        .fold(List(transactionHistoryItem))(_ ++ List(transactionHistoryItem))
+      transactionHistoryForYears ++ Map(transactionYear -> updatedTransactionItemsForYear)
     }
   }
 

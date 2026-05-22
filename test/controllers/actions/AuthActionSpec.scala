@@ -24,7 +24,7 @@ import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
 import handlers.ErrorHandler
 import models.requests.AuthenticatedRequest
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{AnyContent, BodyParsers, Request, Results}
@@ -41,7 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuthActionSpec extends SpecBase with MockitoSugar {
 
   class Harness(authAction: AuthenticatedAction) {
-    def onPageLoad() = authAction { implicit request: Request[AnyContent] => Results.Ok }
+    def onPageLoad()      = authAction { implicit request: Request[AnyContent] => Results.Ok }
     def subscriptionRef() = authAction { implicit request: AuthenticatedRequest[AnyContent] =>
       Results.Ok(request.optSubscription.map(_.sdilRef).getOrElse("none"))
     }
@@ -56,17 +56,22 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -81,17 +86,22 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -106,17 +116,22 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -134,15 +149,20 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig   = application.injector.instanceOf[FrontendAppConfig]
 
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
-            val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
+          val controller = new Harness(authAction)
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -157,17 +177,22 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -182,17 +207,22 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
-            val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
+          val controller = new Harness(authAction)
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
@@ -207,17 +237,22 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val sdilService = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler,sdilService)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
@@ -230,13 +265,13 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = mock[SoftDrinksIndustryLevyConnector]
-          val sdilService = mock[SdilSubscriptionService]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val enrolments = Enrolments(
+          val sdilService   = mock[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val enrolments    = Enrolments(
             Set(
               Enrolment(
                 "HMRC-OBTDS-ORG",
@@ -259,7 +294,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
             sdilService
           )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.subscriptionRef()(FakeRequest())
+          val result     = controller.subscriptionRef()(FakeRequest())
 
           status(result) mustBe OK
           contentAsString(result) mustBe SDIL_REF
@@ -272,13 +307,13 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = mock[SoftDrinksIndustryLevyConnector]
-          val sdilService = mock[SdilSubscriptionService]
-          val ec = application.injector.instanceOf[ExecutionContext]
-          val enrolments = Enrolments(
+          val sdilService   = mock[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val enrolments    = Enrolments(
             Set(
               Enrolment(
                 "IR-CT",
@@ -306,7 +341,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
             sdilService
           )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.subscriptionRef()(FakeRequest())
+          val result     = controller.subscriptionRef()(FakeRequest())
 
           status(result) mustBe OK
           contentAsString(result) mustBe SDIL_REF
@@ -318,7 +353,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
   }
 }
 
-class FakeSuccessfulAuthConnector @Inject()(enrolments: Enrolments) extends AuthConnector {
+class FakeSuccessfulAuthConnector @Inject() (enrolments: Enrolments) extends AuthConnector {
   val serviceUrl: String = ""
 
   override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(using
@@ -330,7 +365,7 @@ class FakeSuccessfulAuthConnector @Inject()(enrolments: Enrolments) extends Auth
     )
 }
 
-class FakeFailingAuthConnector @Inject()(exceptionToReturn: Throwable) extends AuthConnector {
+class FakeFailingAuthConnector @Inject() (exceptionToReturn: Throwable) extends AuthConnector {
   val serviceUrl: String = ""
 
   override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(using hc: HeaderCarrier, ec: ExecutionContext): Future[A] =

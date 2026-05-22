@@ -16,8 +16,8 @@
 
 package models
 
-import play.api.libs.json._
-import repositories.{ DatedCacheMap, Encryption }
+import play.api.libs.json.*
+import repositories.{DatedCacheMap, Encryption}
 import uk.gov.hmrc.crypto.EncryptedValue
 
 import java.time.Instant

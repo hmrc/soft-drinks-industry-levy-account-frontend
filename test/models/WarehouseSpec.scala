@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must.Matchers
 
@@ -25,7 +25,7 @@ class WarehouseSpec extends AnyWordSpec with Matchers {
   "Warehouse JSON serialization" should {
 
     "serialize a Warehouse object to JSON" in {
-      val warehouse = Warehouse(Some("Test Trading Name"), UkAddress(List("123 Test Street", "Test City"), "AB12 3CD"))
+      val warehouse    = Warehouse(Some("Test Trading Name"), UkAddress(List("123 Test Street", "Test City"), "AB12 3CD"))
       val expectedJson = Json.parse(
         """
           {

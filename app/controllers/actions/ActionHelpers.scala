@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
 
 trait ActionHelpers {
 
-  val TWO = 2
+  val TWO  = 2
   val FOUR = 4
 
   val registrationRetrieval = allEnrolments and credentialRole and internalId and affinityGroup

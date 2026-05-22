@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext
 
 trait HttpClientV2Helper extends SpecBase with MockitoSugar with ScalaFutures {
 
-  val mockHttp: HttpClientV2 = mock[HttpClientV2]
+  val mockHttp:       HttpClientV2   = mock[HttpClientV2]
   val requestBuilder: RequestBuilder = mock[RequestBuilder]
   when(mockHttp.get(any[URL])(using any[HeaderCarrier])).thenReturn(requestBuilder)
   when(mockHttp.post(any[URL])(using any[HeaderCarrier])).thenReturn(requestBuilder)

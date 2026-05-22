@@ -20,22 +20,22 @@ import models.ReturnPeriod
 
 object SessionKeys {
 
-  val SUBSCRIPTION = "SUBSCRIPTION"
-  def pendingReturn(utr: String) = s"PENDING_RETURNS_UTR_$utr"
-  def variableReturn(utr: String) = s"VARIABLE_RETURNS_UTR_$utr"
+  val SUBSCRIPTION                                                     = "SUBSCRIPTION"
+  def pendingReturn(utr:  String)                                      = s"PENDING_RETURNS_UTR_$utr"
+  def variableReturn(utr: String)                                      = s"VARIABLE_RETURNS_UTR_$utr"
   def previousSubmittedReturn(utr: String, returnPeriod: ReturnPeriod) = {
-    val year = returnPeriod.year
+    val year    = returnPeriod.year
     val quarter = returnPeriod.quarter
     s"PREVIOUS_SUBMITTED_RETURNS_UTR_${utr}_YEAR${year}_QUARTER_$quarter"
   }
 
-  def balance(withAssessment: Boolean) = if (withAssessment) {
+  def balance(withAssessment: Boolean) = if withAssessment then {
     "BALANCE_WITH_ASSESSMENT"
   } else {
     "BALANCE_WITH_NO_ASSESSMENT"
   }
 
-  def balanceHistory(withAssessment: Boolean) = if (withAssessment) {
+  def balanceHistory(withAssessment: Boolean) = if withAssessment then {
     "BALANCE_HISTORY_WITH_ASSESSMENT"
   } else {
     "BALANCE_HISTORY_WITH_NO_ASSESSMENT"

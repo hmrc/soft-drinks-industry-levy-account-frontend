@@ -33,7 +33,7 @@ package controllers
  */
 
 import base.SpecBase
-import base.TestData._
+import base.TestData.*
 import connectors.{PayApiConnector, SoftDrinksIndustryLevyConnector}
 import errors.{UnexpectedResponseFromPayAPI, UnexpectedResponseFromSDIL}
 import models.NextUrl
@@ -42,8 +42,7 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-
+import play.api.test.Helpers.*
 
 class PaymentsControllerSpec extends SpecBase with MockitoSugar {
 
@@ -57,13 +56,12 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
       when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
 
       val mockPayApiConnector = mock[PayApiConnector]
-      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(NextUrl("http://test")))
+      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(createSuccessAccountResult(NextUrl("http://test")))
 
       val application =
         applicationBuilder()
-          .overrides(
-            bind[PayApiConnector].toInstance(mockPayApiConnector),
-            bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
+          .overrides(bind[PayApiConnector].toInstance(mockPayApiConnector), bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
           .build()
 
       running(application) {
@@ -84,13 +82,12 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
       when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(financialItemsWithNoReturn))
 
       val mockPayApiConnector = mock[PayApiConnector]
-      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(NextUrl("http://test")))
+      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(createSuccessAccountResult(NextUrl("http://test")))
 
       val application =
         applicationBuilder()
-          .overrides(
-            bind[PayApiConnector].toInstance(mockPayApiConnector),
-            bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
+          .overrides(bind[PayApiConnector].toInstance(mockPayApiConnector), bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
           .build()
 
       running(application) {
@@ -104,74 +101,69 @@ class PaymentsControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "render the error page when the call to pay-api fails" in {
+      when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
+      when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(None))
+      when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
 
-      "render the error page when the call to pay-api fails" in {
-        when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
-        when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(None))
-        when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
+      val mockPayApiConnector = mock[PayApiConnector]
+      when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(createFailureAccountResult(UnexpectedResponseFromPayAPI))
 
-        val mockPayApiConnector = mock[PayApiConnector]
-        when(mockPayApiConnector.initJourney(any(), any(), any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromPayAPI))
+      val application =
+        applicationBuilder()
+          .overrides(bind[PayApiConnector].toInstance(mockPayApiConnector), bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
+          .build()
 
-        val application =
-          applicationBuilder()
-            .overrides(
-              bind[PayApiConnector].toInstance(mockPayApiConnector),
-              bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
-            .build()
+      running(application) {
 
-        running(application) {
+        val request = FakeRequest(GET, routes.PaymentsController.setup().url)
 
-          val request = FakeRequest(GET, routes.PaymentsController.setup().url)
+        val result = route(application, request).value
 
-          val result = route(application, request).value
-
-          status(result) mustEqual INTERNAL_SERVER_ERROR
-        }
-      }
-
-      "render the error page when the call to get balance fails" in {
-        when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(Some(emptyReturn)))
-        when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
-        when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-
-
-        val application =
-          applicationBuilder()
-            .overrides(
-              bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
-            .build()
-
-        running(application) {
-
-          val request = FakeRequest(GET, routes.PaymentsController.setup().url)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual INTERNAL_SERVER_ERROR
-        }
-      }
-
-      "render the error page when the call to get a return fails" in {
-        when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
-        when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-        when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
-
-        val application =
-          applicationBuilder()
-            .overrides(
-              bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
-            .build()
-
-        running(application) {
-
-          val request = FakeRequest(GET, routes.PaymentsController.setup().url)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual INTERNAL_SERVER_ERROR
-        }
+        status(result) mustEqual INTERNAL_SERVER_ERROR
       }
     }
+
+    "render the error page when the call to get balance fails" in {
+      when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(Some(emptyReturn)))
+      when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
+      when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+
+      val application =
+        applicationBuilder()
+          .overrides(bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
+          .build()
+
+      running(application) {
+
+        val request = FakeRequest(GET, routes.PaymentsController.setup().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "render the error page when the call to get a return fails" in {
+      when(mockSdilConnector.balance(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(BigDecimal(1000)))
+      when(mockSdilConnector.returns_get(any(), any(), any())(using any())).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+      when(mockSdilConnector.balanceHistory(any(), any(), any())(using any())).thenReturn(createSuccessAccountResult(allFinancialItems))
+
+      val application =
+        applicationBuilder()
+          .overrides(bind[SoftDrinksIndustryLevyConnector].toInstance(mockSdilConnector))
+          .build()
+
+      running(application) {
+
+        val request = FakeRequest(GET, routes.PaymentsController.setup().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual INTERNAL_SERVER_ERROR
+      }
+    }
+  }
 
 }

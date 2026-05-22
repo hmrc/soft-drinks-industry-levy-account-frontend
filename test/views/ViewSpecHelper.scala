@@ -21,10 +21,10 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import play.api.i18n.Messages
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.twirl.api.Html
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 trait ViewSpecHelper extends SpecBase {
 
@@ -51,7 +51,7 @@ trait ViewSpecHelper extends SpecBase {
 
   def testDetails(doc: Document, expectedDetails: Map[String, String]) = {
     val expectedNumberOfDetails = expectedDetails.size
-    val details = doc.getElementsByClass("govuk-details")
+    val details                 = doc.getElementsByClass("govuk-details")
     "should include " + expectedNumberOfDetails + " detail sections" in {
       details.size() mustEqual expectedNumberOfDetails
     }
@@ -102,20 +102,19 @@ trait ViewSpecHelper extends SpecBase {
         technicalHelpLink
           .text() mustBe "Is this page not working properly? (opens in new tab)"
       }
-      "has expected href" in {
+      "has expected href" in
         assert(
           technicalHelpLink
             .attr("href")
             .contains("/contact/report-technical-problem")
         )
-      }
     }
   }
 
   def validateAccessibilityStatementLinkPresent(doc: Document): Unit = {
     val footerItems = doc.getElementsByClass("govuk-footer__inline-list-item")
     "accessibility statement exists, text and link are correct" in {
-      footerItems.html() must include("/accessibility-statement/soft-drinks-industry-levy-account-frontend?referrerUrl=%2F")
+      footerItems.html()     must include("/accessibility-statement/soft-drinks-industry-levy-account-frontend?referrerUrl=%2F")
       footerItems.eachText() must contain("Accessibility statement")
     }
   }

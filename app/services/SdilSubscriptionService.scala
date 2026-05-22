@@ -36,29 +36,31 @@ class SdilSubscriptionService @Inject() (sdilConnector: SoftDrinksIndustryLevyCo
   def resolveActiveSdilRef(sdilRefs: Seq[String], internalId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     val distinctRefs = sdilRefs.distinct
 
-    Future.traverse(distinctRefs) { ref =>
-      sdilConnector.retrieveSubscriptionNoCache(ref, "sdil").value.map {
-        case Right(Some(sub)) => Right(Some((ref, isActive(sub))))
-        case Right(None)      => Right(None)
-        case Left(error)      => Left(error)
+    Future
+      .traverse(distinctRefs) { ref =>
+        sdilConnector.retrieveSubscriptionNoCache(ref, "sdil").value.map {
+          case Right(Some(sub)) => Right(Some((ref, isActive(sub))))
+          case Right(None)      => Right(None)
+          case Left(error)      => Left(error)
+        }
       }
-    }.flatMap { results =>
-      results.collectFirst { case Right(Some((ref, true))) => ref } match {
-        case activeRef @ Some(_) => Future.successful(activeRef)
-        case None if distinctRefs.size == 1 =>
-          results.collectFirst { case Right(Some((ref, false))) => ref } match {
-            case inactiveRef @ Some(_) => Future.successful(inactiveRef)
-            case None                  => handleLookupFailure(results)
-          }
-        case None => handleLookupFailure(results)
+      .flatMap { results =>
+        results.collectFirst { case Right(Some((ref, true))) => ref } match {
+          case activeRef @ Some(_)            => Future.successful(activeRef)
+          case None if distinctRefs.size == 1 =>
+            results.collectFirst { case Right(Some((ref, false))) => ref } match {
+              case inactiveRef @ Some(_) => Future.successful(inactiveRef)
+              case None                  => handleLookupFailure(results)
+            }
+          case None => handleLookupFailure(results)
+        }
       }
-    }
   }
 
   private def handleLookupFailure(
     results: Seq[Either[AccountErrors, Option[(String, Boolean)]]]
   ): Future[Option[String]] =
-    if (results.exists(_.isLeft)) {
+    if results.exists(_.isLeft) then {
       Future.failed(new IllegalStateException("Unable to resolve active SDIL reference"))
     } else {
       Future.successful(None)

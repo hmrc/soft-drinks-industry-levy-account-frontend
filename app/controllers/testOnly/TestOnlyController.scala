@@ -27,7 +27,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import scala.concurrent.Future
 
 class TestOnlyController @Inject() (val controllerComponents: MessagesControllerComponents, config: FrontendAppConfig)
-    extends FrontendBaseController with I18nSupport {
+    extends FrontendBaseController
+    with I18nSupport {
 
   def stubDirectDebitJourney() = Action.async { request =>
     Future.successful(Redirect(config.homePage))

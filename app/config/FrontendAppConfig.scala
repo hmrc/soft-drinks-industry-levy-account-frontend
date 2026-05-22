@@ -16,36 +16,36 @@
 
 package config
 
-import com.google.inject.{ Inject, Singleton }
+import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
 class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
   val accountBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy-account-frontend")
-  val appName: String = configuration.getString("appName")
-  lazy val homePage: String = configuration.getString("microservice.services.home-page-url")
+  val appName:        String = configuration.getString("appName")
+  lazy val homePage:  String = configuration.getString("microservice.services.home-page-url")
 
-  val returnsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-returns-frontend")
+  val returnsBaseUrl      = configuration.baseUrl("soft-drinks-industry-levy-returns-frontend")
   val registrationBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-registration-frontend")
-  val variationsBaseUrl = configuration.baseUrl("soft-drinks-industry-levy-variations-frontend")
+  val variationsBaseUrl   = configuration.baseUrl("soft-drinks-industry-levy-variations-frontend")
 
   def startReturnUrl(year: Int, quarter: Int, isNilReturn: Boolean) =
     s"$returnsBaseUrl/soft-drinks-industry-levy-returns-frontend/submit-return/year/$year/quarter/$quarter/nil-return/$isNilReturn"
 
-  val makeAChangeUrl = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/select-change"
+  val makeAChangeUrl    = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/select-change"
   val correctAReturnUrl = s"$variationsBaseUrl/soft-drinks-industry-levy-variations-frontend/correct-return/select"
 
   val startRegistrationUrl: String =
     s"$registrationBaseUrl/soft-drinks-industry-levy-registration/start"
 
-  private val basGatewayBaseUrl: String = configuration.baseUrl("bas-gateway")
-  val sdilBaseUrl: String = configuration.baseUrl("soft-drinks-industry-levy")
-  private val directDebitIsTest: Boolean = configuration.getBoolean("direct-debit.isTest")
-  private val payApiIsTest: Boolean = configuration.getBoolean("pay-api.isTest")
-  private val directDebitBaseUrl: String = configuration.baseUrl("direct-debit-backend")
-  private val payApiBaseUrl: String = configuration.baseUrl("pay-api")
-  val directDebitUrl: String = if (directDebitIsTest) {
+  private val basGatewayBaseUrl:  String  = configuration.baseUrl("bas-gateway")
+  val sdilBaseUrl:                String  = configuration.baseUrl("soft-drinks-industry-levy")
+  private val directDebitIsTest:  Boolean = configuration.getBoolean("direct-debit.isTest")
+  private val payApiIsTest:       Boolean = configuration.getBoolean("pay-api.isTest")
+  private val directDebitBaseUrl: String  = configuration.baseUrl("direct-debit-backend")
+  private val payApiBaseUrl:      String  = configuration.baseUrl("pay-api")
+  val directDebitUrl:             String  = if directDebitIsTest then {
     directDebitBaseUrl + controllers.testOnly.routes.TestOnlyController.stubDirectDebitInitialise().url
   } else {
     directDebitBaseUrl + "/direct-debit-backend/sdil-frontend/zsdl/journey/start"
@@ -53,29 +53,29 @@ class FrontendAppConfig @Inject() (configuration: ServicesConfig) {
 
   val directDebitEnabled: Boolean = configuration.getBoolean("direct-debit.isEnabled")
 
-  val payApiUrl: String = if (payApiIsTest) {
+  val payApiUrl: String = if payApiIsTest then {
     s"$payApiBaseUrl${controllers.testOnly.routes.TestOnlyController.stubPayApiInitialise().url}"
   } else {
     s"$payApiBaseUrl/pay-api/bta/sdil/journey/start"
   }
 
-  val loginUrl: String = s"$basGatewayBaseUrl/bas-gateway/sign-in"
+  val loginUrl:         String = s"$basGatewayBaseUrl/bas-gateway/sign-in"
   val loginContinueUrl: String = s"$accountBaseUrl/soft-drinks-industry-levy-account-frontend"
-  val signOutUrl: String = s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
+  val signOutUrl:       String = s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
 
   private val exitSurveyBaseUrl: String = configuration.baseUrl("feedback-frontend")
-  val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/soft-drinks-industry-levy-account-frontend"
+  val exitSurveyUrl:             String = s"$exitSurveyBaseUrl/feedback/soft-drinks-industry-levy-account-frontend"
 
-  val timeout: Int = configuration.getInt("timeout-dialog.timeout")
+  val timeout:   Int = configuration.getInt("timeout-dialog.timeout")
   val countdown: Int = configuration.getInt("timeout-dialog.countdown")
 
   val cacheTtl: Int = configuration.getInt("mongodb.timeToLiveInSeconds")
 
-  val sdilGuidance: String = configuration.getString("sdilGuidance")
-  val sdilRegulations: String = configuration.getString("sdilRegulations")
-  val sdilContact: String = configuration.getString("sdilContact")
+  val sdilGuidance:            String = configuration.getString("sdilGuidance")
+  val sdilRegulations:         String = configuration.getString("sdilRegulations")
+  val sdilContact:             String = configuration.getString("sdilContact")
   val creditForExportGuidance: String = configuration.getString("creditForExportGuidance")
-  val howToPayGuidance: String = configuration.getString("howToPayGuidance")
-  val sdilContactNumber: String = configuration.getString("sdilContactNumber")
+  val howToPayGuidance:        String = configuration.getString("howToPayGuidance")
+  val sdilContactNumber:       String = configuration.getString("sdilContactNumber")
 
 }
