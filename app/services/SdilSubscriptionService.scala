@@ -33,7 +33,7 @@ class SdilSubscriptionService @Inject() (sdilConnector: SoftDrinksIndustryLevyCo
     sub.deregDate.isEmpty ||
       sub.deregDate.exists(_.isAfter(LocalDate.now))
 
-  def resolveActiveSdilRef(sdilRefs: Seq[String], internalId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def resolveActiveSdilRef(sdilRefs: Seq[String])(implicit hc: HeaderCarrier): Future[Option[String]] = {
     val distinctRefs = sdilRefs.distinct
 
     Future

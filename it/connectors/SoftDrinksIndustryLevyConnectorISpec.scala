@@ -42,7 +42,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
               .sdilBackend
               .retrieveSubscriptionNone("utr", UTR)
 
-            val res = sdilConnector.retrieveSubscription(UTR, "utr", identifier)
+            val res = sdilConnector.retrieveSubscription(UTR, "utr")
 
             whenReady(res.value) { result =>
               result mustBe Right(None)
@@ -54,7 +54,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
               .sdilBackend
               .retrieveSubscriptionNone("sdil", SDIL_REF)
 
-            val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
+            val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil")
 
             whenReady(res.value) { result =>
               result mustBe Right(None)
@@ -70,7 +70,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
               .sdilBackend
               .retrieveSubscription("utr", UTR)
 
-            val res = sdilConnector.retrieveSubscription(UTR, "utr", identifier)
+            val res = sdilConnector.retrieveSubscription(UTR, "utr")
 
             whenReady(res.value) { result =>
               result mustBe Right(Some(aSubscription))
@@ -82,7 +82,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
               .sdilBackend
               .retrieveSubscription("sdil", SDIL_REF)
 
-            val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
+            val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil")
 
             whenReady(res.value) { result =>
               result mustBe Right(Some(aSubscription))
@@ -97,7 +97,7 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
             .sdilBackend
             .retrieveSubscriptionError("sdil", SDIL_REF)
 
-          val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
+          val res = sdilConnector.retrieveSubscription(SDIL_REF, "sdil")
 
           whenReady(res.value) { result =>
             result mustBe Left(UnexpectedResponseFromSDIL)
@@ -111,8 +111,8 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "and return None when the cache has an empty subscription" - {
           "when searching by utr" in {
             val res = for {
-              _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(None)))
-              result <- sdilConnector.retrieveSubscription(UTR, "utr", identifier)
+              _ <- EitherT.right[AccountErrors](sessionCache.save(UTR, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(None)))
+              result <- sdilConnector.retrieveSubscription(UTR, "utr")
             } yield result
 
             whenReady(res.value) { result =>
@@ -122,8 +122,8 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "when searching by sdilRef" in {
             val res = for {
-              _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(None)))
-              result <- sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
+              _ <- EitherT.right[AccountErrors](sessionCache.save(SDIL_REF, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(None)))
+              result <- sdilConnector.retrieveSubscription(SDIL_REF, "sdil")
             } yield result
 
             whenReady(res.value) { result =>
@@ -135,8 +135,8 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
         "and return the subscription when in the cache" - {
           "when searching by utr" in {
             val res = for {
-              _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(Some(aSubscription))))
-              result <- sdilConnector.retrieveSubscription(UTR, "utr", identifier)
+              _ <- EitherT.right[AccountErrors](sessionCache.save(UTR, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(Some(aSubscription))))
+              result <- sdilConnector.retrieveSubscription(UTR, "utr")
             } yield result
 
             whenReady(res.value) { result =>
@@ -146,8 +146,8 @@ class SoftDrinksIndustryLevyConnectorISpec extends Specifications with TestConfi
 
           "when searching by sdilRef" in {
             val res = for {
-              _ <- EitherT.right[AccountErrors](sessionCache.save(identifier, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(Some(aSubscription))))
-              result <- sdilConnector.retrieveSubscription(SDIL_REF, "sdil", identifier)
+              _ <- EitherT.right[AccountErrors](sessionCache.save(SDIL_REF, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(Some(aSubscription))))
+              result <- sdilConnector.retrieveSubscription(SDIL_REF, "sdil")
             } yield result
 
             whenReady(res.value) { result =>

@@ -93,10 +93,10 @@ class SoftDrinksIndustryLevyConnector @Inject() (
       }
   }
 
-  def retrieveSubscription(identifierValue: String, identifierType: String, internalId: String)(implicit
+  def retrieveSubscription(identifierValue: String, identifierType: String)(implicit
     hc: HeaderCarrier
   ): AccountResult[Option[RetrievedSubscription]] = EitherT {
-    sdilSessionCache.fetchEntry[OptRetrievedSubscription](internalId, SessionKeys.SUBSCRIPTION).flatMap {
+    sdilSessionCache.fetchEntry[OptRetrievedSubscription](identifierValue, SessionKeys.SUBSCRIPTION).flatMap {
       case Some(optSubscription) => Future.successful(Right(optSubscription.optRetrievedSubscription))
       case None                  =>
         executeGet[Option[RetrievedSubscription]](
@@ -105,7 +105,7 @@ class SoftDrinksIndustryLevyConnector @Inject() (
         )
           .flatMap { optRetrievedSubscription =>
             sdilSessionCache
-              .save(internalId, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(optRetrievedSubscription))
+              .save(identifierValue, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(optRetrievedSubscription))
               .map { _ =>
                 Right(optRetrievedSubscription)
               }

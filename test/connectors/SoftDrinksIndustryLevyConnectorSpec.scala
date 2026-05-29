@@ -76,7 +76,7 @@ class SoftDrinksIndustryLevyConnectorSpec extends HttpClientV2Helper {
         )
       )
 
-      Await.result(connector.retrieveSubscription(SDIL_REF, "sdil", "id")(using incomingHc).value, 1.second)
+      Await.result(connector.retrieveSubscription(SDIL_REF, "sdil")(using incomingHc).value, 1.second)
 
       val hcCaptor = ArgumentCaptor.forClass(classOf[HeaderCarrier])
       verify(mockHttp).get(any[URL])(using hcCaptor.capture())

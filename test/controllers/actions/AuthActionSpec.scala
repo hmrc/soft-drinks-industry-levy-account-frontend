@@ -281,9 +281,9 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
             )
           )
 
-          when(sdilService.resolveActiveSdilRef(any[Seq[String]], any[String])(using any[HeaderCarrier]))
+          when(sdilService.resolveActiveSdilRef(any[Seq[String]])(using any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(SDIL_REF)))
-          when(sdilConnector.retrieveSubscription(any[String], any[String], any[String])(using any[HeaderCarrier]))
+          when(sdilConnector.retrieveSubscription(any[String], any[String])(using any[HeaderCarrier]))
             .thenReturn(createSuccessAccountResult(Some(deregSubscription)))
 
           val authAction = new AuthenticatedAuthenticatedAction(
@@ -328,9 +328,9 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
             )
           )
 
-          when(sdilService.resolveActiveSdilRef(any[Seq[String]], any[String])(using any[HeaderCarrier]))
+          when(sdilService.resolveActiveSdilRef(any[Seq[String]])(using any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(SDIL_REF)))
-          when(sdilConnector.retrieveSubscription(eqTo(SDIL_REF), eqTo("sdil"), eqTo("id"))(using any[HeaderCarrier]))
+          when(sdilConnector.retrieveSubscription(eqTo(SDIL_REF), eqTo("sdil"))(using any[HeaderCarrier]))
             .thenReturn(createSuccessAccountResult(Some(aSubscription)))
 
           val authAction = new AuthenticatedAuthenticatedAction(
@@ -345,8 +345,8 @@ class AuthActionSpec extends SpecBase with MockitoSugar {
 
           status(result) mustBe OK
           contentAsString(result) mustBe SDIL_REF
-          verify(sdilConnector).retrieveSubscription(eqTo(SDIL_REF), eqTo("sdil"), eqTo("id"))(using any[HeaderCarrier])
-          verify(sdilConnector, never()).retrieveSubscription(eqTo(UTR), eqTo("utr"), eqTo("id"))(using any[HeaderCarrier])
+          verify(sdilConnector).retrieveSubscription(eqTo(SDIL_REF), eqTo("sdil"))(using any[HeaderCarrier])
+          verify(sdilConnector, never()).retrieveSubscription(eqTo(UTR), eqTo("utr"))(using any[HeaderCarrier])
         }
       }
     }

@@ -62,12 +62,12 @@ class AuthenticatedAuthenticatedAction @Inject() (
           val maybeUtr = getUtr(enrolments)
           val sdilRefs = getAllSdilEnrolments(enrolments)
           sdilService
-            .resolveActiveSdilRef(sdilRefs, internalId)
+            .resolveActiveSdilRef(sdilRefs)
             .flatMap { maybeSdil =>
               (maybeUtr, maybeSdil) match {
                 case (_, Some(sdilRef)) =>
                   sdilConnector
-                    .retrieveSubscription(sdilRef, "sdil", internalId)
+                    .retrieveSubscription(sdilRef, "sdil")
                     .value
                     .flatMap {
                       case Right(optSubscription) =>
@@ -90,7 +90,7 @@ class AuthenticatedAuthenticatedAction @Inject() (
                     }
                 case (Some(utr), _) =>
                   sdilConnector
-                    .retrieveSubscription(utr, "utr", internalId)
+                    .retrieveSubscription(utr, "utr")
                     .value
                     .flatMap {
                       case Right(optSubscription) =>
