@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import controllers.actions.{ AuthenticatedAction, IdentifierAction }
+import controllers.actions.{AuthenticatedAction, IdentifierAction}
 import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -28,11 +28,12 @@ import scala.concurrent.Future
 
 class RegisterController @Inject() (
   val controllerComponents: MessagesControllerComponents,
-  val genericLogger: GenericLogger,
-  authenticated: AuthenticatedAction,
-  identifierAction: IdentifierAction
+  val genericLogger:        GenericLogger,
+  authenticated:            AuthenticatedAction,
+  identifierAction:         IdentifierAction
 )(implicit config: FrontendAppConfig)
-    extends FrontendBaseController with I18nSupport {
+    extends FrontendBaseController
+    with I18nSupport {
 
   def start = (authenticated andThen identifierAction).async { request =>
     Future.successful(Redirect(config.startRegistrationUrl))

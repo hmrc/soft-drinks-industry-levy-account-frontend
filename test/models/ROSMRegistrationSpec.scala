@@ -36,13 +36,13 @@ class ROSMRegistrationSpec extends SpecBase {
       |"contactDetails":{"primaryPhoneNumber":"08926 167394","emailAddress":"qovmlk@rlkioorw.com"}}""".stripMargin
 
   val ROSMRegistrationOrg = RosmRegistration(
-     safeId = "fvp41Gm51rswaeiysohztnrqjdfz7cOnael38omHvuH2ye519ncqiXruPqjBbwewiKdmthpsphun",
-     organisation = Some(OrganisationDetails("foo")),
-     individual = None,
-     address = UkAddress(
-       lines = List("50", "The Lane", "The Town"),
-       postCode = "SM32 5IA"
-     )
+    safeId = "fvp41Gm51rswaeiysohztnrqjdfz7cOnael38omHvuH2ye519ncqiXruPqjBbwewiKdmthpsphun",
+    organisation = Some(OrganisationDetails("foo")),
+    individual = None,
+    address = UkAddress(
+      lines = List("50", "The Lane", "The Town"),
+      postCode = "SM32 5IA"
+    )
   )
 
   val ROSMRegistrationIndividual = RosmRegistration(

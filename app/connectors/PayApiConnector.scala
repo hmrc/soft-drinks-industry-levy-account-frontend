@@ -20,28 +20,28 @@ import cats.data.EitherT
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import errors.UnexpectedResponseFromPayAPI
-import models.{ NextUrl, ReturnPeriod, SdilReturn, SetupPayApiRequest }
+import models.{NextUrl, ReturnPeriod, SdilReturn, SetupPayApiRequest}
 import play.api.libs.json.Json
 import service.AccountResult
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import utilities.GenericLogger
 import play.api.libs.ws.writeableOf_JsValue
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
-class PayApiConnector @Inject() (val http: HttpClientV2, config: FrontendAppConfig, genericLogger: GenericLogger)(
-  implicit ec: ExecutionContext
+class PayApiConnector @Inject() (val http: HttpClientV2, config: FrontendAppConfig, genericLogger: GenericLogger)(implicit
+  ec: ExecutionContext
 ) {
 
   def initJourney(
-    sdilRef: String,
-    balance: BigDecimal,
+    sdilRef:       String,
+    balance:       BigDecimal,
     optLastReturn: Option[SdilReturn],
-    amount: BigDecimal,
-    todaysDate: LocalDate = LocalDate.now()
+    amount:        BigDecimal,
+    todaysDate:    LocalDate = LocalDate.now()
   )(implicit hc: HeaderCarrier): AccountResult[NextUrl] = EitherT {
     val payApiRequest = generateRequestForPayApi(balance, sdilRef, optLastReturn, amount, todaysDate: LocalDate)
     http
@@ -56,15 +56,15 @@ class PayApiConnector @Inject() (val http: HttpClientV2, config: FrontendAppConf
   }
 
   private def generateRequestForPayApi(
-    balance: BigDecimal,
-    sdilRef: String,
-    optLastReturn: Option[SdilReturn],
+    balance:           BigDecimal,
+    sdilRef:           String,
+    optLastReturn:     Option[SdilReturn],
     priorReturnAmount: BigDecimal,
-    todaysDate: LocalDate
+    todaysDate:        LocalDate
   ): SetupPayApiRequest = {
-    val balanceInPence = balance * 100
-    val amountOwed = balanceInPence * -1
-    val exactAmountOwed = amountOwed.toLongExact
+    val balanceInPence     = balance * 100
+    val amountOwed         = balanceInPence * -1
+    val exactAmountOwed    = amountOwed.toLongExact
     val dueDateToSendToApi = generateDueDate(optLastReturn, priorReturnAmount, balance, todaysDate)
 
     SetupPayApiRequest(
@@ -77,13 +77,13 @@ class PayApiConnector @Inject() (val http: HttpClientV2, config: FrontendAppConf
   }
 
   private[connectors] def generateDueDate(
-    optLastReturn: Option[SdilReturn],
+    optLastReturn:     Option[SdilReturn],
     priorReturnAmount: BigDecimal,
-    balance: BigDecimal,
-    todaysDate: LocalDate
+    balance:           BigDecimal,
+    todaysDate:        LocalDate
   ): Option[LocalDate] = {
     val lastReturnPeriod = ReturnPeriod(todaysDate).previous
-    val dueDate = if (optLastReturn.nonEmpty) {
+    val dueDate          = if optLastReturn.nonEmpty then {
       genericLogger.logger.info(
         s"[PayApiConnector][generateDueDate] - optLastReturn is not empty, due date of ${lastReturnPeriod.deadline} generated on return period end"
       )
@@ -97,7 +97,7 @@ class PayApiConnector @Inject() (val http: HttpClientV2, config: FrontendAppConf
 
     dueDate match {
       case Some(dueDate) =>
-        if (dueDate.isAfter(todaysDate) && balance - priorReturnAmount >= 0) {
+        if dueDate.isAfter(todaysDate) && balance - priorReturnAmount >= 0 then {
           genericLogger.logger.info(
             s"[PayApiConnector][generateDueDate] - due date is after today and balance is less than the prior return amount, " +
               s"presumed not overdue and future payment date can be offered"

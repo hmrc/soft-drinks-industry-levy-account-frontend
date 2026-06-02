@@ -18,14 +18,13 @@ package controllers.actions
 
 import com.google.inject.Inject
 import controllers.routes
-import models.requests.{ AuthenticatedRequest, RegisteredRequest }
-import play.api.mvc.Results._
-import play.api.mvc._
+import models.requests.{AuthenticatedRequest, RegisteredRequest}
+import play.api.mvc.Results.*
+import play.api.mvc.*
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
-class RegisteredActionImp @Inject() ()(implicit val executionContext: ExecutionContext)
-    extends RegisteredAction with ActionHelpers {
+class RegisteredActionImp @Inject() ()(implicit val executionContext: ExecutionContext) extends RegisteredAction with ActionHelpers {
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RegisteredRequest[A]]] =
     request.optSubscription match {
       case None =>

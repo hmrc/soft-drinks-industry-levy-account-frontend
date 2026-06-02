@@ -25,7 +25,7 @@ import scala.concurrent.Future
 class SessionCacheSpec extends SpecBase with MockitoSugar {
 
   val mockSessionRepository = mock[SessionRepository]
-  val cascadeUpsert = applicationBuilder().build().injector.instanceOf[CascadeUpsert]
+  val cascadeUpsert         = applicationBuilder().build().injector.instanceOf[CascadeUpsert]
 
   val sessionCache = new SessionCache(mockSessionRepository, cascadeUpsert)
 
@@ -47,13 +47,13 @@ class SessionCacheSpec extends SpecBase with MockitoSugar {
     "when there is data in database should" - {
       "override the value then upsert" - {
         "the key already exists" in {
-          val initialData = CacheMap("sessionId", Map("test" -> JsString("abc")))
+          val initialData  = CacheMap("sessionId", Map("test" -> JsString("abc")))
           val dataToUpsert = CacheMap("sessionId", Map("test" -> JsString("efg")))
 
           when(mockSessionRepository.get("sessionId")).thenReturn(Future.successful(Some(initialData)))
           when(mockSessionRepository.upsert(dataToUpsert)).thenReturn(Future.successful(true))
 
-          val res = sessionCache.save("sessionId","test", "efg")
+          val res = sessionCache.save("sessionId", "test", "efg")
 
           whenReady(res) { result =>
             result mustBe dataToUpsert
@@ -63,7 +63,7 @@ class SessionCacheSpec extends SpecBase with MockitoSugar {
 
       "add the value to map and then upsert" - {
         "when the key does not already exists" in {
-          val initialData = CacheMap("sessionId", Map("test" -> JsString("abc")))
+          val initialData  = CacheMap("sessionId", Map("test" -> JsString("abc")))
           val dataToUpsert = CacheMap(
             "sessionId",
             Map("test" -> JsString("abc"), "test1" -> JsString("efg"))

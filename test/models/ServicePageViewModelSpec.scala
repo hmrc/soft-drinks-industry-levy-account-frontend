@@ -43,19 +43,21 @@ class ServicePageViewModelSpec extends AnyWordSpec with Matchers {
         address = UkAddress(
           lines = List("456 Street"),
           postCode = "CD3 4EF"
-        ), None, None, None
+        ),
+        None,
+        None,
+        None
       )
     ),
     warehouseSites = List.empty,
     contact = Contact(
       name = Some("Test User"),
       None,
-      phoneNumber = ("0123456789"),
-      email = ("test@example.com")
+      phoneNumber = "0123456789",
+      email = "test@example.com"
     ),
     deregDate = Some(LocalDate.of(2024, 3, 13))
   )
-
 
   "RegisteredUserServicePageViewModel" should {
 
@@ -92,7 +94,6 @@ class ServicePageViewModelSpec extends AnyWordSpec with Matchers {
         needsToSendFinalReturn = false
       )
 
-
       model.needsToSendFinalReturn mustBe false
     }
 
@@ -105,11 +106,9 @@ class ServicePageViewModelSpec extends AnyWordSpec with Matchers {
       )
 
       model match {
-        case _: RegisteredUserServicePageViewModel  => fail("Should not match RegisteredUserServicePageViewModel")
+        case _: RegisteredUserServicePageViewModel   => fail("Should not match RegisteredUserServicePageViewModel")
         case _: DeregisteredUserServicePageViewModel => succeed
       }
     }
   }
 }
-
-

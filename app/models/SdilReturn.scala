@@ -16,19 +16,19 @@
 
 package models
 
-import play.api.libs.functional.syntax.{ toFunctionalBuilderOps, unlift }
-import play.api.libs.json.{ Format, JsPath, Json, OFormat }
+import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import play.api.libs.json.{Format, JsPath, Json, OFormat}
 
 import java.time.LocalDateTime
 
 case class SdilReturn(
-  ownBrand: (Long, Long) = (0L, 0L),
-  packLarge: (Long, Long) = (0L, 0L),
-  packSmall: List[SmallProducer] = List.empty,
+  ownBrand:    (Long, Long) = (0L, 0L),
+  packLarge:   (Long, Long) = (0L, 0L),
+  packSmall:   List[SmallProducer] = List.empty,
   importLarge: (Long, Long) = (0L, 0L),
   importSmall: (Long, Long) = (0L, 0L),
-  `export`: (Long, Long) = (0L, 0L),
-  wastage: (Long, Long) = (0L, 0L),
+  `export`:    (Long, Long) = (0L, 0L),
+  wastage:     (Long, Long) = (0L, 0L),
   submittedOn: Option[LocalDateTime] = None
 )
 
@@ -45,5 +45,5 @@ object SdilReturn {
   )
 
   implicit val smallProducerJson: OFormat[SmallProducer] = Json.format[SmallProducer]
-  implicit val returnsFormat: OFormat[SdilReturn] = Json.format[SdilReturn]
+  implicit val returnsFormat:     OFormat[SdilReturn]    = Json.format[SdilReturn]
 }

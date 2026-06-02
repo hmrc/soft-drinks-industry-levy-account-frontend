@@ -16,12 +16,12 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
-import java.time.{ LocalDate => Date }
+import java.time.LocalDate as Date
 
 sealed trait FinancialLineItem {
-  def date: Date
+  def date:   Date
   def amount: BigDecimal
 
   def messageKey: String
@@ -89,7 +89,7 @@ object FinancialLineItem {
         }
 
       def writes(o: FinancialLineItem): JsValue = o match {
-        case i: ReturnCharge => Json.format[ReturnCharge].writes(i).as[JsObject] + ("type" -> JsString("ReturnCharge"))
+        case i: ReturnCharge         => Json.format[ReturnCharge].writes(i).as[JsObject] + ("type" -> JsString("ReturnCharge"))
         case i: ReturnChargeInterest =>
           Json.format[ReturnChargeInterest].writes(i).as[JsObject] + ("type" -> JsString("ReturnChargeInterest"))
         case i: CentralAssessment =>

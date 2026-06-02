@@ -20,23 +20,23 @@ import cats.data.EitherT
 import config.FrontendAppConfig
 import errors.UnexpectedResponseFromSDIL
 import models.FinancialLineItem.formatter
-import models._
-import repositories.{ SessionCache, SessionKeys }
+import models.*
+import repositories.{SessionCache, SessionKeys}
 import service.AccountResult
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, HttpResponse, StringContextOps }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
 import utilities.GenericLogger
 
 import javax.inject.Inject
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 class SoftDrinksIndustryLevyConnector @Inject() (
-  val http: HttpClientV2,
+  val http:          HttpClientV2,
   frontendAppConfig: FrontendAppConfig,
-  sdilSessionCache: SessionCache,
-  genericLogger: GenericLogger
+  sdilSessionCache:  SessionCache,
+  genericLogger:     GenericLogger
 )(implicit ec: ExecutionContext) {
 
   lazy val sdilUrl: String = frontendAppConfig.sdilBaseUrl
@@ -57,53 +57,55 @@ class SoftDrinksIndustryLevyConnector @Inject() (
     )
 
   private def sdilContext(
-    path: String,
-    status: Option[Int] = None,
-    startTime: Option[Long] = None
+    path:       String,
+    status:     Option[Int] = None,
+    durationMs: Option[Long] = None
   ): String =
     Seq(
       Some(s"path=$path"),
       status.map(st => s"status=$st"),
-      startTime.map(st => s"durationMs=${System.currentTimeMillis() - st}")
+      durationMs.map(d => s"durationMs=$d")
     ).flatten.mkString(" ")
 
   private def executeGet[A](operation: String, path: String)(implicit hc: HeaderCarrier, rds: HttpReads[A]): Future[A] = {
     val urlString = s"$sdilUrl$path"
     val startTime = System.currentTimeMillis()
     logger.info(
-      s"SDIL $operation request ${sdilContext(path, startTime = Some(startTime))}"
+      s"SDIL $operation request ${sdilContext(path)}"
     )
     http
       .get(url"$urlString")(using outboundHeaderCarrier(hc))
       .execute[HttpResponse](using rawHttpReads, ec)
       .map { response =>
+        val durationMs = System.currentTimeMillis() - startTime
         logger.info(
-          s"SDIL $operation response ${sdilContext(path, status = Some(response.status), startTime = Some(startTime))}"
+          s"SDIL $operation response ${sdilContext(path, status = Some(response.status), durationMs = Some(durationMs))}"
         )
         rds.read("GET", urlString, response)
       }
       .recoverWith { case NonFatal(e) =>
+        val durationMs = System.currentTimeMillis() - startTime
         logger.error(
-          s"SDIL $operation failure ${sdilContext(path, startTime = Some(startTime))} error=${e.getMessage}",
+          s"SDIL $operation failure ${sdilContext(path, durationMs = Some(durationMs))} error=${e.getMessage}",
           e
         )
         Future.failed(e)
       }
   }
 
-  def retrieveSubscription(identifierValue: String, identifierType: String, internalId: String)(implicit
+  def retrieveSubscription(identifierValue: String, identifierType: String)(implicit
     hc: HeaderCarrier
   ): AccountResult[Option[RetrievedSubscription]] = EitherT {
-    sdilSessionCache.fetchEntry[OptRetrievedSubscription](internalId, SessionKeys.SUBSCRIPTION).flatMap {
+    sdilSessionCache.fetchEntry[OptRetrievedSubscription](identifierValue, SessionKeys.SUBSCRIPTION).flatMap {
       case Some(optSubscription) => Future.successful(Right(optSubscription.optRetrievedSubscription))
-      case None =>
+      case None                  =>
         executeGet[Option[RetrievedSubscription]](
           operation = "retrieveSubscription",
           path = s"/subscription/$identifierType/$identifierValue"
         )
           .flatMap { optRetrievedSubscription =>
             sdilSessionCache
-              .save(internalId, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(optRetrievedSubscription))
+              .save(identifierValue, SessionKeys.SUBSCRIPTION, OptRetrievedSubscription(optRetrievedSubscription))
               .map { _ =>
                 Right(optRetrievedSubscription)
               }
@@ -115,11 +117,24 @@ class SoftDrinksIndustryLevyConnector @Inject() (
     }
   }
 
+  def retrieveSubscriptionNoCache(identifierValue: String, identifierType: String)(implicit
+    hc: HeaderCarrier
+  ): AccountResult[Option[RetrievedSubscription]] = EitherT {
+    executeGet[Option[RetrievedSubscription]](
+      operation = "retrieveSubscription",
+      path = s"/subscription/$identifierType/$identifierValue"
+    )
+      .map(Right(_))
+      .recover { case NonFatal(_) =>
+        Left(UnexpectedResponseFromSDIL)
+      }
+  }
+
   def returns_pending(internalId: String, utr: String)(implicit hc: HeaderCarrier): AccountResult[List[ReturnPeriod]] =
     EitherT {
       sdilSessionCache.fetchEntry[List[ReturnPeriod]](internalId, SessionKeys.pendingReturn(utr)).flatMap {
         case Some(pendingReturns) => Future.successful(Right(pendingReturns))
-        case None =>
+        case None                 =>
           executeGet[List[ReturnPeriod]](
             operation = "returns_pending",
             path = s"/returns/$utr/pending"
@@ -139,7 +154,7 @@ class SoftDrinksIndustryLevyConnector @Inject() (
     EitherT {
       sdilSessionCache.fetchEntry[List[ReturnPeriod]](internalId, SessionKeys.variableReturn(utr)).flatMap {
         case Some(pendingReturns) => Future.successful(Right(pendingReturns))
-        case None =>
+        case None                 =>
           executeGet[List[ReturnPeriod]](
             operation = "returns_variable",
             path = s"/returns/$utr/variable"
@@ -162,7 +177,7 @@ class SoftDrinksIndustryLevyConnector @Inject() (
       .fetchEntry[OptPreviousSubmittedReturn](internalId, SessionKeys.previousSubmittedReturn(utr, period))
       .flatMap {
         case Some(optPreviousReturn) => Future.successful(Right(optPreviousReturn.optReturn))
-        case None =>
+        case None                    =>
           executeGet[Option[SdilReturn]](
             operation = "returns_get",
             path = s"/returns/$utr/year/${period.year}/quarter/${period.quarter}"
@@ -183,9 +198,9 @@ class SoftDrinksIndustryLevyConnector @Inject() (
   }
 
   def balance(
-    sdilRef: String,
+    sdilRef:        String,
     withAssessment: Boolean,
-    internalId: String
+    internalId:     String
   )(implicit hc: HeaderCarrier): AccountResult[BigDecimal] = EitherT {
     sdilSessionCache.fetchEntry[BigDecimal](internalId, SessionKeys.balance(withAssessment)).flatMap {
       case Some(b) =>
@@ -208,15 +223,15 @@ class SoftDrinksIndustryLevyConnector @Inject() (
   }
 
   def balanceHistory(
-    sdilRef: String,
+    sdilRef:        String,
     withAssessment: Boolean,
-    internalId: String
+    internalId:     String
   )(implicit hc: HeaderCarrier): AccountResult[List[FinancialLineItem]] = EitherT {
     sdilSessionCache
       .fetchEntry[List[FinancialLineItem]](internalId, SessionKeys.balanceHistory(withAssessment))
       .flatMap {
         case Some(b) => Future.successful(Right(b))
-        case None =>
+        case None    =>
           executeGet[List[FinancialLineItem]](
             operation = "balanceHistory",
             path = s"/balance/$sdilRef/history/all/$withAssessment"

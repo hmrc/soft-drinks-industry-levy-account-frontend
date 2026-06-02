@@ -16,16 +16,16 @@
 
 package models
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 import java.time.LocalDate
 
 case class SetupPayApiRequest(
-  reference: String,
+  reference:     String,
   amountInPence: Long,
-  dueDate: Option[LocalDate] = None,
-  returnUrl: String,
-  backUrl: String
+  dueDate:       Option[LocalDate] = None,
+  returnUrl:     String,
+  backUrl:       String
 )
 
 object SetupPayApiRequest {

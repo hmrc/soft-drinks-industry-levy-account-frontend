@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must.Matchers
 
@@ -26,7 +26,7 @@ class SmallProducerSpec extends AnyWordSpec with Matchers {
 
     "serialize a SmallProducer object to JSON" in {
       val smallProducer = SmallProducer("TestAlias", "XYZ123", (1000L, 2000L))
-      val expectedJson = Json.parse(
+      val expectedJson  = Json.parse(
         """
           {
             "alias": "TestAlias",

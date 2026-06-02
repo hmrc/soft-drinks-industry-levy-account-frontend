@@ -23,7 +23,6 @@ import play.api.libs.json.*
 
 class SdilReturnSpec extends AnyWordSpec with Matchers {
 
-
   "SdilReturn" should {
     "serialize to JSON correctly" in {
       val sdilReturn = SdilReturn(
@@ -41,19 +40,20 @@ class SdilReturnSpec extends AnyWordSpec with Matchers {
 
       val expectedJson = Json.obj(
         "packLarge" -> Json.obj("lower" -> 150L, "higher" -> 250L),
-        "export" -> Json.obj("lower" -> 500L, "higher" -> 600L),
-        "packSmall" -> Json.arr(Json.obj(
-          "alias" -> "Alias1",
-          "sdilRef" -> "SD123",
-          "litreage" -> Json.obj("lower" -> 10, "higher" -> 20) // ✅ Corrected
-        )),
-        "ownBrand" -> Json.obj("lower" -> 100L, "higher" -> 200L),
+        "export"    -> Json.obj("lower" -> 500L, "higher" -> 600L),
+        "packSmall" -> Json.arr(
+          Json.obj(
+            "alias"    -> "Alias1",
+            "sdilRef"  -> "SD123",
+            "litreage" -> Json.obj("lower" -> 10, "higher" -> 20) // ✅ Corrected
+          )
+        ),
+        "ownBrand"    -> Json.obj("lower" -> 100L, "higher" -> 200L),
         "importLarge" -> Json.obj("lower" -> 300L, "higher" -> 400L),
-        "wastage" -> Json.obj("lower" -> 70L, "higher" -> 80L),
+        "wastage"     -> Json.obj("lower" -> 70L, "higher" -> 80L),
         "submittedOn" -> "2022-01-01T12:00:00",
         "importSmall" -> Json.obj("lower" -> 50L, "higher" -> 60L)
       )
-
 
       Json.toJson(sdilReturn) mustBe expectedJson
     }
@@ -61,15 +61,17 @@ class SdilReturnSpec extends AnyWordSpec with Matchers {
     "deserialize from JSON correctly" in {
       val json = Json.obj(
         "packLarge" -> Json.obj("lower" -> 150L, "higher" -> 250L),
-        "export" -> Json.obj("lower" -> 500L, "higher" -> 600L),
-        "packSmall" -> Json.arr(Json.obj(
-          "alias" -> "Alias1",
-          "sdilRef" -> "SD123",
-          "litreage" -> Json.obj("lower" -> 10, "higher" -> 20) // ✅ Corrected
-        )),
-        "ownBrand" -> Json.obj("lower" -> 100L, "higher" -> 200L),
+        "export"    -> Json.obj("lower" -> 500L, "higher" -> 600L),
+        "packSmall" -> Json.arr(
+          Json.obj(
+            "alias"    -> "Alias1",
+            "sdilRef"  -> "SD123",
+            "litreage" -> Json.obj("lower" -> 10, "higher" -> 20) // ✅ Corrected
+          )
+        ),
+        "ownBrand"    -> Json.obj("lower" -> 100L, "higher" -> 200L),
         "importLarge" -> Json.obj("lower" -> 300L, "higher" -> 400L),
-        "wastage" -> Json.obj("lower" -> 70L, "higher" -> 80L),
+        "wastage"     -> Json.obj("lower" -> 70L, "higher" -> 80L),
         "submittedOn" -> "2022-01-01T12:00:00",
         "importSmall" -> Json.obj("lower" -> 50L, "higher" -> 60L)
       )

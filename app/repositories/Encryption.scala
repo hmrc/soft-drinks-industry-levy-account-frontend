@@ -17,7 +17,7 @@
 package repositories
 
 import play.api.Configuration
-import uk.gov.hmrc.crypto.{ AdDecrypter, AdEncrypter, SymmetricCryptoFactory }
+import uk.gov.hmrc.crypto.{AdDecrypter, AdEncrypter, SymmetricCryptoFactory}
 
 import javax.inject.Inject
 

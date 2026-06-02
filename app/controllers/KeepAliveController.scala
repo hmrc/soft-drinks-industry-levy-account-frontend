@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.AuthenticatedAction
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionCache
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import javax.inject.Inject
@@ -25,8 +25,8 @@ import scala.concurrent.ExecutionContext
 import controllers.oldRoute.routes
 class KeepAliveController @Inject() (
   val controllerComponents: MessagesControllerComponents,
-  identify: AuthenticatedAction,
-  sessionCache: SessionCache
+  identify:                 AuthenticatedAction,
+  sessionCache:             SessionCache
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController {
 

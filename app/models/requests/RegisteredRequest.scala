@@ -17,12 +17,12 @@
 package models.requests
 
 import models.RetrievedSubscription
-import play.api.mvc.{ Request, WrappedRequest }
+import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.Enrolments
 
 case class RegisteredRequest[A](
-  request: Request[A],
-  internalId: String,
-  enrolments: Enrolments,
+  request:      Request[A],
+  internalId:   String,
+  enrolments:   Enrolments,
   subscription: RetrievedSubscription
 ) extends WrappedRequest[A](request)

@@ -21,37 +21,35 @@ import org.jsoup.nodes.Document
 
 trait RegisteredUserServiceViewHelper extends ServiceViewHelper {
 
-
-  def warningMessageForPendingReturns(pendingReturns: List[ReturnPeriod]): String = {
-    if (pendingReturns.size == 1) {
+  def warningMessageForPendingReturns(pendingReturns: List[ReturnPeriod]): String =
+    if pendingReturns.size == 1 then {
       val pendingReturn = pendingReturns.head
-      val startMonth = pendingReturn.start.format(monthFormatter)
-      val endDate = pendingReturn.end.format(monthYearFormatter)
-      val deadline = pendingReturn.deadline.format(dateFormatter)
+      val startMonth    = pendingReturn.start.format(monthFormatter)
+      val endDate       = pendingReturn.end.format(monthYearFormatter)
+      val deadline      = pendingReturn.deadline.format(dateFormatter)
       s"! Warning The return for Super Lemonade Plc from $startMonth to $endDate is due by $deadline."
     } else {
       s"! Warning You have ${pendingReturns.size} overdue returns"
     }
-  }
 
   def overdueBulletMessage(returnPeriod: ReturnPeriod): String = {
     val startMonth = returnPeriod.start.format(monthFormatter)
-    val endDate = returnPeriod.end.format(monthYearFormatter)
+    val endDate    = returnPeriod.end.format(monthYearFormatter)
     s"$startMonth to $endDate"
   }
 
   def getExpectedBalanceMessage(page: Document, balance: BigDecimal, interest: BigDecimal): String = {
-    val formattedBalance = f"£${balance.abs}%,.2f"
+    val formattedBalance  = f"£${balance.abs}%,.2f"
     val formattedInterest = f"£${interest.abs}%,.2f"
-    if (balance == 0) {
+    if balance == 0 then {
       "Your balance is £0."
-    } else if (balance > 0) {
-      s"You are ${formattedBalance} in credit."
+    } else if balance > 0 then {
+      s"You are $formattedBalance in credit."
     } else {
-      if (interest < 0) {
-        s"Your balance is ${formattedBalance} including ${formattedInterest} of interest."
+      if interest < 0 then {
+        s"Your balance is $formattedBalance including $formattedInterest of interest."
       } else {
-        s"Your balance is ${formattedBalance}."
+        s"Your balance is $formattedBalance."
       }
     }
   }
