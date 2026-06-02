@@ -16,7 +16,7 @@
 
 package repositories
 
-import play.api.libs.json.{ JsValue, Json, OFormat }
+import play.api.libs.json.{JsValue, Json, OFormat}
 
 case class CacheMap(id: String, data: Map[String, JsValue])
 

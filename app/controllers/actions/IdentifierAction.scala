@@ -19,17 +19,16 @@ package controllers.actions
 import com.google.inject.Inject
 import controllers.routes
 import handlers.ErrorHandler
-import models.requests.{ AuthenticatedRequest, IdentificationRequest }
-import play.api.mvc.Results._
-import play.api.mvc._
+import models.requests.{AuthenticatedRequest, IdentificationRequest}
+import play.api.mvc.Results.*
+import play.api.mvc.*
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
-class IdentificationActionImp @Inject() (errorHandler: ErrorHandler)(implicit ec: ExecutionContext)
-    extends IdentifierAction with ActionHelpers {
-  
+class IdentificationActionImp @Inject() (errorHandler: ErrorHandler)(implicit ec: ExecutionContext) extends IdentifierAction with ActionHelpers {
+
   override protected def executionContext: ExecutionContext = ec
-  
+
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, IdentificationRequest[A]]] =
     (request.optUtr, request.optSubscription) match {
       case (Some(_), Some(sub)) if sub.deregDate.isEmpty =>

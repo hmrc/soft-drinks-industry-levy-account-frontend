@@ -16,6 +16,7 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.client.WireMock.{getRequestedFor, urlPathEqualTo, verify as verifyRequest}
 import models.ReturnPeriod
 import org.jsoup.Jsoup
 import org.scalatest.matchers.must.Matchers.*
@@ -118,6 +119,53 @@ class ServicePageControllerISpec extends ServicePageITHelper with Specifications
                   validatePage(res.body, List.empty, Some(emptyReturn), 1000, 0, false)
                 }
               }
+            }
+          }
+        }
+
+        "that selects the active subscription when auth has active and inactive SDIL enrolments" in {
+          build
+            .user.isAuthorisedAndEnrolledWithInactiveAndActiveSdilRefs
+            .sdilBackend.retrieveSubscription("sdil", INACTIVE_SDIL_REF, aSubscriptionWithInactiveSdilRefAndDeRegDate)
+            .sdilBackend.retrieveSubscription("sdil", SDIL_REF, aSubscription)
+            .sdilBackend.retrievePendingReturns(UTR, List.empty)
+            .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+            .sdilBackend.balance(SDIL_REF, true, 100)
+            .sdilBackend.balanceHistory(SDIL_REF, true, List.empty)
+            .sdilBackend.checkDirectDebitStatus(SDIL_REF, false)
+
+          WsTestClient.withClient { client =>
+            val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+            whenReady(result1) { res =>
+              res.status mustBe 200
+              validatePage(res.body, List.empty, Some(emptyReturn), 100, 0, false)
+              verifyRequest(1, getRequestedFor(urlPathEqualTo(s"/subscription/sdil/$INACTIVE_SDIL_REF")))
+              verifyRequest(2, getRequestedFor(urlPathEqualTo(s"/subscription/sdil/$SDIL_REF")))
+            }
+          }
+        }
+
+        "that selects the active subscription when auth has UTR, active and inactive SDIL enrolments" in {
+          build
+            .user.isAuthorisedAndEnrolledWithUtrInactiveAndActiveSdilRefs
+            .sdilBackend.retrieveSubscription("sdil", INACTIVE_SDIL_REF, aSubscriptionWithInactiveSdilRefAndDeRegDate)
+            .sdilBackend.retrieveSubscription("sdil", SDIL_REF, aSubscription)
+            .sdilBackend.retrievePendingReturns(UTR, List.empty)
+            .sdilBackend.retrieveReturn(UTR, currentReturnPeriod.previous, Some(emptyReturn))
+            .sdilBackend.balance(SDIL_REF, true, 100)
+            .sdilBackend.balanceHistory(SDIL_REF, true, List.empty)
+            .sdilBackend.checkDirectDebitStatus(SDIL_REF, false)
+
+          WsTestClient.withClient { client =>
+            val result1 = createClientRequestGet(client, baseUrl + servicePagePath)
+
+            whenReady(result1) { res =>
+              res.status mustBe 200
+              validatePage(res.body, List.empty, Some(emptyReturn), 100, 0, false)
+              verifyRequest(1, getRequestedFor(urlPathEqualTo(s"/subscription/sdil/$INACTIVE_SDIL_REF")))
+              verifyRequest(2, getRequestedFor(urlPathEqualTo(s"/subscription/sdil/$SDIL_REF")))
+              verifyRequest(0, getRequestedFor(urlPathEqualTo(s"/subscription/utr/$UTR")))
             }
           }
         }

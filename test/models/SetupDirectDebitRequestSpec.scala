@@ -16,15 +16,15 @@
 
 package models
 
-import org.scalatest._
-import play.api.libs.json._
+import org.scalatest.*
+import play.api.libs.json.*
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class SetupDirectDebitRequestSpec extends AnyWordSpec with Matchers {
 
   val returnUrl = "https://example.com"
-  val backUrl = "https://example.com"
+  val backUrl   = "https://example.com"
 
   "SetupDirectDebitRequest" should {
     "serialize to JSON correctly" in {
@@ -32,7 +32,7 @@ class SetupDirectDebitRequestSpec extends AnyWordSpec with Matchers {
 
       val expectedJson = Json.obj(
         "returnUrl" -> "https://example.com",
-        "backUrl" -> "https://example.com"
+        "backUrl"   -> "https://example.com"
       )
 
       Json.toJson(request) mustBe expectedJson
@@ -41,7 +41,7 @@ class SetupDirectDebitRequestSpec extends AnyWordSpec with Matchers {
     "deserialize from JSON correctly" in {
       val json = Json.obj(
         "returnUrl" -> "https://example.com",
-        "backUrl" -> "https://example.com"
+        "backUrl"   -> "https://example.com"
       )
 
       val expectedRequest = new SetupDirectDebitRequest(returnUrl, backUrl)

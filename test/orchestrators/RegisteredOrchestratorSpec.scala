@@ -37,8 +37,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
   val registeredRequest: RegisteredRequest[AnyContent] = RegisteredRequest(FakeRequest(), "id", Enrolments(Set.empty), aSubscription)
   val mockSDILConnector = mock[SoftDrinksIndustryLevyConnector]
-  val mockSessionCache = mock[SessionCache]
-  val mockConfig = mock[FrontendAppConfig]
+  val mockSessionCache  = mock[SessionCache]
+  val mockConfig        = mock[FrontendAppConfig]
 
   implicit def intToBigDecimal(i: Int): BigDecimal = BigDecimal(i)
 
@@ -49,10 +49,10 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
       "should return a registeredUserServicePageViewModel" - {
         "containing the pending returns, balance, no interest, direct debit status and subscription" - {
           "when the user has pending returns, no lastReturn, a positive balance, and no interest to pay and has a direct debit setup" in {
-            val balance = BigDecimal(123.45)
+            val balance        = BigDecimal(123.45)
             val balanceHistory = List(financialItemReturnCharge)
-            val interest = BigDecimal(0)
-            val ddStatus = true
+            val interest       = BigDecimal(0)
+            val ddStatus       = true
             val expectedResult = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, Some(ddStatus))
             when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(pendingReturns3))
             when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
@@ -71,13 +71,14 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         "containing the last return sent, balance, no interest, ddStatus and subscription" - {
           "when the user has no pending returns, submitted a return for the current return period, has 0 balance and interest and has no direct debit setup" in {
-            val balance = BigDecimal(0)
+            val balance        = BigDecimal(0)
             val balanceHistory = List.empty
-            val interest = BigDecimal(0)
-            val ddStatus = false
+            val interest       = BigDecimal(0)
+            val ddStatus       = false
             val expectedResult = registeredUserServicePageViewModel(List.empty, Some(emptyReturn), balance, interest, Some(ddStatus))
             when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List.empty))
-            when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(Some(emptyReturn)))
+            when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc))
+              .thenReturn(createSuccessAccountResult(Some(emptyReturn)))
             when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balance))
             when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistory))
             when(mockConfig.directDebitEnabled).thenReturn(true)
@@ -91,15 +92,15 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
           }
         }
 
-
         "containing pending returns, the last return sent, balance, no interest, ddStatus and subscription" - {
           "when the user has pending returns, submitted a return for the current return period, has a balance in credit and no interest and direct debit is disabled" in {
-            val balance = BigDecimal(-123.45)
+            val balance        = BigDecimal(-123.45)
             val balanceHistory = List.empty
-            val interest = BigDecimal(0)
+            val interest       = BigDecimal(0)
             val expectedResult = registeredUserServicePageViewModel(pendingReturns3, Some(emptyReturn), balance, interest, None)
             when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(pendingReturns3))
-            when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(Some(emptyReturn)))
+            when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc))
+              .thenReturn(createSuccessAccountResult(Some(emptyReturn)))
             when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balance))
             when(mockConfig.directDebitEnabled).thenReturn(false)
             when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistory))
@@ -112,15 +113,15 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
           }
         }
 
-
         "containing pending returns sorted, no last return sent, a balance and interest to be payed and direct debit disabled" - {
           "when the user has pending returns in the wrong order and not submitted a return for the current return period" in {
-            val balance = BigDecimal(123.45)
+            val balance        = BigDecimal(123.45)
             val balanceHistory = allFinancialItems
-            val interest = BigDecimal(20.45)
+            val interest       = BigDecimal(20.45)
             val expectedResult = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, None)
 
-            when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List(pendingReturn3, pendingReturn1, pendingReturn2)))
+            when(mockSDILConnector.returns_pending("id", UTR)(using hc))
+              .thenReturn(createSuccessAccountResult(List(pendingReturn3, pendingReturn1, pendingReturn2)))
             when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
             when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balance))
             when(mockConfig.directDebitEnabled).thenReturn(false)
@@ -136,12 +137,13 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         "when the finicial item list has no distinct values" - {
           "should filter out repeated items and calculate the interest based off that" in {
-            val balance = BigDecimal(123.45)
+            val balance        = BigDecimal(123.45)
             val balanceHistory = allFinancialItems ++ allFinancialItems
-            val interest = BigDecimal(20.45)
+            val interest       = BigDecimal(20.45)
             val expectedResult = registeredUserServicePageViewModel(pendingReturns3, None, balance, interest, None)
 
-            when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List(pendingReturn3, pendingReturn1, pendingReturn2)))
+            when(mockSDILConnector.returns_pending("id", UTR)(using hc))
+              .thenReturn(createSuccessAccountResult(List(pendingReturn3, pendingReturn1, pendingReturn2)))
             when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
             when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balance))
             when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistory))
@@ -170,7 +172,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         "when the call to get lastReturn fails" in {
           when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List.empty))
-          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
 
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
 
@@ -182,7 +185,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         "when the call to get balance fails" in {
           when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List.empty))
           when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
-          when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
 
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
 
@@ -196,7 +200,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
           when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List.empty))
           when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
           when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balance))
-          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
 
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
 
@@ -206,14 +211,15 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         }
 
         "when the call to get direct debit fails" in {
-          val balance = BigDecimal(123.45)
+          val balance        = BigDecimal(123.45)
           val balanceHistory = allFinancialItems ++ allFinancialItems
           when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List.empty))
           when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
           when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balance))
           when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistory))
           when(mockConfig.directDebitEnabled).thenReturn(true)
-          when(mockSDILConnector.checkDirectDebitStatus(aSubscription.sdilRef)(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.checkDirectDebitStatus(aSubscription.sdilRef)(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
 
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
 
@@ -224,11 +230,15 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         "when all the calls fail" in {
           when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-          when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.balance(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
           when(mockConfig.directDebitEnabled).thenReturn(true)
-          when(mockSDILConnector.checkDirectDebitStatus(aSubscription.sdilRef)(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.checkDirectDebitStatus(aSubscription.sdilRef)(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
 
           whenReady(res.value) { result =>
@@ -241,10 +251,11 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
       val deregisteredRequest: RegisteredRequest[AnyContent] = RegisteredRequest(FakeRequest(), "id", Enrolments(Set.empty), deregSubscription)
       "should return a deregisteredUserServicePageViewModel" - {
         val hasVariableReturnsOptions = List(true, false)
-        val hasSentLastReturnOptions = List(true, false)
-        val sentFinalReturnOptions = List(true, false)
-        val balanceOptions: List[BigDecimal] = List(100, 0, -100)
-        def hasOrHasNot(isTrue: Boolean): String = if(isTrue) {"has"} else {"has not"}
+        val hasSentLastReturnOptions  = List(true, false)
+        val sentFinalReturnOptions    = List(true, false)
+        val balanceOptions:               List[BigDecimal] = List(100, 0, -100)
+        def hasOrHasNot(isTrue: Boolean): String           = if isTrue then { "has" }
+        else { "has not" }
 
         hasVariableReturnsOptions.foreach { hasVariableReturns =>
           hasSentLastReturnOptions.foreach { hasSentLastReturn =>
@@ -252,22 +263,31 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
               balanceOptions.foreach { balance =>
                 s"containing hasVariableReturns $hasVariableReturns, needsToSendFinalReturn ${!sentFinalReturn}," +
                   s" hasSentLastReturn $hasSentLastReturn, and a balance of $balance" - {
-                  s"when the user ${hasOrHasNot(hasVariableReturns)} variable return(s)," +
-                  s" ${hasOrHasNot(hasSentLastReturn)} sent the last return, ${hasOrHasNot(sentFinalReturn)} sent the final return" +
-                  s" and has a balance of $balance" in new DeregisteredUserTestSetup(hasVariableReturns, hasSentLastReturn, !sentFinalReturn, balance) {
+                    s"when the user ${hasOrHasNot(hasVariableReturns)} variable return(s)," +
+                      s" ${hasOrHasNot(hasSentLastReturn)} sent the last return, ${hasOrHasNot(sentFinalReturn)} sent the final return" +
+                      s" and has a balance of $balance" in new DeregisteredUserTestSetup(
+                        hasVariableReturns,
+                        hasSentLastReturn,
+                        !sentFinalReturn,
+                        balance
+                      ) {
 
-                    when(mockSDILConnector.returns_variable("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(variableReturnsSuccessResp))
-                    when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(lastReturnSuccessResp))
-                    when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc)).thenReturn(createSuccessAccountResult(finalReturnSuccessResp))
-                    when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balance))
+                        when(mockSDILConnector.returns_variable("id", UTR)(using hc))
+                          .thenReturn(createSuccessAccountResult(variableReturnsSuccessResp))
+                        when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc))
+                          .thenReturn(createSuccessAccountResult(lastReturnSuccessResp))
+                        when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc))
+                          .thenReturn(createSuccessAccountResult(finalReturnSuccessResp))
+                        when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc))
+                          .thenReturn(createSuccessAccountResult(balance))
 
-                    val res = orchestrator.handleServicePageRequest(using deregisteredRequest, hc, ec)
+                        val res = orchestrator.handleServicePageRequest(using deregisteredRequest, hc, ec)
 
-                    whenReady(res.value) { result =>
-                      result mustBe Right(expectedResult)
-                    }
+                        whenReady(res.value) { result =>
+                          result mustBe Right(expectedResult)
+                        }
+                      }
                   }
-                }
               }
             }
           }
@@ -290,7 +310,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         "when the call to get last return fails" in {
           when(mockSDILConnector.returns_variable("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List()))
-          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
           when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc)).thenReturn(createSuccessAccountResult(None))
           when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(0))
 
@@ -304,7 +325,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         "when the call to get final return fails" in {
           when(mockSDILConnector.returns_variable("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List()))
           when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
-          when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
           when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(0))
 
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
@@ -318,7 +340,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
           when(mockSDILConnector.returns_variable("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List()))
           when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createSuccessAccountResult(None))
           when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc)).thenReturn(createSuccessAccountResult(None))
-          when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
 
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
 
@@ -329,9 +352,12 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
 
         "when all the calls fails" in {
           when(mockSDILConnector.returns_variable("id", UTR)(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-          when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
-          when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.returns_get(UTR, currentReturnPeriod.previous, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.returns_get(UTR, ReturnPeriod(deregDate), "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
+          when(mockSDILConnector.balance(deregSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
 
           val res = orchestrator.handleServicePageRequest(using registeredRequest, hc, ec)
 
@@ -347,7 +373,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
     "when the call to get balance history is successful" - {
       "and the user has no fininicial items" - {
         "should return an empty map" in {
-          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(List.empty[FinancialLineItem]))
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createSuccessAccountResult(List.empty[FinancialLineItem]))
 
           val res = orchestrator.getTransactionHistoryForAllYears(using registeredRequest, hc, ec)
 
@@ -358,7 +385,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
       }
 
       "should return the expected" - {
-        val year = 2022
+        val year  = 2022
         val year2 = 2021
         val year3 = 2020
         val date1 = LocalDate.of(year, 12, 1)
@@ -370,21 +397,21 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         val date7 = LocalDate.of(year3, 12, 1)
         val date8 = LocalDate.of(year3, 6, 20)
         val date9 = LocalDate.of(year3, 1, 30)
-        val fi1 = PaymentOnAccount(date1, "test", BigDecimal(132.00))
-        val fi2 = ReturnCharge(ReturnPeriod.apply(date2), BigDecimal(-120.00))
-        val fi3 = ReturnChargeInterest(date3, BigDecimal(-12.00))
-        val fi4 = Unknown(date4, "test", BigDecimal(300.00))
-        val fi5 = CentralAssessment(date5, BigDecimal(-100.00))
-        val fi6 = CentralAsstInterest(date6, BigDecimal(-10.00))
-        val fi7 = OfficerAssessment(date7, BigDecimal(-130.00))
-        val fi8 = OfficerAsstInterest(date8, BigDecimal(-13.00))
-        val fi9 = ReturnCharge(ReturnPeriod.apply(date9), BigDecimal(-47.00))
-
+        val fi1   = PaymentOnAccount(date1, "test", BigDecimal(132.00))
+        val fi2   = ReturnCharge(ReturnPeriod.apply(date2), BigDecimal(-120.00))
+        val fi3   = ReturnChargeInterest(date3, BigDecimal(-12.00))
+        val fi4   = Unknown(date4, "test", BigDecimal(300.00))
+        val fi5   = CentralAssessment(date5, BigDecimal(-100.00))
+        val fi6   = CentralAsstInterest(date6, BigDecimal(-10.00))
+        val fi7   = OfficerAssessment(date7, BigDecimal(-130.00))
+        val fi8   = OfficerAsstInterest(date8, BigDecimal(-13.00))
+        val fi9   = ReturnCharge(ReturnPeriod.apply(date9), BigDecimal(-47.00))
 
         "when the user only has one fininicial items" in {
           val balanceHistoryList = List(fi1)
-          val expectedResult = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
-          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+          val expectedResult     = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createSuccessAccountResult(balanceHistoryList))
 
           val res = orchestrator.getTransactionHistoryForAllYears(using registeredRequest, hc, ec)
 
@@ -393,12 +420,12 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
           }
         }
 
-
         "with the duplicates removed" - {
           "when the user only has multiple fininicial items that are all identical" in {
             val balanceHistoryList = List(fi1)
-            val expectedResult = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
-            when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+            val expectedResult     = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
+            when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+              .thenReturn(createSuccessAccountResult(balanceHistoryList))
 
             val res = orchestrator.getTransactionHistoryForAllYears(using registeredRequest, hc, ec)
 
@@ -409,14 +436,15 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         }
 
         "when the user only has multiple fininicial items for the same year" in {
-          val balanceHistoryList = List(fi1, fi2, fi3)
+          val balanceHistoryList              = List(fi1, fi2, fi3)
           val expectedTransactionHistoryItems = List(
             TransactionHistoryItem(fi1, BigDecimal(0.00)),
             TransactionHistoryItem(fi2, BigDecimal(-132.00)),
             TransactionHistoryItem(fi3, fi3.amount)
           )
           val expectedResult = Map(year -> expectedTransactionHistoryItems)
-          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createSuccessAccountResult(balanceHistoryList))
 
           val res = orchestrator.getTransactionHistoryForAllYears(using registeredRequest, hc, ec)
 
@@ -426,7 +454,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         }
 
         "when the user only has multiple fininicial items for different years" in {
-          val balanceHistoryList = List( fi9, fi8, fi7, fi6, fi5, fi4, fi3, fi2, fi1)
+          val balanceHistoryList                      = List(fi9, fi8, fi7, fi6, fi5, fi4, fi3, fi2, fi1)
           val expectedTransactionHistoryItemsForYear1 = List(
             TransactionHistoryItem(fi1, BigDecimal(0)),
             TransactionHistoryItem(fi2, BigDecimal(-132.00)),
@@ -445,12 +473,12 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
           )
 
           val expectedResult = Map(
-            year -> expectedTransactionHistoryItemsForYear1,
+            year  -> expectedTransactionHistoryItemsForYear1,
             year2 -> expectedTransactionHistoryItemsForYear2,
             year3 -> expectedTransactionHistoryItemsForYear3
-
           )
-          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+          when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+            .thenReturn(createSuccessAccountResult(balanceHistoryList))
 
           val res = orchestrator.getTransactionHistoryForAllYears(using registeredRequest, hc, ec)
 
@@ -462,7 +490,7 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
         "with transaction ordered from newest to oldest" - {
 
           "when the user has multiple fininicial items for different years but are not in date order" in {
-            val balanceHistoryList = List(fi9, fi1, fi5, fi6, fi7, fi2, fi3, fi4, fi8)
+            val balanceHistoryList                      = List(fi9, fi1, fi5, fi6, fi7, fi2, fi3, fi4, fi8)
             val expectedTransactionHistoryItemsForYear1 = List(
               TransactionHistoryItem(fi1, BigDecimal(0)),
               TransactionHistoryItem(fi2, BigDecimal(-132.00)),
@@ -481,12 +509,12 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
             )
 
             val expectedResult = Map(
-              year -> expectedTransactionHistoryItemsForYear1,
+              year  -> expectedTransactionHistoryItemsForYear1,
               year2 -> expectedTransactionHistoryItemsForYear2,
-              year3 -> expectedTransactionHistoryItemsForYear3,
-
+              year3 -> expectedTransactionHistoryItemsForYear3
             )
-            when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc)).thenReturn(createSuccessAccountResult(balanceHistoryList))
+            when(mockSDILConnector.balanceHistory(aSubscription.sdilRef, true, "id")(using hc))
+              .thenReturn(createSuccessAccountResult(balanceHistoryList))
 
             val res = orchestrator.getTransactionHistoryForAllYears(using registeredRequest, hc, ec)
 
@@ -524,7 +552,8 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
       }
 
       "when there is only more than 1 return pending and they are not ordered" in {
-        when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createSuccessAccountResult(List(pendingReturn2, pendingReturn3, pendingReturn1)))
+        when(mockSDILConnector.returns_pending("id", UTR)(using hc))
+          .thenReturn(createSuccessAccountResult(List(pendingReturn2, pendingReturn3, pendingReturn1)))
         when(mockSessionCache.removeRecord("id")).thenReturn(Future.successful(true))
 
         val res = orchestrator.handleStartAReturn(using registeredRequest, hc, ec)
@@ -544,7 +573,6 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
       }
     }
 
-
     "return UnexpectedResponseFromSDIL error when an error occurs" in {
       when(mockSDILConnector.returns_pending("id", UTR)(using hc)).thenReturn(createFailureAccountResult(UnexpectedResponseFromSDIL))
       val res = orchestrator.handleStartAReturn(using registeredRequest, hc, ec)
@@ -555,35 +583,28 @@ class RegisteredOrchestratorSpec extends SpecBase with MockitoSugar {
     }
   }
 
-  class DeregisteredUserTestSetup(hasVariableReturns: Boolean,
-                                  hasSentLastReturn: Boolean,
-                                  needToSendFinalReturn: Boolean,
-                                  balance: BigDecimal) {
+  class DeregisteredUserTestSetup(hasVariableReturns: Boolean, hasSentLastReturn: Boolean, needToSendFinalReturn: Boolean, balance: BigDecimal) {
 
-
-    val variableReturnsSuccessResp: List[ReturnPeriod] = {
-      if(hasVariableReturns) {
+    val variableReturnsSuccessResp: List[ReturnPeriod] =
+      if hasVariableReturns then {
         pendingReturns3
       } else {
         List()
       }
-    }
 
-    val lastReturnSuccessResp: Option[SdilReturn] = {
-      if (hasSentLastReturn) {
+    val lastReturnSuccessResp: Option[SdilReturn] =
+      if hasSentLastReturn then {
         Some(emptyReturn)
       } else {
         None
       }
-    }
 
-    val finalReturnSuccessResp: Option[SdilReturn] = {
-      if (needToSendFinalReturn) {
+    val finalReturnSuccessResp: Option[SdilReturn] =
+      if needToSendFinalReturn then {
         None
       } else {
         Some(emptyReturn)
       }
-    }
 
     val expectedResult = generateDeregUserServicePageModel(hasVariableReturns, needToSendFinalReturn, hasSentLastReturn, balance)
   }

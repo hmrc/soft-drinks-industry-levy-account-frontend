@@ -18,7 +18,7 @@ package repositories
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json._
+import play.api.libs.json.*
 
 class CacheMapSpec extends AnyWordSpec with Matchers {
 
@@ -26,9 +26,9 @@ class CacheMapSpec extends AnyWordSpec with Matchers {
 
   "CacheMap JSON format" should {
     "serialize to JSON correctly" in {
-      val returnObj = CacheMap("1", Map("test" -> greeting))
+      val returnObj    = CacheMap("1", Map("test" -> greeting))
       val expectedJson = Json.obj(
-        "id" -> "1",
+        "id"   -> "1",
         "data" -> Json.obj("test" -> greeting)
       )
 
@@ -37,7 +37,7 @@ class CacheMapSpec extends AnyWordSpec with Matchers {
 
     "deserialize from JSON correctly" in {
       val json = Json.obj(
-        "id" -> "1",
+        "id"   -> "1",
         "data" -> Json.obj("test" -> greeting)
       )
 

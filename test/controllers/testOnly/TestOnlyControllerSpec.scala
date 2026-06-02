@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 class TestOnlyControllerSpec extends SpecBase with MockitoSugar {
 
@@ -40,7 +40,8 @@ class TestOnlyControllerSpec extends SpecBase with MockitoSugar {
 
   "stubDirectDebitInitialise" - {
     "must redirect to the sdil home" in {
-      val res = controller.stubDirectDebitInitialise()
+      val res = controller
+        .stubDirectDebitInitialise()
         .apply(FakeRequest("", ""))
 
       status(res) mustEqual OK
@@ -60,7 +61,8 @@ class TestOnlyControllerSpec extends SpecBase with MockitoSugar {
 
   "stubPayApiInitialise" - {
     "must redirect to the sdil home" in {
-      val res = controller.stubPayApiInitialise()
+      val res = controller
+        .stubPayApiInitialise()
         .apply(FakeRequest("", ""))
 
       status(res) mustEqual OK

@@ -18,8 +18,8 @@ package repositories
 
 import play.api.libs.json.Format
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SessionCache @Inject() (sessionRepository: SessionRepository, cascadeUpsert: CascadeUpsert)(implicit
@@ -45,7 +45,8 @@ class SessionCache @Inject() (sessionRepository: SessionRepository, cascadeUpser
         CacheMap(_id, Map.empty)
       }
   def removeRecord(_id: String): Future[Boolean] =
-    sessionRepository.removeRecord(_id)
+    sessionRepository
+      .removeRecord(_id)
       .recover { case _ =>
         false
       }

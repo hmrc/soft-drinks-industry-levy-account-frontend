@@ -32,8 +32,8 @@ trait DeregisteredUserServiceViewHelper extends ServiceViewHelper {
       val content = notificationBanner.getElementsByClass("govuk-notification-banner__content").first()
 
       "with the expected subheading" in {
-        val heading = content.getElementsByClass("govuk-notification-banner__heading").first()
-        val expectedHeader = if (sentFinalReturn) {
+        val heading        = content.getElementsByClass("govuk-notification-banner__heading").first()
+        val expectedHeader = if sentFinalReturn then {
           "This account is no longer registered with the Soft Drinks Industry Levy."
         } else {
           "Your request to cancel your registration is on hold."
@@ -43,18 +43,18 @@ trait DeregisteredUserServiceViewHelper extends ServiceViewHelper {
 
       "with the expected content" in {
         val notificationContent = notificationBanner.getElementsByClass("govuk-body")
-        val expectedContent = if (sentFinalReturn) {
-          val formattedDeregDate = deregDate.format(dateFormatter)
+        val expectedContent     = if sentFinalReturn then {
+          val formattedDeregDate    = deregDate.format(dateFormatter)
           val formattedAccessToDate = deregDate.plusYears(7L).format(dateFormatter)
           s"The registration was cancelled on the $formattedDeregDate. You will be able to access this account until $formattedAccessToDate."
         } else {
-          val deregReturnPeriod = ReturnPeriod(deregDate)
-          val formattedDeregStart = deregReturnPeriod.start.format(dateFormatter)
-          val formattedDeregEnd = deregReturnPeriod.end.format(dateFormatter)
-          val deregReturnPeriodNext = deregReturnPeriod.next
+          val deregReturnPeriod       = ReturnPeriod(deregDate)
+          val formattedDeregStart     = deregReturnPeriod.start.format(dateFormatter)
+          val formattedDeregEnd       = deregReturnPeriod.end.format(dateFormatter)
+          val deregReturnPeriodNext   = deregReturnPeriod.next
           val formattedDeregNextStart = deregReturnPeriodNext.start.format(dateFormatter)
-          val formattedDeregNextEnd = deregReturnPeriodNext.end.format(dateFormatter)
-            s"Before we can cancel your registration, you must send a final return for the current period," +
+          val formattedDeregNextEnd   = deregReturnPeriodNext.end.format(dateFormatter)
+          s"Before we can cancel your registration, you must send a final return for the current period," +
             s" $formattedDeregStart to $formattedDeregEnd and make any outstanding payments." +
             s" You will be able to send the final return from $formattedDeregNextStart until $formattedDeregNextEnd." +
             s" You will be able to access your account for 7 years from when you send your final return." +
@@ -66,7 +66,7 @@ trait DeregisteredUserServiceViewHelper extends ServiceViewHelper {
 
   }
 
-  def testOverdueFinalReturnSection(document: Element) = {
+  def testOverdueFinalReturnSection(document: Element) =
     "should include a section to send final return" - {
       "that has the expected header" in {
         val header = document.getElementById("sendFinalReturn")
@@ -75,10 +75,10 @@ trait DeregisteredUserServiceViewHelper extends ServiceViewHelper {
       }
 
       "that has the expected content" in {
-        val content = document.getElementById("sendFinalReturnParagraph")
+        val content           = document.getElementById("sendFinalReturnParagraph")
         val deregReturnPeriod = ReturnPeriod(deregDate)
-        val deregPeriodStart = deregReturnPeriod.previous.start.format(monthYearFormatter)
-        val deregPeriodEnd = deregReturnPeriod.previous.end.format(monthYearFormatter)
+        val deregPeriodStart  = deregReturnPeriod.previous.start.format(monthYearFormatter)
+        val deregPeriodEnd    = deregReturnPeriod.previous.end.format(monthYearFormatter)
         content.text() mustBe s"You must send a return for $deregPeriodStart to $deregPeriodEnd before we can cancel your registration."
       }
       "that includes a details section" - {
@@ -98,25 +98,21 @@ trait DeregisteredUserServiceViewHelper extends ServiceViewHelper {
         nilReturnLink.attr("href") mustBe "/soft-drinks-industry-levy-account-frontend/start-a-return/nilReturn/true"
       }
     }
-  }
 
-  def testFinalReturnDueInFutureSection(document: Element) = {
+  def testFinalReturnDueInFutureSection(document: Element) =
     "should contain content about sending final return when due" in {
       document.getElementById("lastReturnInset").text() mustBe noReturnsPendingMessage(emptyReturn)
     }
-  }
 
-
-  def testFinalAndLastReturnSentSection(document: Element) = {
+  def testFinalAndLastReturnSentSection(document: Element) =
     "should contain content about final return sent" in {
       val currentReturnPeriod = ReturnPeriod(localDate)
-      val lastPeriodStart = currentReturnPeriod.previous.start.format(monthFormatter)
-      val lastPeriodEnd = currentReturnPeriod.previous.end.format(monthYearFormatter)
-      val submittedTime = submittedDateTime.format(timeFormatter).toLowerCase
-      val submittedDate = submittedDateTime.format(dateFormatter)
-      val expectedText = s"Your return for $lastPeriodStart to $lastPeriodEnd was submitted at $submittedTime on $submittedDate."
+      val lastPeriodStart     = currentReturnPeriod.previous.start.format(monthFormatter)
+      val lastPeriodEnd       = currentReturnPeriod.previous.end.format(monthYearFormatter)
+      val submittedTime       = submittedDateTime.format(timeFormatter).toLowerCase
+      val submittedDate       = submittedDateTime.format(dateFormatter)
+      val expectedText        = s"Your return for $lastPeriodStart to $lastPeriodEnd was submitted at $submittedTime on $submittedDate."
       document.getElementById("finalReturnCompleted").text() mustBe expectedText
     }
-  }
 
 }

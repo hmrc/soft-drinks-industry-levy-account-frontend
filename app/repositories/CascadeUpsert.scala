@@ -16,7 +16,7 @@
 
 package repositories
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import javax.inject.Singleton
 

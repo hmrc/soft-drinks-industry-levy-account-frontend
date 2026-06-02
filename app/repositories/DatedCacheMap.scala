@@ -18,22 +18,22 @@ package repositories
 
 import models.ModelEncryption
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.crypto.EncryptedValue
 import uk.gov.hmrc.crypto.json.CryptoFormats
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.Implicits._
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.Implicits.*
 
 import java.time.Instant
 
 case class DatedCacheMap(
-  _id: String,
-  data: Map[String, JsValue],
+  _id:         String,
+  data:        Map[String, JsValue],
   lastUpdated: Instant = Instant.now()
 )
 object DatedCacheMap {
   object MongoFormats {
-    implicit val cryptEncryptedValueFormats: Format[EncryptedValue] = CryptoFormats.encryptedValueFormat
-    def reads(implicit encryption: Encryption): Reads[DatedCacheMap] =
+    implicit val cryptEncryptedValueFormats:    Format[EncryptedValue] = CryptoFormats.encryptedValueFormat
+    def reads(implicit encryption: Encryption): Reads[DatedCacheMap]   =
       (
         (__ \ "id").read[String] and
           (__ \ "data").read[Map[String, EncryptedValue]] and

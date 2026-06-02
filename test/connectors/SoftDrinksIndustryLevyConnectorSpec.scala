@@ -28,12 +28,12 @@ import utilities.GenericLogger
 
 import java.net.URL
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 class SoftDrinksIndustryLevyConnectorSpec extends HttpClientV2Helper {
 
   private val mockSessionCache = mock[SessionCache]
-  private val connector = new SoftDrinksIndustryLevyConnector(
+  private val connector        = new SoftDrinksIndustryLevyConnector(
     http = mockHttp,
     frontendAppConfig = application1.injector.instanceOf[config.FrontendAppConfig],
     sdilSessionCache = mockSessionCache,
@@ -76,7 +76,7 @@ class SoftDrinksIndustryLevyConnectorSpec extends HttpClientV2Helper {
         )
       )
 
-      Await.result(connector.retrieveSubscription(SDIL_REF, "sdil", "id")(using incomingHc).value, 1.second)
+      Await.result(connector.retrieveSubscription(SDIL_REF, "sdil")(using incomingHc).value, 1.second)
 
       val hcCaptor = ArgumentCaptor.forClass(classOf[HeaderCarrier])
       verify(mockHttp).get(any[URL])(using hcCaptor.capture())

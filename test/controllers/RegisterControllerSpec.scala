@@ -21,9 +21,9 @@ import config.FrontendAppConfig
 import helpers.LoggerHelper
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
-class RegisterControllerSpec extends SpecBase with MockitoSugar with LoggerHelper{
+class RegisterControllerSpec extends SpecBase with MockitoSugar with LoggerHelper {
 
   lazy val mockConfig = mock[FrontendAppConfig]
 

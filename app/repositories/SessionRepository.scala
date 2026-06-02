@@ -19,7 +19,7 @@ package repositories
 import config.FrontendAppConfig
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Updates.set
-import org.mongodb.scala.model._
+import org.mongodb.scala.model.*
 import play.api.libs.json.Format
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -27,12 +27,12 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SessionRepository @Inject() (mongoComponent: MongoComponent, appConfig: FrontendAppConfig)(implicit
-  ec: ExecutionContext,
+  ec:         ExecutionContext,
   encryption: Encryption
 ) extends PlayMongoRepository[DatedCacheMap](
       collectionName = "session-cache",
@@ -53,7 +53,7 @@ class SessionRepository @Inject() (mongoComponent: MongoComponent, appConfig: Fr
 
   def upsert(cm: CacheMap): Future[Boolean] = {
     val cmUpdated = DatedCacheMap(cm.id, cm.data)
-    val options = ReplaceOptions().upsert(true)
+    val options   = ReplaceOptions().upsert(true)
     collection
       .replaceOne(equal("_id", cm.id), cmUpdated, options)
       .toFuture()

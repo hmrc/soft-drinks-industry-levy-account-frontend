@@ -17,27 +17,27 @@
 package views.helpers
 
 import com.google.inject.Inject
-import models.{ FinancialLineItem, ReturnCharge, ReturnChargeInterest, TransactionHistoryItem, Unknown }
+import models.{FinancialLineItem, ReturnCharge, ReturnChargeInterest, TransactionHistoryItem, Unknown}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.html.components.GovukTable
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{ Content, HtmlContent, Text }
-import uk.gov.hmrc.govukfrontend.views.viewmodels.table.{ HeadCell, Table, TableRow }
-import uk.gov.hmrc.govukfrontend.views.viewmodels.tabs.{ TabItem, TabPanel, Tabs }
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{Content, HtmlContent, Text}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.table.{HeadCell, Table, TableRow}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.tabs.{TabItem, TabPanel, Tabs}
 
 import java.time.format.DateTimeFormatter
 
 class TransactionHistoryTabGenerator @Inject() (govukTable: GovukTable) {
 
-  lazy val dateFormatter = DateTimeFormatter.ofPattern("d MMM")
-  lazy val monthFormatter = DateTimeFormatter.ofPattern("MMMM")
+  lazy val dateFormatter      = DateTimeFormatter.ofPattern("d MMM")
+  lazy val monthFormatter     = DateTimeFormatter.ofPattern("MMMM")
   lazy val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
-  lazy val fullDateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+  lazy val fullDateFormatter  = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
   def generateTabs(
     transactionHistoryForYears: Map[Int, List[TransactionHistoryItem]]
   )(implicit messages: Messages): Tabs = {
     val tabItems: Seq[TabItem] = transactionHistoryForYears.map { case (year, transactionHistoryItems) =>
-      val panelH2 = s"<h2 class=\"govuk-heading-m\">${year.toString}</h2>"
+      val panelH2    = s"<h2 class=\"govuk-heading-m\">${year.toString}</h2>"
       val panelTable = s"${govukTable(getTableHistoryForYear(transactionHistoryItems))}"
       TabItem(
         id = Some(s"year-${year.toString}"),
@@ -102,12 +102,12 @@ class TransactionHistoryTabGenerator @Inject() (govukTable: GovukTable) {
 
   private def getTransaction(item: FinancialLineItem)(implicit messages: Messages): Content =
     item match {
-      case fli: Unknown => Text(fli.messageKey)
+      case fli: Unknown      => Text(fli.messageKey)
       case fli: ReturnCharge =>
-        val message = messages(s"transactionHistory.transaction.${fli.messageKey}")
+        val message   = messages(s"transactionHistory.transaction.${fli.messageKey}")
         val fromMonth = fli.period.start.format(monthFormatter)
         val endPeriod = fli.period.end.format(monthYearFormatter)
-        val hint = s"""<div class ="govuk-hint">${messages(
+        val hint      = s"""<div class ="govuk-hint">${messages(
             s"transactionHistory.transaction.${fli.messageKey}.hint",
             fromMonth,
             endPeriod
@@ -115,9 +115,9 @@ class TransactionHistoryTabGenerator @Inject() (govukTable: GovukTable) {
         HtmlContent(s"$message <br/>$hint")
 
       case fli: ReturnChargeInterest =>
-        val message = messages(s"transactionHistory.transaction.${fli.messageKey}")
+        val message       = messages(s"transactionHistory.transaction.${fli.messageKey}")
         val formattedDate = fli.date.format(fullDateFormatter)
-        val hint = s"""<div class ="govuk-hint">${messages(
+        val hint          = s"""<div class ="govuk-hint">${messages(
             s"transactionHistory.transaction.${fli.messageKey}.hint",
             formattedDate
           )}</div>"""
@@ -126,14 +126,14 @@ class TransactionHistoryTabGenerator @Inject() (govukTable: GovukTable) {
     }
 
   private def getCredit(transactionHistoryItem: TransactionHistoryItem): HtmlContent =
-    if (transactionHistoryItem.financialLineItem.amount > 0) {
+    if transactionHistoryItem.financialLineItem.amount > 0 then {
       formatPounds(transactionHistoryItem.financialLineItem.amount)
     } else {
       HtmlContent("£0.00")
     }
 
   private def getDebit(transactionHistoryItem: TransactionHistoryItem): HtmlContent =
-    if (transactionHistoryItem.financialLineItem.amount < 0) {
+    if transactionHistoryItem.financialLineItem.amount < 0 then {
       formatPounds(transactionHistoryItem.financialLineItem.amount)
     } else {
       HtmlContent("£0.00")

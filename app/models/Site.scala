@@ -16,13 +16,13 @@
 
 package models
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 import java.time.LocalDate
 
 case class Site(
-  address: UkAddress,
-  ref: Option[String],
+  address:     UkAddress,
+  ref:         Option[String],
   tradingName: Option[String],
   closureDate: Option[LocalDate]
 )

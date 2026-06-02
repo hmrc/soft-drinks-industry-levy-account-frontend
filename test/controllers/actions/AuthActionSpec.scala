@@ -17,25 +17,34 @@
 package controllers.actions
 
 import base.SpecBase
+import base.TestData.{SDIL_REF, UTR, aSubscription, deregSubscription}
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import connectors.SoftDrinksIndustryLevyConnector
 import controllers.routes
 import handlers.ErrorHandler
+import models.requests.AuthenticatedRequest
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.{never, verify, when}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{AnyContent, BodyParsers, Request, Results}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
+import play.api.test.Helpers.*
+import services.SdilSubscriptionService
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionSpec extends SpecBase {
+class AuthActionSpec extends SpecBase with MockitoSugar {
 
   class Harness(authAction: AuthenticatedAction) {
-    def onPageLoad() = authAction { implicit request: Request[AnyContent] => Results.Ok }
+    def onPageLoad()      = authAction { implicit request: Request[AnyContent] => Results.Ok }
+    def subscriptionRef() = authAction { implicit request: AuthenticatedRequest[AnyContent] =>
+      Results.Ok(request.optSubscription.map(_.sdilRef).getOrElse("none"))
+    }
   }
 
   "Auth Action" - {
@@ -47,16 +56,22 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -71,16 +86,22 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -95,16 +116,22 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -122,14 +149,20 @@ class AuthActionSpec extends SpecBase {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig   = application.injector.instanceOf[FrontendAppConfig]
 
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
-            val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
+          val controller = new Harness(authAction)
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -144,16 +177,22 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad.url
@@ -168,16 +207,22 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
-            val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
+          val controller = new Harness(authAction)
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
@@ -192,26 +237,135 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder().build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
-          val appConfig   = application.injector.instanceOf[FrontendAppConfig]
-          val errorHandler = application.injector.instanceOf[ErrorHandler]
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
           val sdilConnector = application.injector.instanceOf[SoftDrinksIndustryLevyConnector]
-          val ec = application.injector.instanceOf[ExecutionContext]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val sdilService   = application.injector.instanceOf[SdilSubscriptionService]
 
-          val authAction = new AuthenticatedAuthenticatedAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-            bodyParsers, sdilConnector, errorHandler)(using ec, appConfig)
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
           val controller = new Harness(authAction)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result     = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
         }
       }
     }
+
+    "the user has one inactive SDIL enrolment resolved by the subscription service" - {
+      "must retrieve the inactive subscription so the deregistered account flow can handle it" in {
+        val application = applicationBuilder().build()
+
+        running(application) {
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
+          val sdilConnector = mock[SoftDrinksIndustryLevyConnector]
+          val sdilService   = mock[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val enrolments    = Enrolments(
+            Set(
+              Enrolment(
+                "HMRC-OBTDS-ORG",
+                Seq(EnrolmentIdentifier("EtmpRegistrationNumber", SDIL_REF)),
+                "Activated"
+              )
+            )
+          )
+
+          when(sdilService.resolveActiveSdilRef(any[Seq[String]])(using any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(SDIL_REF)))
+          when(sdilConnector.retrieveSubscription(any[String], any[String])(using any[HeaderCarrier]))
+            .thenReturn(createSuccessAccountResult(Some(deregSubscription)))
+
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeSuccessfulAuthConnector(enrolments),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
+          val controller = new Harness(authAction)
+          val result     = controller.subscriptionRef()(FakeRequest())
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe SDIL_REF
+        }
+      }
+    }
+
+    "the user has a UTR and a resolved SDIL enrolment" - {
+      "must retrieve the subscription by SDIL ref so UTR does not mask active SDIL selection" in {
+        val application = applicationBuilder().build()
+
+        running(application) {
+          val bodyParsers   = application.injector.instanceOf[BodyParsers.Default]
+          val appConfig     = application.injector.instanceOf[FrontendAppConfig]
+          val errorHandler  = application.injector.instanceOf[ErrorHandler]
+          val sdilConnector = mock[SoftDrinksIndustryLevyConnector]
+          val sdilService   = mock[SdilSubscriptionService]
+          val ec            = application.injector.instanceOf[ExecutionContext]
+          val enrolments    = Enrolments(
+            Set(
+              Enrolment(
+                "IR-CT",
+                Seq(EnrolmentIdentifier("UTR", UTR)),
+                "Activated"
+              ),
+              Enrolment(
+                "HMRC-OBTDS-ORG",
+                Seq(EnrolmentIdentifier("EtmpRegistrationNumber", SDIL_REF)),
+                "Activated"
+              )
+            )
+          )
+
+          when(sdilService.resolveActiveSdilRef(any[Seq[String]])(using any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(SDIL_REF)))
+          when(sdilConnector.retrieveSubscription(eqTo(SDIL_REF), eqTo("sdil"))(using any[HeaderCarrier]))
+            .thenReturn(createSuccessAccountResult(Some(aSubscription)))
+
+          val authAction = new AuthenticatedAuthenticatedAction(
+            new FakeSuccessfulAuthConnector(enrolments),
+            bodyParsers,
+            sdilConnector,
+            errorHandler,
+            sdilService
+          )(using ec, appConfig)
+          val controller = new Harness(authAction)
+          val result     = controller.subscriptionRef()(FakeRequest())
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe SDIL_REF
+          verify(sdilConnector).retrieveSubscription(eqTo(SDIL_REF), eqTo("sdil"))(using any[HeaderCarrier])
+          verify(sdilConnector, never()).retrieveSubscription(eqTo(UTR), eqTo("utr"))(using any[HeaderCarrier])
+        }
+      }
+    }
   }
 }
 
-class FakeFailingAuthConnector @Inject()(exceptionToReturn: Throwable) extends AuthConnector {
+class FakeSuccessfulAuthConnector @Inject() (enrolments: Enrolments) extends AuthConnector {
+  val serviceUrl: String = ""
+
+  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(using
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[A] =
+    Future.successful(
+      new ~(new ~(new ~(enrolments, Some(User)), Some("id")), Some(AffinityGroup.Organisation)).asInstanceOf[A]
+    )
+}
+
+class FakeFailingAuthConnector @Inject() (exceptionToReturn: Throwable) extends AuthConnector {
   val serviceUrl: String = ""
 
   override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(using hc: HeaderCarrier, ec: ExecutionContext): Future[A] =

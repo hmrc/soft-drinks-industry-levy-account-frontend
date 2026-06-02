@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import base.TestData._
+import base.TestData.*
 import config.FrontendAppConfig
 import errors.{NoPendingReturns, UnexpectedResponseFromSDIL}
 import helpers.LoggerHelper
@@ -27,20 +27,20 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{await, _}
+import play.api.test.Helpers.{await, *}
 import utilities.GenericLogger
 import views.html.{DeregisteredUserServiceView, ServiceView}
 import scala.concurrent.Future
 
-class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHelper{
+class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHelper {
 
   lazy val mockOrchestrator = mock[RegisteredOrchestrator]
-  lazy val mockConfig = mock[FrontendAppConfig]
+  lazy val mockConfig       = mock[FrontendAppConfig]
 
-  val servicePageRoute = routes.ServicePageController.onPageLoad
+  val servicePageRoute                        = routes.ServicePageController.onPageLoad
   def startAReturnRoute(isNilReturn: Boolean) = routes.ServicePageController.startAReturn(isNilReturn)
-  val makeAChangeRoute = routes.ServicePageController.makeAChange
-  val correctAReturnRoute = routes.ServicePageController.correctAReturn
+  val makeAChangeRoute                        = routes.ServicePageController.makeAChange
+  val correctAReturnRoute                     = routes.ServicePageController.correctAReturn
 
   "onPageLoad" - {
     "when the user is a registered user" - {
@@ -49,21 +49,27 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
         val application = applicationBuilder()
           .overrides(
             bind[RegisteredOrchestrator].toInstance(mockOrchestrator)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(GET, servicePageRoute.url)
 
           val config = application.injector.instanceOf[FrontendAppConfig]
 
-          when(mockOrchestrator.handleServicePageRequest(using any(), any(), any())).thenReturn(createSuccessAccountResult(registeredUserServicePageViewModel1PendingReturns))
+          when(mockOrchestrator.handleServicePageRequest(using any(), any(), any()))
+            .thenReturn(createSuccessAccountResult(registeredUserServicePageViewModel1PendingReturns))
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[ServiceView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(registeredUserServicePageViewModel1PendingReturns)(using request, messages(application), config).toString
+          contentAsString(result) mustEqual view(registeredUserServicePageViewModel1PendingReturns)(using
+            request,
+            messages(application),
+            config
+          ).toString
         }
       }
     }
@@ -74,12 +80,13 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
         val application = applicationBuilder()
           .overrides(
             bind[RegisteredOrchestrator].toInstance(mockOrchestrator)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(GET, servicePageRoute.url)
 
-          val config = application.injector.instanceOf[FrontendAppConfig]
+          val config               = application.injector.instanceOf[FrontendAppConfig]
           val deregUserSeviceModel = generateDeregUserServicePageModel(true, true, true, 100)
 
           when(mockOrchestrator.handleServicePageRequest(using any(), any(), any())).thenReturn(createSuccessAccountResult(deregUserSeviceModel))
@@ -101,12 +108,12 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
       "when a request for a non nilReturn is submitted" in {
 
         val application = applicationBuilder()
-          .overrides(
-            bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+          .overrides(bind[RegisteredOrchestrator].toInstance(mockOrchestrator))
+          .build()
 
         running(application) {
           val request = FakeRequest(GET, startAReturnRoute(false).url)
-          val config = application.injector.instanceOf[FrontendAppConfig]
+          val config  = application.injector.instanceOf[FrontendAppConfig]
           when(mockOrchestrator.handleStartAReturn(using any(), any(), any())).thenReturn(createSuccessAccountResult(pendingReturn1))
           val result = route(application, request).value
 
@@ -118,8 +125,8 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
       "when a request for a nilReturn is submitted" in {
 
         val application = applicationBuilder()
-          .overrides(
-            bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+          .overrides(bind[RegisteredOrchestrator].toInstance(mockOrchestrator))
+          .build()
 
         running(application) {
           val config = application.injector.instanceOf[FrontendAppConfig]
@@ -138,8 +145,8 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
     "must redirect to servicePage" - {
       "when there are no pending returns" in {
         val application = applicationBuilder()
-          .overrides(
-            bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+          .overrides(bind[RegisteredOrchestrator].toInstance(mockOrchestrator))
+          .build()
 
         running(application) {
           val request = FakeRequest(GET, startAReturnRoute(false).url)
@@ -156,8 +163,8 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
     "must return internal server error page" - {
       "when an internal error occurs" in {
         val application = applicationBuilder()
-          .overrides(
-            bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+          .overrides(bind[RegisteredOrchestrator].toInstance(mockOrchestrator))
+          .build()
 
         running(application) {
           val request = FakeRequest(GET, startAReturnRoute(false).url)
@@ -172,19 +179,20 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
 
     "must log an error when no pending returns" in {
       val application = applicationBuilder()
-        .overrides(
-          bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+        .overrides(bind[RegisteredOrchestrator].toInstance(mockOrchestrator))
+        .build()
 
       running(application) {
         withCaptureOfLoggingFrom(application.injector.instanceOf[GenericLogger].logger) { events =>
           val request = FakeRequest(GET, startAReturnRoute(false).url)
           when(mockOrchestrator.handleStartAReturn(using any(), any(), any())).thenReturn(createFailureAccountResult(NoPendingReturns))
           await(route(application, request).value)
-          events.collectFirst {
-            case event =>
+          events
+            .collectFirst { case event =>
               event.getLevel.levelStr mustBe "WARN"
               event.getMessage mustEqual "Unable to start return - no returns pending"
-          }.getOrElse(fail("No logging captured"))
+            }
+            .getOrElse(fail("No logging captured"))
         }
       }
     }
@@ -194,12 +202,12 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
     "must empty the cache redirect to sdilVariations" in {
 
       val application = applicationBuilder()
-        .overrides(
-          bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+        .overrides(bind[RegisteredOrchestrator].toInstance(mockOrchestrator))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, makeAChangeRoute.url)
-        val config = application.injector.instanceOf[FrontendAppConfig]
+        val config  = application.injector.instanceOf[FrontendAppConfig]
         when(mockOrchestrator.emptyCache(using any())).thenReturn(Future.successful(true))
         val result = route(application, request).value
 
@@ -213,12 +221,12 @@ class ServicePageControllerSpec extends SpecBase with MockitoSugar with LoggerHe
     "must empty the cache redirect to sdilVariations" in {
 
       val application = applicationBuilder()
-        .overrides(
-          bind[RegisteredOrchestrator].toInstance(mockOrchestrator)).build()
+        .overrides(bind[RegisteredOrchestrator].toInstance(mockOrchestrator))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, correctAReturnRoute.url)
-        val config = application.injector.instanceOf[FrontendAppConfig]
+        val config  = application.injector.instanceOf[FrontendAppConfig]
         when(mockOrchestrator.emptyCache(using any())).thenReturn(Future.successful(true))
         val result = route(application, request).value
 

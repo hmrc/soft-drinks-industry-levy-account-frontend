@@ -16,19 +16,18 @@
 
 package views
 
-import models._
+import models.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 trait TransactionHistoryViewHelper extends ViewSpecHelper {
 
-  lazy val dateFormatter = DateTimeFormatter.ofPattern("d MMM")
-  lazy val monthFormatter = DateTimeFormatter.ofPattern("MMMM")
+  lazy val dateFormatter      = DateTimeFormatter.ofPattern("d MMM")
+  lazy val monthFormatter     = DateTimeFormatter.ofPattern("MMMM")
   lazy val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
-  lazy val fullDateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+  lazy val fullDateFormatter  = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-
-  val year = 2022
+  val year  = 2022
   val year2 = 2021
   val year3 = 2020
   val date1 = LocalDate.of(year, 12, 1)
@@ -40,18 +39,17 @@ trait TransactionHistoryViewHelper extends ViewSpecHelper {
   val date7 = LocalDate.of(year3, 12, 1)
   val date8 = LocalDate.of(year3, 6, 20)
   val date9 = LocalDate.of(year3, 1, 30)
-  val fi1 = PaymentOnAccount(date1, "test", BigDecimal(132.00))
-  val fi2 = ReturnCharge(ReturnPeriod.apply(date2), BigDecimal(-120.00))
-  val fi3 = ReturnChargeInterest(date3, BigDecimal(-12.00))
-  val fi4 = Unknown(date4, "test", BigDecimal(300.00))
-  val fi5 = CentralAssessment(date5, BigDecimal(-100.00))
-  val fi6 = CentralAsstInterest(date6, BigDecimal(-10.00))
-  val fi7 = OfficerAssessment(date7, BigDecimal(-130.00))
-  val fi8 = OfficerAsstInterest(date8, BigDecimal(-13.00))
-  val fi9 = ReturnCharge(ReturnPeriod.apply(date9), BigDecimal(-47.00))
+  val fi1   = PaymentOnAccount(date1, "test", BigDecimal(132.00))
+  val fi2   = ReturnCharge(ReturnPeriod.apply(date2), BigDecimal(-120.00))
+  val fi3   = ReturnChargeInterest(date3, BigDecimal(-12.00))
+  val fi4   = Unknown(date4, "test", BigDecimal(300.00))
+  val fi5   = CentralAssessment(date5, BigDecimal(-100.00))
+  val fi6   = CentralAsstInterest(date6, BigDecimal(-10.00))
+  val fi7   = OfficerAssessment(date7, BigDecimal(-130.00))
+  val fi8   = OfficerAsstInterest(date8, BigDecimal(-13.00))
+  val fi9   = ReturnCharge(ReturnPeriod.apply(date9), BigDecimal(-47.00))
 
-
-  val transitionHistoryItems1Item = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
+  val transitionHistoryItems1Item    = Map(year -> List(TransactionHistoryItem(fi1, fi1.amount)))
   val transitionHistoryItemsSameYear = {
     val expectedTransactionHistoryItems = List(
       TransactionHistoryItem(fi1, BigDecimal(0.00)),
@@ -81,19 +79,18 @@ trait TransactionHistoryViewHelper extends ViewSpecHelper {
     )
 
     Map(
-      year -> expectedTransactionHistoryItemsForYear1,
+      year  -> expectedTransactionHistoryItemsForYear1,
       year2 -> expectedTransactionHistoryItemsForYear2,
       year3 -> expectedTransactionHistoryItemsForYear3
     )
   }
 
-  def expectedDateField(transactionHistoryItem: TransactionHistoryItem): String = {
+  def expectedDateField(transactionHistoryItem: TransactionHistoryItem): String =
     transactionHistoryItem.financialLineItem.date.format(dateFormatter)
-  }
 
-  def expectedTransactionField(transactionHistoryItem: TransactionHistoryItem): String = {
+  def expectedTransactionField(transactionHistoryItem: TransactionHistoryItem): String =
     transactionHistoryItem.financialLineItem match {
-      case fli: Unknown => fli.title
+      case fli: Unknown      => fli.title
       case fli: ReturnCharge =>
         val fromMonth = fli.period.start.format(monthFormatter)
         val endPeriod = fli.period.end.format(monthYearFormatter)
@@ -101,31 +98,27 @@ trait TransactionHistoryViewHelper extends ViewSpecHelper {
       case fli: ReturnChargeInterest =>
         val formattedDate = fli.date.format(fullDateFormatter)
         s"Interest Charged up to $formattedDate"
-      case _: CentralAssessment => "Central Assessment"
+      case _: CentralAssessment   => "Central Assessment"
       case _: CentralAsstInterest => "Interest on Central Assessment"
-      case _: OfficerAssessment => "Officers Assessment"
+      case _: OfficerAssessment   => "Officers Assessment"
       case _: OfficerAsstInterest => "Interest on Officers Assessment"
-      case _: PaymentOnAccount => "Payment on account"
+      case _: PaymentOnAccount    => "Payment on account"
     }
-  }
 
-  def expectedCredit(transactionHistoryItem: TransactionHistoryItem): String = {
-    if (transactionHistoryItem.financialLineItem.amount > 0) {
+  def expectedCredit(transactionHistoryItem: TransactionHistoryItem): String =
+    if transactionHistoryItem.financialLineItem.amount > 0 then {
       formatPounds(transactionHistoryItem.financialLineItem.amount)
     } else {
       "£0.00"
     }
-  }
 
-  def expectedDebit(transactionHistoryItem: TransactionHistoryItem): String = {
-    if (transactionHistoryItem.financialLineItem.amount < 0) {
+  def expectedDebit(transactionHistoryItem: TransactionHistoryItem): String =
+    if transactionHistoryItem.financialLineItem.amount < 0 then {
       s"${formatPounds(transactionHistoryItem.financialLineItem.amount)}"
     } else {
       "£0.00"
     }
-  }
 
   def formatPounds(bd: BigDecimal): String = f"£$bd%,.2f".replace("£-", "−£")
-
 
 }

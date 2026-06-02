@@ -24,7 +24,7 @@ class RetrievedActivitySpec extends SpecBase {
 
   "isLiable" - {
     "should return true when " - {
-      "not a small producer" -{
+      "not a small producer" - {
         "and is a large producer" in {
           val rActivity = retrievedActivityAllFalse.copy(largeProducer = true)
           rActivity.isLiable mustBe true

@@ -19,7 +19,7 @@ package controllers.auth
 import config.FrontendAppConfig
 import controllers.actions.AuthenticatedAction
 import play.api.i18n.I18nSupport
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
@@ -28,11 +28,12 @@ import scala.concurrent.ExecutionContext
 
 class AuthController @Inject() (
   val controllerComponents: MessagesControllerComponents,
-  config: FrontendAppConfig,
-  sessionRepository: SessionRepository,
-  identify: AuthenticatedAction
+  config:                   FrontendAppConfig,
+  sessionRepository:        SessionRepository,
+  identify:                 AuthenticatedAction
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController with I18nSupport {
+    extends FrontendBaseController
+    with I18nSupport {
 
   def signOut(): Action[AnyContent] = identify.async { implicit request =>
     sessionRepository

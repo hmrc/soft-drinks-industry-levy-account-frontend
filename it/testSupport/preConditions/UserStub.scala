@@ -78,6 +78,82 @@ case class UserStub
     builder
   }
 
+  def isAuthorisedAndEnrolledWithInactiveAndActiveSdilRefs = {
+    stubFor(
+      post(urlPathEqualTo("/auth/authorise"))
+        .willReturn(
+          ok(
+            s"""
+               |{
+               |  "internalId": "$identifier",
+               |  "email": "test@test.com",
+               |  "allEnrolments": [{
+               |     "key": "HMRC-OBTDS-ORG",
+               |     "identifiers": [{
+               |       "key":"EtmpRegistrationNumber",
+               |       "value": "$INACTIVE_SDIL_REF"
+               |     }]
+               |  }, {
+               |     "key": "HMRC-OBTDS-ORG",
+               |     "identifiers": [{
+               |       "key":"EtmpRegistrationNumber",
+               |       "value": "$SDIL_REF"
+               |     }]
+               |  }],
+               |  "affinityGroup" : "Organisation",
+               |  "loginTimes": {
+               |     "currentLogin": "2018-03-27T09:00:00.000Z",
+               |     "previousLogin": "2018-03-01T12:00:00.000Z"
+               |  }
+               |}
+             """.stripMargin
+          )
+        )
+    )
+    builder
+  }
+
+  def isAuthorisedAndEnrolledWithUtrInactiveAndActiveSdilRefs = {
+    stubFor(
+      post(urlPathEqualTo("/auth/authorise"))
+        .willReturn(
+          ok(
+            s"""
+               |{
+               |  "internalId": "$identifier",
+               |  "email": "test@test.com",
+               |  "allEnrolments": [{
+               |     "key": "IR-CT",
+               |     "identifiers": [{
+               |       "key":"UTR",
+               |       "value": "$UTR"
+               |     }]
+               |  }, {
+               |     "key": "HMRC-OBTDS-ORG",
+               |     "identifiers": [{
+               |       "key":"EtmpRegistrationNumber",
+               |       "value": "$INACTIVE_SDIL_REF"
+               |     }]
+               |  }, {
+               |     "key": "HMRC-OBTDS-ORG",
+               |     "identifiers": [{
+               |       "key":"EtmpRegistrationNumber",
+               |       "value": "$SDIL_REF"
+               |     }]
+               |  }],
+               |  "affinityGroup" : "Organisation",
+               |  "loginTimes": {
+               |     "currentLogin": "2018-03-27T09:00:00.000Z",
+               |     "previousLogin": "2018-03-01T12:00:00.000Z"
+               |  }
+               |}
+             """.stripMargin
+          )
+        )
+    )
+    builder
+  }
+
   def isAuthorisedAndEnrolledBoth = {
     stubFor(
       post(urlPathEqualTo("/auth/authorise"))

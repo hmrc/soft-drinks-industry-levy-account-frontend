@@ -35,11 +35,11 @@ class SetupPayApiRequestSpec extends AnyWordSpec with Matchers {
       )
 
       val expectedJson = Json.obj(
-        "reference" -> "order12345",
+        "reference"     -> "order12345",
         "amountInPence" -> 1000,
-        "dueDate" -> "2025-03-15",
-        "returnUrl" -> "https://example.com/return",
-        "backUrl" -> "https://example.com/cancel"
+        "dueDate"       -> "2025-03-15",
+        "returnUrl"     -> "https://example.com/return",
+        "backUrl"       -> "https://example.com/cancel"
       )
 
       Json.toJson(request) mustBe expectedJson
@@ -47,11 +47,11 @@ class SetupPayApiRequestSpec extends AnyWordSpec with Matchers {
 
     "deserialize from JSON correctly" in {
       val json = Json.obj(
-        "reference" -> "order12345",
+        "reference"     -> "order12345",
         "amountInPence" -> 1000,
-        "dueDate" -> "2025-03-15",
-        "returnUrl" -> "https://example.com/return",
-        "backUrl" -> "https://example.com/cancel"
+        "dueDate"       -> "2025-03-15",
+        "returnUrl"     -> "https://example.com/return",
+        "backUrl"       -> "https://example.com/cancel"
       )
 
       val expectedRequest = SetupPayApiRequest(
@@ -66,4 +66,3 @@ class SetupPayApiRequestSpec extends AnyWordSpec with Matchers {
     }
   }
 }
-
