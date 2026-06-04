@@ -42,23 +42,23 @@
 
     @if(viewModel.sdilSubscription.activity.voluntaryRegistration) {
         @govukInsetText(createVoluntaryRegistrationInsetMessage)
-        <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+        <hr role="presentation" class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
     } else if(viewModel.overdueReturns.nonEmpty || viewModel.optLastReturn.isDefined) {
         @returns(viewModel.overdueReturns, viewModel.sdilSubscription.orgName, viewModel.optLastReturn)
-        <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+        <hr role="presentation" class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
     }
 
     @accountBalance(viewModel.sdilSubscription.sdilRef, false, viewModel.balance, viewModel.interest, viewModel.overdueReturns, viewModel.optHasExistingDD)
 
-    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+    <hr role="presentation" class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 
     @manageYourAccount()
 
-    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+    <hr role="presentation" class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 
     @businessDetails(viewModel.sdilSubscription)
 
-    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+    <hr role="presentation" class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 
     @needHelpView()
 
