@@ -108,8 +108,9 @@ class TransactionHistoryViewSpec extends TransactionHistoryViewHelper {
                   panel.className() mustBe expectedPanelClassName
                 }
 
-                "which includes a heading with the year " in {
-                  panel.getElementsByClass("govuk-heading-m").text() mustBe year.toString
+                "which includes a table caption with the year heading" in {
+                  val caption = panel.getElementsByClass("govuk-table__caption").first()
+                  caption.getElementsByTag("h2").text() mustBe year.toString
                 }
 
                 "which includes a table" - {
