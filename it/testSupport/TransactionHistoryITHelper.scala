@@ -115,7 +115,8 @@ trait TransactionHistoryITHelper extends ControllerITTestHelper {
 
         val expectedPanelClassName = if(index == 0) {"govuk-tabs__panel"} else {"govuk-tabs__panel govuk-tabs__panel--hidden"}
         panel.className() mustBe expectedPanelClassName
-        panel.getElementsByClass("govuk-heading-m").text() mustBe year.toString
+        val caption = panel.getElementsByClass("govuk-table__caption").first()
+        caption.getElementsByTag("h2").text() mustBe year.toString
         val table = panel.getElementsByClass("govuk-table").first()
         val tableHeaders = table.getElementsByClass("govuk-table__header")
         tableHeaders.size() mustBe 5

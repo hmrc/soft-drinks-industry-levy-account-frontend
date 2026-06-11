@@ -37,13 +37,15 @@ class TransactionHistoryTabGenerator @Inject() (govukTable: GovukTable) {
     transactionHistoryForYears: Map[Int, List[TransactionHistoryItem]]
   )(implicit messages: Messages): Tabs = {
     val tabItems: Seq[TabItem] = transactionHistoryForYears.map { case (year, transactionHistoryItems) =>
-      val panelH2    = s"<h2 class=\"govuk-heading-m\">${year.toString}</h2>"
-      val panelTable = s"${govukTable(getTableHistoryForYear(transactionHistoryItems))}"
+      val tableHtml   = s"${govukTable(getTableHistoryForYear(transactionHistoryItems))}"
+      val captionHtml =
+        s"""<caption class="govuk-table__caption govuk-heading-m"><h2 class="govuk-heading-m">${year.toString}</h2></caption>"""
+      val panelTable = tableHtml.replace("<thead", s"$captionHtml<thead")
       TabItem(
         id = Some(s"year-${year.toString}"),
         label = year.toString,
         panel = TabPanel(
-          HtmlContent(s"$panelH2 $panelTable")
+          HtmlContent(panelTable)
         )
       )
     }.toSeq
